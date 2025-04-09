@@ -4,3 +4,6 @@
 - [Infrastructure](./Docs/infrastructure.md) 
 - [Application](./Docs/application.md)  
 - [API](./Docs/api.md)
+
+## Database
+- [Database](https://github.com/matheusfarnetani/EasyTrainer-Database/)

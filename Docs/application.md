@@ -67,70 +67,55 @@
 
 ### Services Interfaces
 - IUserService
-- IInstructorService
-- IGoalService
-- ILevelService
-- ITypeService
-- IModalityService
-- IHashtagService
-- IWorkoutService
-- IRoutineService
-- IExerciseService
-- IUserHasGoalService
-- IWorkoutHasUserService
-- IRoutineHasExerciseService
-
-### Services Implementation
-- UserService
 	- CreateUser(*CreateUserInputDTO*) -> *UserOutputDTO*
 	- UpdateUser(*UpdateUserInputDTO*) -> *UserOutputDTO*
 	- DeleteUser(*int* userId) -> *Void*
 	- GetUserById(*int* userId) -> *UserOutputDTO*
 	- ListUsers() -> List of *UserListOutputDTO*
-- InstructorService
+- IInstructorService
 	- CreateInstructor(*CreateInstructorInputDTO*) ->*InstructorOutputDTO*
 	- UpdateInstructor(*UpdateInstructorInputDTO*) -> *InstructorOutputDTO*
 	- DeleteInstructor(*int* instructorId) ->*Void*
 	- GetInstructorById(*int* instructorId) -> *InstructorOutputDTO*
 	- ListInstructors() -> List of *InstructorListOutputDTO*
-- GoalService
+- IGoalService
 	- CreateGoal(*CreateGoalInputDTO*) -> *GoalOutputDTO*
 	- DeleteGoal(*int* goalId) -> *Void*
 	- GetGoalById(*int* goalId) -> *GoalOutputDTO*
 	- GetGoals() -> List of *GoalOutputDTO*
-- LevelService
+- ILevelService
 	- CreateLevel(*CreateLevelInputDTO*) -> *LevelOutputDTO*
 	- DeleteLevel(*int* levelId) -> *Void*
 	- GetLevelById(*int* levelId) -> *LevelOutputDTO*
 	- GetLevels() -> List of *LevelOutputDTO*
-- TypeService
+- ITypeService
 	- CreateType(*CreateTypeInputDTO*) -> *TypeOutputDTO*
 	- DeleteType(*int* typeId) -> *Void*
 	- GetTypeById(*int* typeId) -> *TypeOutputDTO*
 	- GetTypes() -> List of *TypeOutputDTO*
-- ModalityService
+- IModalityService
 	- CreateModality(*CreateModalityInputDTO*) -> *ModalityOutputDTO*
 	- DeleteModality(*int* modalityId) -> *Void*
 	- GetModalityById(*int* modalityId) -> *Void*
 	- GetModalities() -> List of *ModalityOutputDTO*
-- HashtagService
+- IHashtagService
 	- CreateHashtag(*CreateHashtagInputDTO*) -> *HashtagOutputDTO*
 	- DeleteHashtag(*int* hashtagId) -> *Void*
 	- GetHashtagById(*int* hashtagId) -> *HashtagOutputDTO*
 	- GetHashtags() -> List of *HashtagOutputDTO*
-- WorkoutService:
+- IWorkoutService
 	- CreateWorkout(*CreateWorkoutInputDTO*) -> *WorkoutOutputDTO*
 	- UpdateWorkout(*UpdateWorkoutInputDTO*) -> *WorkoutOutputDTO*
 	- DeleteWorkout(*int* workoutId) -> *Void*
 	- GetWorkoutById(*int* workoutId) -> *WorkoutOutputDTO*
 	- ListWorkouts() -> List of *WorkoutListOutputDTO*
-- RoutineService
+- IRoutineService
 	- CreateRoutine(*CreateRoutineInputDTO*) -> *RoutineOutputDTO*
 	- UpdateRoutine(*UpdateRoutineInputDTO*) -> *RoutineOutputDTO*
 	- DeleteRoutine(*int* routineId) -> *Void*
 	- GetRoutineById(*int* routineId) -> *RoutineOutputDTO*
 	- ListRoutines() -> List of *RoutineListOutputDTO*
-- ExerciseService:
+- IExerciseService
 	- CreateExercise(*CreateExerciseInputDTO*) -> *ExerciseOutputDTO*
 	- UpdateExercise(*UpdateExerciseInputDTO*) -> *ExerciseOutputDTO*
 	- DeleteExercise(*int* exerciseId) -> *Void*
@@ -139,15 +124,30 @@
 	- RemoveVariationFromExercise(*int* exerciseId, *int* variationExerciseId) -> *Void*
 	- ListExercises() -> List of *ExerciseListOutputDTO*
 	- ListVariations(*int* exerciseId) -> List of *VariationsOutputDTO*
-- UserHasGoalService
+- IUserHasGoalService
 	- CreateUserHasGoal(*CreateUserHasGoalInputDTO*) -> *UserHasGoalOutputDTO*
 	- DeleteUserHasGoal(*int* userHasGoalId) -> *Void*
-- WorkoutHasUserService
+- IWorkoutHasUserService
 	- CreateWorkoutHasUser(*CreateWorkoutHasUserInputDTO*) -> *WorkoutHasUserOutputDTO*
 	- DeleteWorkoutHasUser(*int* workoutHasUserId) -> *Void*
-- RoutineHasExerciseService
+- IRoutineHasExerciseService
 	- CreateRoutineHasExercise(*CreateRoutineHasExerciseInputDTO*) -> *RoutineHasExerciseOutputDTO*
 	- DeleteRoutineHasExercise(*int* routineHasExerciseId) -> *Void*
+
+### Services Implementation
+- UserService
+- InstructorService
+- GoalService
+- LevelService
+- TypeService
+- ModalityService
+- HashtagService
+- WorkoutService:
+- RoutineService
+- ExerciseService:
+- UserHasGoalService
+- WorkoutHasUserService
+- RoutineHasExerciseService
 
 ---
 ## AutoMapper Profiles
