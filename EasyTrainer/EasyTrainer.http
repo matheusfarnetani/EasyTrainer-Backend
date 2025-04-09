@@ -1,0 +1,6 @@
+@EasyTrainer_HostAddress = http://localhost:5209
+
+GET {{EasyTrainer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
