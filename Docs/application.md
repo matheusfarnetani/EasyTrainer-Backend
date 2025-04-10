@@ -164,3 +164,139 @@
 | Routine            | RoutineProfile            |
 | Exercise           | ExerciseProfile           |
 | RoutineHasExercise | RoutineHasExerciseProfile |
+
+---
+## UnitOfWork Class
+The `UnitOfWork` class is the concrete implementation of `IUnitOfWork`.
+- Manages a single instance of DbContext.
+- Manages a single database transaction.
+- Ensures that all changes across multiple repositories are committed or rolled back atomically.
+- Provides an integration point to set database session variables (e.g., `SET @user_id = ...`) during a transaction.
+
+**Benefits:**
+- Promotes clean, scalable, and maintainable data access.
+- Avoids inconsistent data states.
+- Provides better transaction management and control.
+- Centralizes access to all repositories through a single object.
+
+```
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Threading.Tasks;
+
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly AppDbContext _context;
+    private IDbContextTransaction _transaction;
+    private int? _currentUserId;
+
+    public IUserRepository Users { get; private set; }
+    public IInstructorRepository Instructors { get; private set; }
+    public IGoalRepository Goals { get; private set; }
+    public ILevelRepository Levels { get; private set; }
+    public ITypeRepository Types { get; private set; }
+    public IModalityRepository Modalities { get; private set; }
+    public IHashtagRepository Hashtags { get; private set; }
+    public IWorkoutRepository Workouts { get; private set; }
+    public IRoutineRepository Routines { get; private set; }
+    public IExerciseRepository Exercises { get; private set; }
+    public IRoutineHasExerciseRepository RoutineHasExercises { get; private set; }
+
+    public UnitOfWork(AppDbContext context,
+                      IUserRepository users,
+                      IInstructorRepository instructors,
+                      IGoalRepository goals,
+                      ILevelRepository levels,
+                      ITypeRepository types,
+                      IModalityRepository modalities,
+                      IHashtagRepository hashtags,
+                      IWorkoutRepository workouts,
+                      IRoutineRepository routines,
+                      IExerciseRepository exercises,
+                      IRoutineHasExerciseRepository routineHasExercises)
+    {
+        _context = context;
+        Users = users;
+        Instructors = instructors;
+        Goals = goals;
+        Levels = levels;
+        Types = types;
+        Modalities = modalities;
+        Hashtags = hashtags;
+        Workouts = workouts;
+        Routines = routines;
+        Exercises = exercises;
+        RoutineHasExercises = routineHasExercises;
+    }
+
+    /// <summary>
+    /// Sets the user ID for the current transaction context.
+    /// Must be called before any Create, Update, or Delete operations.
+    /// </summary>
+    public async Task BeginTransactionAsync(int userId)
+    {
+        if (_transaction != null)
+            return;
+
+        _transaction = await _context.Database.BeginTransactionAsync();
+
+        _currentUserId = userId;
+
+        // Sets the @user_id variable inside the MySQL session
+        await _context.Database.ExecuteSqlRawAsync($"SET @user_id = {_currentUserId};");
+    }
+
+    public async Task CommitAsync()
+    {
+        try
+        {
+            await _context.SaveChangesAsync();
+            if (_transaction != null)
+            {
+                await _transaction.CommitAsync();
+            }
+        }
+        catch
+        {
+            await RollbackAsync();
+            throw;
+        }
+        finally
+        {
+            if (_transaction != null)
+            {
+                await _transaction.DisposeAsync();
+                _transaction = null;
+            }
+            _currentUserId = null;
+        }
+    }
+
+    public async Task RollbackAsync()
+    {
+        if (_transaction != null)
+        {
+            await _transaction.RollbackAsync();
+            await _transaction.DisposeAsync();
+            _transaction = null;
+        }
+        _currentUserId = null;
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+}
+```
+
+Usage on services:
+
+```
+await _unitOfWork.BeginTransactionAsync(currentUserId);
+
+await _unitOfWork.Users.AddAsync(newUser);
+await _unitOfWork.Goals.AddAsync(newGoal);
+
+await _unitOfWork.CommitAsync();
+```

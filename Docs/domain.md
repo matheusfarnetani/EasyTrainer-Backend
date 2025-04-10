@@ -40,34 +40,34 @@
 
 ---
 ## Main Models
-### 1.  user
+### User
 **Properties**
-- id *int*
-- name *string*  
-- email *string*  
-- mobile_number *string*  
-- birthday *date*  
-- weight *float*  
-- height *float*  
-- gender *char*  
-- password *string*
-- level_id *int*
-- instructor_id *int*
+- Id *int*
+- Name *string*  
+- Email *string*  
+- MobileNumber *string*  
+- Birthday *date*  
+- Weight *float*  
+- Height *float*  
+- Gender *char*  
+- Password *string*
+- LevelId *int*
+- InstructorId *int*
 
 **Navigation Properties**
 - ICollection of UserHasGoal - UserGoals
 - ICollection of WorkoutHasUser - WorkoutUsers
 
 ---
-### 2. instructor
+### Instructor
 **Properties**
-- id *int*
-- name *string*  
-- email  *string*  
-- mobile_number *string*  
-- birthday *date*  
-- gender *char*  
-- password *string*
+- Id *int*
+- Name *string*  
+- Email  *string*  
+- MobileNumber *string*  
+- Birthday *date*  
+- Gender *char*  
+- Password *string*
 
 **Navigation Properties**
 - ICollection of Workout - Workouts
@@ -75,11 +75,11 @@
 - ICollection of Exercise - Exercises
 
 ---
-### 3. goal
+### Goal
 **Properties**
-- id *int*
-- name *string*  
-- description *string*
+- Id *int*
+- Name *string*  
+- Description *string*
 
 **Navigation Properties**
 - ICollection of UserHasGoal - UserGoals
@@ -88,11 +88,11 @@
 - ICollection of ExerciseHasGoal - ExerciseGoals
 
 ---
-### 4. level
+### Level
 **Properties**
-- id *int*
-- name *string*  
-- description *string*
+- Id *int*
+- Name *string*  
+- Description *string*
 
 **Navigation Properties**
 - ICollection of User - Users
@@ -101,11 +101,11 @@
 - ICollection of Exercise - Exercises
 
 ---
-### 5. type
+### Type
 **Properties**
-- id *int*
-- name *string*  
-- description *string*
+- Id *int*
+- Name *string*  
+- Description *string*
 
 **Navigation Properties**
 - ICollection of WorkoutHasType - WorkoutTypes
@@ -113,11 +113,11 @@
 - ICollection of ExerciseHasType - ExerciseTypes
 
 ---
-### 6. modality
+### Modality
 **Properties**
-- id *int*
-- name *string*  
-- description *string*
+- Id *int*
+- Name *string*  
+- Description *string*
 
 **Navigation Properties**
 - ICollection of WorkoutHasModality - WorkoutModalities
@@ -125,10 +125,10 @@
 - ICollection of ExerciseHasModality - ExerciseModalities
 
 ---
-### 7. hashtag
+### Hashtag
 **Properties**
-- id *int*
-- hashtag *string*
+- Id *int*
+- Hashtag *string*
 
 **Navigation Properties**
 - ICollection of WorkoutHasHashtag - WorkoutHashtags
@@ -136,17 +136,17 @@
 - ICollection of ExerciseHasHashtag - ExerciseHashtags
 
 ---
-### 8. workout
+### Workout
 **Properties**
-- id *int*
-- name *string*  
-- description *string*  
-- number_of_days *int*  
-- image_url *string*  
-- duration *time*  
-- indoor *bool*
-- instructor_id *int*
-- level_id *int*
+- Id *int*
+- Name *string*  
+- Description *string*  
+- NumberOfDays *int*  
+- ImageUrl *string*  
+- Duration *time*  
+- Indoor *bool*
+- InstructorId *int*
+- LevelId *int*
 
 **Navigation Properties**
 - ICollection of WorkoutHasType - WorkoutTypes
@@ -158,15 +158,15 @@
 - ICollection of WorkoutHasExercise - WorkoutExercises
 
 ---
-### 9. routine
+### Routine
 **Properties**
-- id *int*
-- name *string*  
-- description *string*  
-- duration *time*  
-- image_url *string*
-- instructor_id *int*
-- level_id *int*
+- Id *int*
+- Name *string*  
+- Description *string*  
+- Duration *time*  
+- ImageUrl *string*
+- InstructorId *int*
+- LevelId *int*
 
 **Navigation Properties**
 - ICollection of RoutineHasType - RoutineTypes
@@ -177,27 +177,27 @@
 - ICollection of WorkoutHasRoutine - WorkoutRoutines
 
 ---
-### 10. exercise
+### Exercise
 **Properties**
-- id *int*
-- name *string*  
-- description *string*  
-- equipment *string*  
-- duration *time*  
-- repetition *int*  
-- sets *int*  
-- rest_time *time*  
-- body_part *string*  
-- video_url *string*  
-- image_url *string*  
-- steps (instructions) *string*  
-- contraindications *string*  
-- safety_tips *string*  
-- common_mistakes *string*  
-- indicated_for *string*  
-- calories_burned_estimate *float*
-- instructor_id *int*
-- level_id *int*
+- Id *int*
+- Name *string*  
+- Description *string*  
+- Equipment *string*  
+- Duration *time*  
+- Repetition *int*  
+- Sets *int*  
+- RestTime *time*  
+- BodyPart *string*  
+- VideoUrl *string*  
+- ImageUrl *string*  
+- Steps *string*  
+- Contraindications *string*  
+- SafetyTips *string*  
+- CommonMistakes *string*  
+- IndicatedFor *string*  
+- CaloriesBurnedEstimate *float*
+- InstructorId *int*
+- LevelId *int*
 
 **Navigation Properties**
 - ICollection of ExerciseHasType - ExerciseTypes
@@ -212,196 +212,198 @@
 ## Relationship Models
 All relationship models follow the naming convention: `EntityOneHasEntityTwo` and each relationship model has two navigation properties.
 
-### 11. UserHasGoal
+### UserHasInstructor
 **Properties**
-- user_id *int*  
-- goal_id *int*
+- UserId *int*  
+- InstructorId *int*
 
+**Navigation Properties**
+- User
+- Instructor
+
+---
+### UserHasGoal
+**Properties**
+- UserId *int*  
+- GoalId *int*
 
 **Navigation Properties**
 - User
 - Goal
 
 ---
-### 12. WorkoutHasType
+### WorkoutHasType
 **Properties**
-- workout_id *int*  
-- type_id *int*
-
+- WorkoutId *int*  
+- TypeId *int*
 
 **Navigation Properties**
 - Workout
 - Type
 
 ---
-### 13. WorkoutHasModality
+### WorkoutHasModality
 **Properties**
-- workout_id *int*  
-- modality_id *int*
-
+- WorkoutId *int*  
+- ModalityId *int*
 
 **Navigation Properties**
 - Workout
 - Modality
 
 ---
-### 14. WorkoutHasGoal
+### WorkoutHasGoal
 **Properties**
-- workout_id *int*  
-- goal_id *int*
-
+- WorkoutId *int*  
+- GoalId *int*
 
 **Navigation Properties**
 - Workout
 - Goal
 
 ---
-### 15. WorkoutHasHashtag
+### WorkoutHasHashtag
 **Properties**
-- workout_id *int*  
-- hashtag_id *int*
-
+- WorkoutId *int*  
+- HashtagId *int*
 
 **Navigation Properties**
 - Workout
 - Hashtag
 
 ---
-### 16. WorkoutHasUser
+### WorkoutHasUser
 **Properties**
-- workout_id  *int*
-- user_id *int*
-
+- WorkoutId  *int*
+- UserId *int*
 
 **Navigation Properties**
 - Workout
 - User
 
 ---
-### 17. WorkoutHasRoutine
+### WorkoutHasRoutine
 **Properties**
-- workout_id  *int*
-- routine_id *int*
-
+- WorkoutId  *int*
+- RoutineId *int*
 
 **Navigation Properties**
 - Workout
 - Routine
 
 ---
-### 18. WorkoutHasExercise
+### WorkoutHasExercise
 **Properties**
-- workout_id  *int*
-- exercise_id *int*
-
+- WorkoutId  *int*
+- ExerciseId *int*
 
 **Navigation Properties**
 - Workout
 - Exercise
 
 ---
-### 19. RoutineHasType
+### RoutineHasType
 **Properties**
-- routine_id *int*  
-- type_id *int*
+- RoutineId *int*  
+- TypeId *int*
 
 **Navigation Properties**
 - Routine
 - Type
 
 ---
-### 20. RoutineHasModality
+### RoutineHasModality
 **Properties**
-- routine_id *int*  
-- modality_id *int*
+- RoutineId *int*  
+- ModalityId *int*
 
 **Navigation Properties**
 - Routine
 - Modality
 
 ---
-### 21. RoutineHasGoal
+### RoutineHasGoal
 **Properties**
-- routine_id *int*  
-- goal_id *int*
+- RoutineId *int*  
+- GoalId *int*
 
 **Navigation Properties**
 - Routine
 - Goal
 
 ---
-### 22. RoutineHasExercise
+### RoutineHasExercise
 **Properties**
-- routine_id *int*  
-- exercise_id *int*  
-- order *int*  
-- sets *int*  
-- reps *int*  
-- rest_time *time*  
-- note *string*  
-- day *int*  
-- week *int*  
-- is_optional *bool*
+- RoutineId *int*  
+- ExerciseId *int*  
+- Order *int*  
+- Sets *int*  
+- Reps *int*  
+- RestTime *time*  
+- Note *string*  
+- Day *int*  
+- Week *int*  
+- IsOptional *bool*
 
 **Navigation Properties**
 - Routine
 - Exercise
 
 ---
-### 23. RoutineHasHashtag
+### RoutineHasHashtag
 **Properties**
-- routine_id *int*  
-- hashtag_id *int*
+- RoutineId *int*  
+- HashtagId *int*
 
 **Navigation Properties**
 - Routine
 - Hashtag
 
 ---
-### 24. ExerciseHasType
+### ExerciseHasType
 **Properties**
-- exercise_id *int*  
-- type_id *int*
+- ExerciseId *int*  
+- TypeId *int*
 
 **Navigation Properties**
 - Exercise
 - Type
 
 ---
-### 25. ExerciseHasModality
+### ExerciseHasModality
 **Properties**
-- exercise_id *int*  
-- modality_id *int*
+- ExerciseId *int*  
+- ModalityId *int*
 
 **Navigation Properties**
 - Exercise
 - Modality
 
 ---
-### 26. ExerciseHasGoal
+### ExerciseHasGoal
 **Properties**
-- exercise_id *int*  
-- goal_id *int*
+- ExerciseId *int*  
+- GoalId *int*
 
 **Navigation Properties**
 - Exercise
 - Goal
 
 ---
-### 27. ExerciseHasHashtag
+### ExerciseHasHashtag
 **Properties**
-- exercise_id *int*  
-- hashtag_id *int*
+- ExerciseId *int*  
+- HashtagId *int*
 
 **Navigation Properties**
 - Exercise
 - Hashtag
 
 ---
-### 28. ExerciseHasVariation
+### ExerciseHasVariation
 **Properties**
-- exercise_id *int*  
-- variation_id *int*
+- ExerciseId *int*  
+- VariationId *int*
 
 **Navigation Properties**
 - Exercise
@@ -414,33 +416,12 @@ All relationship models follow the naming convention: `EntityOneHasEntityTwo` an
 
 ---
 ## Repositories Interfaces
-All main domain models have their own repository and repository interface, following the generic repository pattern.
 
-### Main Repositories Interfaces
-- IUserRepository
-- IInstructorRepository
-- IGoalRepository
-- ILevelRepository
-- ITypeRepository
-- IModalityRepository
-- IHashtagRepository
-- IWorkoutRepository
-- IRoutineRepository
-- IExerciseRepository
-
-### Relationship Repositories Interfaces
-- IRoutineHasExerciseRepository
-
-### Notes
-- Only `RoutineHasExercise` has a dedicated repository because it contains additional business attributes (order, sets, reps, rest time, notes, day, week, is_optional).
-- All other relationship tables (simple many-to-many links) are handled through entity navigation and do not require separate repositories.
-
----
 ### Generic Repository
 The **Generic Repository Pattern** is designed to provide a reusable set of data operations (CRUD) for different entities without duplicating code.
 
 The logic behind it is:
-- Define a **generic interface** `IRepository` that works with any entity type.
+- Define a **generic interface** `IGenericRepository` that works with any entity type.
 - Implement **standard CRUD operations** once, and reuse them for all entities.
 - Extend the generic repository with **specific repositories** if you need custom queries (e.g., `GetUserByEmail`, `GetWorkoutsByUserId`).
 
@@ -450,3 +431,251 @@ The logic behind it is:
 - Simplifies maintenance by isolating data access logic.
 - Facilitates scalability when adding new entities.
 - Promotes separation of concerns between business logic and data persistence.
+
+---
+### IGenericRepository
+
+```
+public interface IGenericRepository<T> where T : class
+    {
+        Task AddAsync(T entity);
+        Task<T> GetByIdAsync(int id);
+        Task<List<T?>> GetAllAsync(bool tracked = true);
+        Task UpdateAsync(T entity);
+        Task DeleteByIdAsync(int id);
+        Task SaveAsync();
+    }
+```
+
+All main domain models have their own repository and repository interface, following the generic repository pattern.
+
+---
+### Main Repositories Interfaces
+- `IUserRepository`
+
+```
+public interface IUserRepository : IGenericRepository<User>
+{
+    Task<User> GetUserByEmailAsync(string email);
+    Task<List<User>> GetUsersByInstructorIdAsync(int instructorId);
+    Task<List<User>> GetUsersByGoalIdAsync(int goalId);
+    Task<List<User>> GetUsersByLevelIdAsync(int levelId);
+    Task<List<User>> GetUsersByWorkoutIdAsync(int workoutId);
+}
+```
+
+- `IInstructorRepository`
+
+```
+public interface IInstructorRepository : IGenericRepository<Instructor>
+{
+    Task<Instructor> GetInstructorByEmailAsync(string email);
+    Task<List<Instructor>> GetInstructorsByUserIdAsync(int userId);
+    Task<Instructor> GetInstructorByWorkoutIdAsync(int workoutId);
+    Task<Instructor> GetInstructorByRoutineIdAsync(int routineId);
+    Task<Instructor> GetInstructorByExerciseIdAsync(int exerciseId);
+}
+```
+
+- `IGoalRepository`
+
+```
+public interface IGoalRepository : IGenericRepository<Goal>
+{
+    Task<List<Goal>> GetGoalsByUserAsync(int userId);
+    Task<List<Goal>> GetGoalsByWorkoutAsync(int workoutId);
+    Task<List<Goal>> GetGoalsByRoutineAsync(int routineId);
+    Task<List<Goal>> GetGoalsByExerciseAsync(int exerciseId);
+}
+```
+
+
+- `ILevelRepository`
+
+```
+public interface ILevelRepository : IGenericRepository<Level>
+{
+    Task<Level> GetLevelByUserAsync(int userId);
+    Task<Level> GetLevelByWorkoutAsync(int workoutId);
+    Task<Level> GetLevelByRoutineAsync(int routineId);
+    Task<Level> GetLevelByExerciseAsync(int exerciseId);
+}
+```
+
+
+- `ITypeRepository`
+
+```
+public interface ITypeRepository : IGenericRepository<Type>
+{
+    Task<List<Type>> GetTypesByWorkoutAsync(int workoutId);
+    Task<List<Type>> GetTypesByRoutineAsync(int routineId);
+    Task<List<Type>> GetTypesByExerciseAsync(int exerciseId);
+}
+```
+
+
+- `IModalityRepository`
+
+```
+public interface IModalityRepository : IGenericRepository<Modality>
+{
+    Task<List<Modality>> GetModalitiesByWorkoutAsync(int workoutId);
+    Task<List<Modality>> GetModalitiesByRoutineAsync(int routineId);
+    Task<List<Modality>> GetModalitiesByExerciseAsync(int exerciseId);
+}
+```
+
+
+- `IHashtagRepository`
+
+```
+public interface IHashtagRepository : IGenericRepository<Hashtag>
+{
+    Task<List<Hashtag>> GetHashtagsByWorkoutAsync(int workoutId);
+    Task<List<Hashtag>> GetHashtagsByRoutineAsync(int routineId);
+    Task<List<Hashtag>> GetHashtagsByExerciseAsync(int exerciseId);
+}
+```
+
+
+- `IWorkoutRepository`
+
+```
+public interface IWorkoutRepository : IGenericRepository<Workout>
+{
+	Task<List<Workout>> GetWorkoutsByUserIdAsync(int userId);
+    Task<List<Workout>> GetWorkoutsByInstructorIdAsync(int instructorId);
+	Task<List<Workout>> GetWorkoutsByGoalIdAsync(int goalId, int? instructorId = null, int? userId = null);
+    Task<List<Workout>> GetWorkoutsByLevelIdAsync(int levelId, int? instructorId = null, int? userId = null);
+    Task<List<Workout>> GetWorkoutsByModalityAsync(int modalityId, int? instructorId = null, int? userId = null);
+    Task<List<Workout>> GetWorkoutsByHashtagAsync(int hashtagId, int? instructorId = null, int? userId = null);
+    Task<List<Workout>> GetWorkoutsByRoutineAsync(int routineId, int? instructorId = null, int? userId = null);
+    Task<List<Workout>> GetWorkoutsByExerciseAsync(int exerciseId, int? instructorId = null, int? userId = null);
+}
+```
+
+
+- `IRoutineRepository`
+
+```
+public interface IRoutineRepository : IGenericRepository<Routine>
+{
+    Task<List<Routine>> GetRoutinesByInstructorIdAsync(int instructorId);
+	Task<List<Routine>> GetRoutinesByGoalIdAsync(int goalId, int instructorId);
+    Task<List<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId);
+    Task<List<Routine>> GetRoutinesByTypeIdAsync(int workoutId, int instructorId);
+    Task<List<Routine>> GetRoutinesByModalityAsync(int modalityId, int instructorId);
+    Task<List<Routine>> GetRoutinesByHashtagAsync(int hashtagId, int instructorId);
+    Task<List<Routine>> GetRoutinesByWorkoutAsync(int workoutId, int instructorId);
+    Task<List<Routine>> GetRoutinesByExerciseAsync(int exerciseId, int instructorId);
+}
+```
+
+
+- `IExerciseRepository`
+
+```
+public interface IExerciseRepository : IGenericRepository<Exercise>
+{
+    Task<List<Exercise>> GetExercisesByInstructorIdAsync(int instructorId);
+	Task<List<Exercise>> GetExercisesByGoalIdAsync(int goalId, int instructorId);
+    Task<List<Exercise>> GetExercisesByLevelIdAsync(int levelId, int instructorId);
+    Task<List<Exercise>> GetExercisesByTypeIdAsync(int workoutId, int instructorId);
+    Task<List<Exercise>> GetExercisesByModalityAsync(int modalityId, int instructorId);
+    Task<List<Exercise>> GetExercisesByHashtagAsync(int hashtagId, int instructorId);
+    Task<List<Exercise>> GetExercisesByRoutineAsync(int routineId, int instructorId);
+    Task<List<Exercise>> GetExercisesByExerciseAsync(int exerciseId, int instructorId);
+	Task<List<Exercise>> GetVariationsByExerciseAsync(int variationId, int instructorId);
+}
+```
+
+---
+### Relationship Repositories Interfaces
+For relationships containing additional attributes, we define specific repositories.
+- `IRoutineHasExerciseRepository`
+
+```
+public interface IRoutineHasExerciseRepository : IGenericRepository<RoutineHasExercise>
+{
+    Task<List<RoutineHasExercise>> GetExercisesByRoutineIdAsync(int routineId);
+	Task<List<RoutineHasExercise>> GetRoutinesByExerciseIdAsync(int exerciseId);
+}
+```
+
+---
+### Notes
+- Only `RoutineHasExercise` has a dedicated repository because it contains additional business attributes (order, sets, reps, rest time, notes, day, week, is_optional).
+- All other relationship tables (simple many-to-many links) are handled through entity navigation and do not require separate repositories.
+
+---
+## Unit of Work (UoW)
+The Unit of Work pattern is used to group multiple database operations into a single transaction.
+
+In this project, the Unit of Work also manages the database session variable `@user_id` to properly record the user responsible for each change.
+
+### Key Features
+- **BeginTransactionAsync(userId)**: Starts a transaction and sets the `@user_id` in the MySQL session.
+- **CommitAsync()**: Commits all changes atomically; if an error occurs, automatically rolls back.
+- **RollbackAsync()**: Cancels all pending changes if necessary.
+- **Repositories Access**: Provides access to all repositories through properties.
+
+---
+### Why use this approach?
+- Ensures **data consistency**: Either all changes are saved or none.
+- Centralizes **user context** for auditing operations.
+- Reduces duplication of transaction management across services.
+
+---
+### IUnitOfWork
+The `IUnitOfWork` interface defines the structure for the Unit of Work:
+- Exposes access to all the repositories.
+- Allows starting a transaction (`BeginTransactionAsync`).
+- Allows committing all changes (`CommitAsync`).
+- Allows rolling back changes in case of failure (`RollbackAsync`).
+- Implements IDisposable to manage the DbContext lifetime.
+
+```
+public interface IUnitOfWork : IDisposable
+{
+    IUserRepository Users { get; }
+    IInstructorRepository Instructors { get; }
+    IGoalRepository Goals { get; }
+    ILevelRepository Levels { get; }
+    ITypeRepository Types { get; }
+    IModalityRepository Modalities { get; }
+    IHashtagRepository Hashtags { get; }
+    IWorkoutRepository Workouts { get; }
+    IRoutineRepository Routines { get; }
+    IExerciseRepository Exercises { get; }
+    IRoutineHasExerciseRepository RoutineHasExercises { get; }
+
+    Task BeginTransactionAsync(int userId);
+    Task CommitAsync();
+    Task RollbackAsync();
+}
+```
+
+---
+## IConnectionManager Interface
+The `IConnectionManager` interface defines the contract for retrieving database connection strings based on user roles.
+
+This abstraction allows the application to dynamically determine which database credentials should be used for a given user context without tying the business logic to infrastructure-specific details.
+
+```
+public interface IConnectionManager
+{
+    string GetConnectionString(string role);
+}
+```
+
+```
+{
+  "ConnectionStrings": {
+    "EasyTrainerAdmin": "Server=localhost;Database=easytrainer;User=easytrainer_admin;Password=adminpassword;",
+    "EasyTrainerInstructor": "Server=localhost;Database=easytrainer;User=easytrainer_instructor;Password=instructorpassword;",
+    "EasyTrainerUser": "Server=localhost;Database=easytrainer;User=easytrainer_user;Password=userpassword;"
+  }
+}
+```
+
