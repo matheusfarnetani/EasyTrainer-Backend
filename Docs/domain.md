@@ -545,13 +545,13 @@ public interface IHashtagRepository : IGenericRepository<Hashtag>
 public interface IWorkoutRepository : IGenericRepository<Workout>
 {
 	Task<List<Workout>> GetWorkoutsByUserIdAsync(int userId);
-    Task<List<Workout>> GetWorkoutsByInstructorIdAsync(int instructorId);
+	Task<List<Workout>> GetWorkoutsByInstructorIdAsync(int instructorId);
 	Task<List<Workout>> GetWorkoutsByGoalIdAsync(int goalId, int? instructorId = null, int? userId = null);
-    Task<List<Workout>> GetWorkoutsByLevelIdAsync(int levelId, int? instructorId = null, int? userId = null);
-    Task<List<Workout>> GetWorkoutsByModalityAsync(int modalityId, int? instructorId = null, int? userId = null);
-    Task<List<Workout>> GetWorkoutsByHashtagAsync(int hashtagId, int? instructorId = null, int? userId = null);
-    Task<List<Workout>> GetWorkoutsByRoutineAsync(int routineId, int? instructorId = null, int? userId = null);
-    Task<List<Workout>> GetWorkoutsByExerciseAsync(int exerciseId, int? instructorId = null, int? userId = null);
+	Task<List<Workout>> GetWorkoutsByLevelIdAsync(int levelId, int? instructorId = null, int? userId = null);
+	Task<List<Workout>> GetWorkoutsByModalityAsync(int modalityId, int? instructorId = null, int? userId = null);
+	Task<List<Workout>> GetWorkoutsByHashtagAsync(int hashtagId, int? instructorId = null, int? userId = null);
+	Task<List<Workout>> GetWorkoutsByRoutineAsync(int routineId, int? instructorId = null, int? userId = null);
+	Task<List<Workout>> GetWorkoutsByExerciseAsync(int exerciseId, int? instructorId = null, int? userId = null);
 }
 ```
 
@@ -561,14 +561,14 @@ public interface IWorkoutRepository : IGenericRepository<Workout>
 ```
 public interface IRoutineRepository : IGenericRepository<Routine>
 {
-    Task<List<Routine>> GetRoutinesByInstructorIdAsync(int instructorId);
+	Task<List<Routine>> GetRoutinesByInstructorIdAsync(int instructorId);
 	Task<List<Routine>> GetRoutinesByGoalIdAsync(int goalId, int instructorId);
-    Task<List<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId);
-    Task<List<Routine>> GetRoutinesByTypeIdAsync(int workoutId, int instructorId);
-    Task<List<Routine>> GetRoutinesByModalityAsync(int modalityId, int instructorId);
-    Task<List<Routine>> GetRoutinesByHashtagAsync(int hashtagId, int instructorId);
-    Task<List<Routine>> GetRoutinesByWorkoutAsync(int workoutId, int instructorId);
-    Task<List<Routine>> GetRoutinesByExerciseAsync(int exerciseId, int instructorId);
+	Task<List<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId);
+	Task<List<Routine>> GetRoutinesByTypeIdAsync(int workoutId, int instructorId);
+	Task<List<Routine>> GetRoutinesByModalityAsync(int modalityId, int instructorId);
+	Task<List<Routine>> GetRoutinesByHashtagAsync(int hashtagId, int instructorId);
+	Task<List<Routine>> GetRoutinesByWorkoutAsync(int workoutId, int instructorId);
+	Task<List<Routine>> GetRoutinesByExerciseAsync(int exerciseId, int instructorId);
 }
 ```
 
@@ -578,14 +578,14 @@ public interface IRoutineRepository : IGenericRepository<Routine>
 ```
 public interface IExerciseRepository : IGenericRepository<Exercise>
 {
-    Task<List<Exercise>> GetExercisesByInstructorIdAsync(int instructorId);
+	Task<List<Exercise>> GetExercisesByInstructorIdAsync(int instructorId);
 	Task<List<Exercise>> GetExercisesByGoalIdAsync(int goalId, int instructorId);
-    Task<List<Exercise>> GetExercisesByLevelIdAsync(int levelId, int instructorId);
-    Task<List<Exercise>> GetExercisesByTypeIdAsync(int workoutId, int instructorId);
-    Task<List<Exercise>> GetExercisesByModalityAsync(int modalityId, int instructorId);
-    Task<List<Exercise>> GetExercisesByHashtagAsync(int hashtagId, int instructorId);
-    Task<List<Exercise>> GetExercisesByRoutineAsync(int routineId, int instructorId);
-    Task<List<Exercise>> GetExercisesByExerciseAsync(int exerciseId, int instructorId);
+	Task<List<Exercise>> GetExercisesByLevelIdAsync(int levelId, int instructorId);
+	Task<List<Exercise>> GetExercisesByTypeIdAsync(int workoutId, int instructorId);
+	Task<List<Exercise>> GetExercisesByModalityAsync(int modalityId, int instructorId);
+	Task<List<Exercise>> GetExercisesByHashtagAsync(int hashtagId, int instructorId);
+	Task<List<Exercise>> GetExercisesByRoutineAsync(int routineId, int instructorId);
+	Task<List<Exercise>> GetExercisesByExerciseAsync(int exerciseId, int instructorId);
 	Task<List<Exercise>> GetVariationsByExerciseAsync(int variationId, int instructorId);
 }
 ```
@@ -598,7 +598,7 @@ For relationships containing additional attributes, we define specific repositor
 ```
 public interface IRoutineHasExerciseRepository : IGenericRepository<RoutineHasExercise>
 {
-    Task<List<RoutineHasExercise>> GetExercisesByRoutineIdAsync(int routineId);
+	Task<List<RoutineHasExercise>> GetExercisesByRoutineIdAsync(int routineId);
 	Task<List<RoutineHasExercise>> GetRoutinesByExerciseIdAsync(int exerciseId);
 }
 ```
@@ -679,3 +679,66 @@ public interface IConnectionManager
 }
 ```
 
+---
+## Generic Services
+To promote **code reuse**, **clean architecture**, and **scalability** within the Application Layer, EasyTrainer adopts two types of **Generic Services**:
+- **IGenericService**: For **simple entities** not linked to a specific Instructor.
+- **IGenericInstructorOwnedService**: For **Instructor-owned entities** like Workouts, Routines, and Exercises.
+    
+This design follows **DRY** (Don't Repeat Yourself) and **Single Responsibility Principle** from SOLID principles.
+
+### IGenericService
+Handles standard CRUD operations for simple models.
+
+```
+public interface IGenericService<TCreateDTO, TUpdateDTO, TOutputDTO>
+{
+    Task<TOutputDTO> CreateAsync(TCreateDTO dto);
+    Task<TOutputDTO> UpdateAsync(TUpdateDTO dto);
+    Task DeleteAsync(int id);
+    Task<TOutputDTO> GetByIdAsync(int id);
+    Task<PaginationResponseDTO<TOutputDTO>> GetAllAsync(PaginationRequestDTO pagination);
+}
+```
+
+**Responsibilities:**
+- Handle basic Create, Update, Delete, Get by ID, and Paginated List operations.
+- Abstracts common CRUD behavior into a shared, reusable interface.
+
+|Service|Interface|
+|---|---|
+|IUserService|IGenericService<CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO>|
+|IInstructorService|IGenericService<CreateInstructorInputDTO, UpdateInstructorInputDTO, InstructorOutputDTO>|
+|IGoalService|IGenericService<CreateGoalInputDTO, UpdateGoalInputDTO, GoalOutputDTO>|
+|ITypeService|IGenericService<CreateTypeInputDTO, UpdateTypeInputDTO, TypeOutputDTO>|
+|ILevelService|IGenericService<CreateLevelInputDTO, UpdateLevelInputDTO, LevelOutputDTO>|
+|IModalityService|IGenericService<CreateModalityInputDTO, UpdateModalityInputDTO, ModalityOutputDTO>|
+|IHashtagService|IGenericService<CreateHashtagInputDTO, UpdateHashtagInputDTO, HashtagOutputDTO>|
+
+---
+### IGenericInstructorOwnedService
+**Use case:**  
+For entities that **must be owned** and **controlled by an Instructor**, such as `Workout`, `Routine`, and `Exercise`.
+
+**Interface:**
+
+```
+public interface IGenericInstructorOwnedService<TCreateDTO, TUpdateDTO, TOutputDTO>
+{
+    Task<TOutputDTO> CreateAsync(TCreateDTO dto, int instructorId);
+    Task<TOutputDTO> UpdateAsync(TUpdateDTO dto, int instructorId);
+    Task DeleteAsync(int id, int instructorId);
+    Task<TOutputDTO> GetByIdAsync(int id, int instructorId);
+    Task<PaginationResponseDTO<TOutputDTO>> GetAllAsync(int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+**Responsibilities:**
+- Same as `IGenericService`, but every operation explicitly receives the `instructorId` to enforce ownership.
+- Adds security and control, ensuring that instructors can only manage their own resources.
+
+| Service          | Interface                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| IWorkoutService  | IGenericInstructorOwnedService<CreateWorkoutInputDTO, UpdateWorkoutInputDTO, WorkoutOutputDTO>    |
+| IRoutineService  | IGenericInstructorOwnedService<CreateRoutineInputDTO, UpdateRoutineInputDTO, RoutineOutputDTO>    |
+| IExerciseService | IGenericInstructorOwnedService<CreateExerciseInputDTO, UpdateExerciseInputDTO, ExerciseOutputDTO> |

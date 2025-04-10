@@ -12,10 +12,15 @@
     - CreateInstructorInputDTO
     - UpdateInstructorInputDTO
     - CreateGoalInputDTO
+    - UpdateGoalInputDTO
     - CreateLevelInputDTO
+    - UpdateLevelInputDTO
     - CreateTypeInputDTO
+    - UpdateTypeInputDTO
     - CreateModalityInputDTO
+    - UpdateModalityInputDTO
     - CreateHashtagInputDTO
+    - UpdateHashtagInputDTO
     - CreateWorkoutInputDTO
     - UpdateWorkoutInputDTO
     - CreateRoutineInputDTO
@@ -26,11 +31,11 @@
     - CreateWorkoutHasUserInputDTO
     - CreateRoutineHasExerciseInputDTO
 
+---
 ### Outputs
 - DTOs used for **Read** operations.
 - May expose additional computed fields (e.g., `FullName`, `GoalNames`, etc.).
 - Never expose sensitive fields (e.g., passwords).
-- **Unit**
     - UserOutputDTO
     - InstructorOutputDTO
     - GoalOutputDTO
@@ -41,17 +46,51 @@
     - WorkoutOutputDTO
     - RoutineOutputDTO
     - ExerciseOutputDTO
+    - VariationOutputDTO
     - UserHasGoalOutputDTO
     - WorkoutHasUserOutputDTO
     - RoutineHasExerciseOutputDTO
 
-- **List**
-    - UserListOutputDTO
-    - InstructorListOutputDTO
-    - WorkoutListOutputDTO
-    - RoutineListOutputDTO
-    - ExerciseListOutputDTO
-    - VariationsOutputDTO
+---
+### System's DTOs
+#### Pagination
+- DTOs: `PaginationRequestDTO`, `PaginationResponseDTO<T>`
+- Purpose: Improve scalability by supporting paging in list operations.
+
+```
+public class PaginationRequestDTO
+{
+    public int PageNumber { get; set; } = 1;  // Default to first page
+    public int PageSize { get; set; } = 10;   // Default page size
+}
+```
+
+```
+public class PaginationResponseDTO<T>
+{
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public int TotalRecords { get; set; }
+    public List<T> Items { get; set; }
+}
+```
+
+---
+#### API Response Envelope
+- DTO: `ApiResponseDTO<T>`
+- Purpose: Standardize API responses for better frontend and integration consistency.
+
+```
+public class ApiResponseDTO<T>
+{
+    public bool Success { get; set; }
+    public string Message { get; set; }
+    public T Data { get; set; }
+    public List<string> Errors { get; set; }
+    public int? StatusCode { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+}
+```
 
 ---
 ## Services
@@ -65,74 +104,234 @@
 - Combine **multiple repositories** when necessary.
 - Handle **transactions** (possibly via UnitOfWork).
 
+### System's Services
+#### Delete Service
+- Interface: IDeletionValidationService
+- Purpose: Ensure safe deletion by verifying if an entity is not being referenced elsewhere.
+
+```
+public interface IDeletionValidationService
+{
+    Task<bool> CanDeleteTypeAsync(int typeId);
+    Task<bool> CanDeleteModalityAsync(int modalityId);
+    Task<bool> CanDeleteHashtagAsync(int hashtagId);
+}
+```
+
+---
 ### Services Interfaces
-- IUserService
-	- CreateUser(*CreateUserInputDTO*) -> *UserOutputDTO*
-	- UpdateUser(*UpdateUserInputDTO*) -> *UserOutputDTO*
-	- DeleteUser(*int* userId) -> *Void*
-	- GetUserById(*int* userId) -> *UserOutputDTO*
-	- ListUsers() -> List of *UserListOutputDTO*
-- IInstructorService
-	- CreateInstructor(*CreateInstructorInputDTO*) ->*InstructorOutputDTO*
-	- UpdateInstructor(*UpdateInstructorInputDTO*) -> *InstructorOutputDTO*
-	- DeleteInstructor(*int* instructorId) ->*Void*
-	- GetInstructorById(*int* instructorId) -> *InstructorOutputDTO*
-	- ListInstructors() -> List of *InstructorListOutputDTO*
-- IGoalService
-	- CreateGoal(*CreateGoalInputDTO*) -> *GoalOutputDTO*
-	- DeleteGoal(*int* goalId) -> *Void*
-	- GetGoalById(*int* goalId) -> *GoalOutputDTO*
-	- GetGoals() -> List of *GoalOutputDTO*
-- ILevelService
-	- CreateLevel(*CreateLevelInputDTO*) -> *LevelOutputDTO*
-	- DeleteLevel(*int* levelId) -> *Void*
-	- GetLevelById(*int* levelId) -> *LevelOutputDTO*
-	- GetLevels() -> List of *LevelOutputDTO*
-- ITypeService
-	- CreateType(*CreateTypeInputDTO*) -> *TypeOutputDTO*
-	- DeleteType(*int* typeId) -> *Void*
-	- GetTypeById(*int* typeId) -> *TypeOutputDTO*
-	- GetTypes() -> List of *TypeOutputDTO*
-- IModalityService
-	- CreateModality(*CreateModalityInputDTO*) -> *ModalityOutputDTO*
-	- DeleteModality(*int* modalityId) -> *Void*
-	- GetModalityById(*int* modalityId) -> *Void*
-	- GetModalities() -> List of *ModalityOutputDTO*
-- IHashtagService
-	- CreateHashtag(*CreateHashtagInputDTO*) -> *HashtagOutputDTO*
-	- DeleteHashtag(*int* hashtagId) -> *Void*
-	- GetHashtagById(*int* hashtagId) -> *HashtagOutputDTO*
-	- GetHashtags() -> List of *HashtagOutputDTO*
-- IWorkoutService
-	- CreateWorkout(*CreateWorkoutInputDTO*) -> *WorkoutOutputDTO*
-	- UpdateWorkout(*UpdateWorkoutInputDTO*) -> *WorkoutOutputDTO*
-	- DeleteWorkout(*int* workoutId) -> *Void*
-	- GetWorkoutById(*int* workoutId) -> *WorkoutOutputDTO*
-	- ListWorkouts() -> List of *WorkoutListOutputDTO*
-- IRoutineService
-	- CreateRoutine(*CreateRoutineInputDTO*) -> *RoutineOutputDTO*
-	- UpdateRoutine(*UpdateRoutineInputDTO*) -> *RoutineOutputDTO*
-	- DeleteRoutine(*int* routineId) -> *Void*
-	- GetRoutineById(*int* routineId) -> *RoutineOutputDTO*
-	- ListRoutines() -> List of *RoutineListOutputDTO*
-- IExerciseService
-	- CreateExercise(*CreateExerciseInputDTO*) -> *ExerciseOutputDTO*
-	- UpdateExercise(*UpdateExerciseInputDTO*) -> *ExerciseOutputDTO*
-	- DeleteExercise(*int* exerciseId) -> *Void*
-	- GetExerciseById(*int* exerciseId) -> *ExerciseOutputDTO*
-	- AddVariationToExercise(*int* exerciseId, *int* variationExerciseId) -> *Void*
-	- RemoveVariationFromExercise(*int* exerciseId, *int* variationExerciseId) -> *Void*
-	- ListExercises() -> List of *ExerciseListOutputDTO*
-	- ListVariations(*int* exerciseId) -> List of *VariationsOutputDTO*
-- IUserHasGoalService
-	- CreateUserHasGoal(*CreateUserHasGoalInputDTO*) -> *UserHasGoalOutputDTO*
-	- DeleteUserHasGoal(*int* userHasGoalId) -> *Void*
-- IWorkoutHasUserService
-	- CreateWorkoutHasUser(*CreateWorkoutHasUserInputDTO*) -> *WorkoutHasUserOutputDTO*
-	- DeleteWorkoutHasUser(*int* workoutHasUserId) -> *Void*
-- IRoutineHasExerciseService
-	- CreateRoutineHasExercise(*CreateRoutineHasExerciseInputDTO*) -> *RoutineHasExerciseOutputDTO*
-	- DeleteRoutineHasExercise(*int* routineHasExerciseId) -> *Void*
+- `IUserService`
+
+```
+public interface IUserService : IGenericService<CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO>
+{
+    Task AddGoalToUserAsync(int userId, int goalId);
+    Task RemoveGoalFromUserAsync(int userId, int goalId);
+    Task<PaginationResponseDTO<GoalOutputDTO>> GetGoalsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+
+    Task AddInstructorToUserAsync(int userId, int instructorId);
+    Task RemoveInstructorFromUserAsync(int userId, int instructorId);
+    Task<PaginationResponseDTO<InstructorOutputDTO>> GetInstructorsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+
+	Task AddWorkoutToUserAsync(int userId, int workoutId);
+	Task RemoveWorkoutFromUserAsync(int userId, int workoutId)
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+}
+```
+
+- `IInstructorService`
+
+```
+public interface IInstructorService : IGenericService<CreateInstructorInputDTO, UpdateInstructorInputDTO, InstructorOutputDTO>
+{
+	
+    Task<PaginationResponseDTO<UserOutputDTO>> GetUsersByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
+}
+
+```
+
+- `IGoalService`
+
+```
+public interface IGoalService : IGenericService<CreateGoalInputDTO, UpdateGoalInputDTO, GoalOutputDTO>
+{
+    // Relationships
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+- `ILevelService`
+
+```
+public interface ILevelService : IGenericService<CreateLevelInputDTO, UpdateLevelInputDTO, LevelOutputDTO>
+{
+    // Relationships
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+- `ITypeService`
+
+```
+public interface ITypeService : IGenericService<CreateTypeInputDTO, UpdateTypeInputDTO, TypeOutputDTO>
+{
+    // Relationships
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+- `IModalityService`
+
+```
+public interface IModalityService : IGenericService<CreateModalityInputDTO, UpdateModalityInputDTO, ModalityOutputDTO>
+{
+    // Relationships
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+- `IHashtagService`
+
+```
+public interface IHashtagService : IGenericService<CreateHashtagInputDTO, UpdateHashtagInputDTO, HashtagOutputDTO>
+{
+    // Relationships
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+- `IWorkoutService`
+
+```
+public interface IWorkoutService : IGenericInstructorOwnedService<CreateWorkoutInputDTO, UpdateWorkoutInputDTO, WorkoutOutputDTO>
+{
+    Task AddGoalToWorkoutAsync(int workoutId, int goalId, int instructorId);
+    Task RemoveGoalFromWorkoutAsync(int workoutId, int goalId, int instructorId);
+
+    Task AddTypeToWorkoutAsync(int workoutId, int typeId, int instructorId);
+    Task RemoveTypeFromWorkoutAsync(int workoutId, int typeId, int instructorId);
+
+    Task AddModalityToWorkoutAsync(int workoutId, int modalityId, int instructorId);
+    Task RemoveModalityFromWorkoutAsync(int workoutId, int modalityId, int instructorId);
+
+    Task AddHashtagToWorkoutAsync(int workoutId, int hashtagId, int instructorId);
+    Task RemoveHashtagFromWorkoutAsync(int workoutId, int hashtagId, int instructorId);
+
+    Task AddRoutineToWorkoutAsync(int workoutId, int routineId, int instructorId);
+    Task RemoveRoutineFromWorkoutAsync(int workoutId, int routineId, int instructorId);
+
+    Task AddExerciseToWorkoutAsync(int workoutId, int exerciseId, int instructorId);
+    Task RemoveExerciseFromWorkoutAsync(int workoutId, int exerciseId, int instructorId);
+
+    Task<InstructorOutputDTO> GetInstructorByWorkoutIdAsync(int workoutId);
+    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByWorkoutIdAsync(int workoutId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByWorkoutIdAsync(int workoutId, int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+- `IRoutineService`
+
+```
+public interface IRoutineService : IGenericInstructorOwnedService<CreateRoutineInputDTO, UpdateRoutineInputDTO, RoutineOutputDTO>
+{
+    Task AddGoalToRoutineAsync(int routineId, int goalId, int instructorId);
+    Task RemoveGoalFromRoutineAsync(int routineId, int goalId, int instructorId);
+
+    Task AddTypeToRoutineAsync(int routineId, int typeId, int instructorId);
+    Task RemoveTypeFromRoutineAsync(int routineId, int typeId, int instructorId);
+
+    Task AddModalityToRoutineAsync(int routineId, int modalityId, int instructorId);
+    Task RemoveModalityFromRoutineAsync(int routineId, int modalityId, int instructorId);
+
+    Task AddHashtagToRoutineAsync(int routineId, int hashtagId, int instructorId);
+    Task RemoveHashtagFromRoutineAsync(int routineId, int hashtagId, int instructorId);
+
+    Task AddExerciseToRoutineAsync(int routineId, int exerciseId, int order, int sets, int reps, TimeSpan restTime, string note, int day, int week, bool isOptional);
+    Task RemoveExerciseFromRoutineAsync(int routineId, int exerciseId);
+
+    Task<InstructorOutputDTO> GetInstructorByRoutineIdAsync(int routineId);
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+- `IExerciseService`
+
+```
+public interface IExerciseService : IGenericInstructorOwnedService<CreateExerciseInputDTO, UpdateExerciseInputDTO, ExerciseOutputDTO>
+{
+    Task AddGoalToExerciseAsync(int exerciseId, int goalId, int instructorId);
+    Task RemoveGoalFromExerciseAsync(int exerciseId, int goalId, int instructorId);
+
+    Task AddTypeToExerciseAsync(int exerciseId, int typeId, int instructorId);
+    Task RemoveTypeFromExerciseAsync(int exerciseId, int typeId, int instructorId);
+
+    Task AddModalityToExerciseAsync(int exerciseId, int modalityId, int instructorId);
+    Task RemoveModalityFromExerciseAsync(int exerciseId, int modalityId, int instructorId);
+
+    Task AddHashtagToExerciseAsync(int exerciseId, int hashtagId, int instructorId);
+    Task RemoveHashtagFromExerciseAsync(int exerciseId, int hashtagId, int instructorId);
+
+    Task AddVariationToExerciseAsync(int exerciseId, int variationId, int instructorId);
+    Task RemoveVariationFromExerciseAsync(int exerciseId, int variationId, int instructorId);
+
+    Task<InstructorOutputDTO> GetInstructorByExerciseIdAsync(int exerciseId);
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByExerciseIdAsync(int exerciseId, int instructorId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByExerciseIdAsync(int exerciseId, int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+- `IUserHasGoalService`
+
+```
+public interface IUserHasGoalService
+{
+    Task<UserHasGoalOutputDTO> CreateUserHasGoalAsync(CreateUserHasGoalInputDTO dto);
+    Task DeleteUserHasGoalAsync(int userId, int goalId);
+
+    Task<PaginationResponseDTO<GoalOutputDTO>> GetGoalsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<UserOutputDTO>> GetUsersByGoalIdAsync(int goalId, PaginationRequestDTO pagination);
+}
+```
+
+- `IWorkoutHasUserService`
+
+```
+public interface IWorkoutHasUserService
+{
+    Task<WorkoutHasUserOutputDTO> CreateWorkoutHasUserAsync(CreateWorkoutHasUserInputDTO dto);
+    Task DeleteWorkoutHasUserAsync(int workoutId, int userId);
+
+    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<UserOutputDTO>> GetUsersByWorkoutIdAsync(int workoutId, PaginationRequestDTO pagination);
+}
+```
+
+- `IRoutineHasExerciseService`
+
+```
+public interface IRoutineHasExerciseService
+{
+    Task<RoutineHasExerciseOutputDTO> CreateRoutineHasExerciseAsync(CreateRoutineHasExerciseInputDTO dto);
+    Task DeleteRoutineHasExerciseAsync(int routineId, int exerciseId);
+
+    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByRoutineIdAsync(int routineId, PaginationRequestDTO pagination);
+    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByExerciseIdAsync(int exerciseId, PaginationRequestDTO pagination);
+}
+```
 
 ### Services Implementation
 - UserService
@@ -289,6 +488,8 @@ public class UnitOfWork : IUnitOfWork
     }
 }
 ```
+
+> Every Create, Update or Delete operation must be wrapped with a `BeginTransactionAsync(currentUserId)` followed by `CommitAsync()`.
 
 Usage on services:
 
