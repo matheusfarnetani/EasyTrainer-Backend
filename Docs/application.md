@@ -7,49 +7,49 @@
 - DTOs used for **Create** and **Update** operations.
 - Contain only fields allowed to be written by the client.
 - May include validation annotations (e.g., `[Required]`, `[MaxLength]`).
-    - CreateUserInputDTO
-    - UpdateUserInputDTO
-    - CreateInstructorInputDTO
-    - UpdateInstructorInputDTO
-    - CreateGoalInputDTO
-    - UpdateGoalInputDTO
-    - CreateLevelInputDTO
-    - UpdateLevelInputDTO
-    - CreateTypeInputDTO
-    - UpdateTypeInputDTO
-    - CreateModalityInputDTO
-    - UpdateModalityInputDTO
-    - CreateHashtagInputDTO
-    - UpdateHashtagInputDTO
-    - CreateWorkoutInputDTO
-    - UpdateWorkoutInputDTO
-    - CreateRoutineInputDTO
-    - UpdateRoutineInputDTO
-    - CreateExerciseInputDTO
-    - UpdateExerciseInputDTO
-    - CreateUserHasGoalInputDTO
-    - CreateWorkoutHasUserInputDTO
-    - CreateRoutineHasExerciseInputDTO
+    - `CreateUserInputDTO`
+    - `UpdateUserInputDTO`
+    - `CreateInstructorInputDTO`
+    - `UpdateInstructorInputDTO`
+    - `CreateGoalInputDTO`
+    - `UpdateGoalInputDTO`
+    - `CreateLevelInputDTO`
+    - `UpdateLevelInputDTO`
+    - `CreateTypeInputDTO`
+    - `UpdateTypeInputDTO`
+    - `CreateModalityInputDTO`
+    - `UpdateModalityInputDTO`
+    - `CreateHashtagInputDTO`
+    - `UpdateHashtagInputDTO`
+    - `CreateWorkoutInputDTO`
+    - `UpdateWorkoutInputDTO`
+    - `CreateRoutineInputDTO`
+    - `UpdateRoutineInputDTO`
+    - `CreateExerciseInputDTO`
+    - `UpdateExerciseInputDTO`
+    - `CreateUserHasGoalInputDTO`
+    - `CreateWorkoutHasUserInputDTO`
+    - `CreateRoutineHasExerciseInputDTO`
 
 ---
 ### Outputs
 - DTOs used for **Read** operations.
 - May expose additional computed fields (e.g., `FullName`, `GoalNames`, etc.).
 - Never expose sensitive fields (e.g., passwords).
-    - UserOutputDTO
-    - InstructorOutputDTO
-    - GoalOutputDTO
-    - LevelOutputDTO
-    - TypeOutputDTO
-    - ModalityOutputDTO
-    - HashtagOutputDTO
-    - WorkoutOutputDTO
-    - RoutineOutputDTO
-    - ExerciseOutputDTO
-    - VariationOutputDTO
-    - UserHasGoalOutputDTO
-    - WorkoutHasUserOutputDTO
-    - RoutineHasExerciseOutputDTO
+    - `UserOutputDTO`
+    - `InstructorOutputDTO`
+    - `GoalOutputDTO`
+    - `LevelOutputDTO`
+    - `TypeOutputDTO`
+    - `ModalityOutputDTO`
+    - `HashtagOutputDTO`
+    - `WorkoutOutputDTO`
+    - `RoutineOutputDTO`
+    - `ExerciseOutputDTO`
+    - `VariationOutputDTO`
+    - `UserHasGoalOutputDTO`
+    - `WorkoutHasUserOutputDTO`
+    - `RoutineHasExerciseOutputDTO`
 
 ---
 ### System's DTOs
@@ -102,20 +102,63 @@ public class ApiResponseDTO<T>
 - Perform **validations** before calling the database.
 - Handle **rules** and **restrictions** (e.g., cannot create a Workout without an Instructor).
 - Combine **multiple repositories** when necessary.
-- Handle **transactions** (possibly via UnitOfWork).
+- Handle **transactions** (possibly via `UnitOfWork`).
 
-### System's Services
-#### Delete Service
-- Interface: IDeletionValidationService
-- Purpose: Ensure safe deletion by verifying if an entity is not being referenced elsewhere.
+### Delete Service
+**Purpose:** The `DeletionValidationService` is responsible for ensuring **safe deletions** of auxiliary entities like `Type`, `Modality`, and `Hashtag`.  
+It verifies that an entity is **not being referenced** in other related tables (such as `Workouts`, `Routines`, or `Exercises`) before allowing its deletion.
+
+This service helps prevent:
+- Broken foreign key relationships
+- Data inconsistencies
+- System errors after deletions
+
+It enforces **business rules** that protect data integrity.
 
 ```
-public interface IDeletionValidationService
+public class DeletionValidationService : IDeletionValidationService
 {
-    Task<bool> CanDeleteTypeAsync(int typeId);
-    Task<bool> CanDeleteModalityAsync(int modalityId);
-    Task<bool> CanDeleteHashtagAsync(int hashtagId);
-}
+    private readonly IWorkoutRepository _workoutRepository;
+    private readonly IRoutineRepository _routineRepository;
+    private readonly IExerciseRepository _exerciseRepository;
+
+    public DeletionValidationService(
+        IWorkoutRepository workoutRepository,
+        IRoutineRepository routineRepository,
+        IExerciseRepository exerciseRepository)
+    {
+        _workoutRepository = workoutRepository;
+        _routineRepository = routineRepository;
+        _exerciseRepository = exerciseRepository;
+    }
+
+    public async Task<bool> CanDeleteTypeAsync(int typeId)
+    {
+        var workouts = await _workoutRepository.GetWorkoutsByTypeIdAsync(typeId);
+        var routines = await _routineRepository.GetRoutinesByTypeIdAsync(typeId);
+        var exercises = await _exerciseRepository.GetExercisesByTypeIdAsync(typeId);
+
+        return workouts.Count == 0 && routines.Count == 0 && exercises.Count == 0;
+    }
+
+    public async Task<bool> CanDeleteModalityAsync(int modalityId)
+    {
+        var workouts = await _workoutRepository.GetWorkoutsByModalityIdAsync(modalityId);
+        var routines = await _routineRepository.GetRoutinesByModalityIdAsync(modalityId);
+        var exercises = await _exerciseRepository.GetExercisesByModalityIdAsync(modalityId);
+
+        return workouts.Count == 0 && routines.Count == 0 && exercises.Count == 0;
+    }
+
+    public async Task<bool> CanDeleteHashtagAsync(int hashtagId)
+    {
+        var workouts = await _workoutRepository.GetWorkoutsByHashtagIdAsync(hashtagId);
+        var routines = await _routineRepository.GetRoutinesByHashtagIdAsync(hashtagId);
+        var exercises = await _exerciseRepository.GetExercisesByHashtagIdAsync(hashtagId);
+
+        return workouts.Count == 0 && routines.Count == 0 && exercises.Count == 0;
+    }
+	}
 ```
 
 ---
@@ -134,7 +177,7 @@ public interface IUserService : IGenericService<CreateUserInputDTO, UpdateUserIn
     Task<PaginationResponseDTO<InstructorOutputDTO>> GetInstructorsByUserIdAsync(int userId, PaginationRequestDTO pagination);
 
 	Task AddWorkoutToUserAsync(int userId, int workoutId);
-	Task RemoveWorkoutFromUserAsync(int userId, int workoutId)
+	Task RemoveWorkoutFromUserAsync(int userId, int workoutId);
     Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByUserIdAsync(int userId, PaginationRequestDTO pagination);
 }
 ```
@@ -334,19 +377,19 @@ public interface IRoutineHasExerciseService
 ```
 
 ### Services Implementation
-- UserService
-- InstructorService
-- GoalService
-- LevelService
-- TypeService
-- ModalityService
-- HashtagService
-- WorkoutService:
-- RoutineService
-- ExerciseService:
-- UserHasGoalService
-- WorkoutHasUserService
-- RoutineHasExerciseService
+- `UserService`
+- `InstructorService`
+- `GoalService`
+- `LevelService`
+- `TypeService`
+- `ModalityService`
+- `HashtagService`
+- `WorkoutService`
+- `RoutineService`
+- `ExerciseService`
+- `UserHasGoalService`
+- `WorkoutHasUserService`
+- `RoutineHasExerciseService`
 
 ---
 ## AutoMapper Profiles

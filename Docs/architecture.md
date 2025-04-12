@@ -53,39 +53,45 @@ The primary goals are low coupling, high cohesion, maintainability, testability,
 - Core of the system: Entities, Models, Repository Interfaces.
 - Contains pure business rules.
 - Independent of frameworks or infrastructure.
+- No dependency on Application, Infrastructure, or API layers.
 
 ### EasyTrainer.Infrastructure
 - Implements database access using Entity Framework Core.
 - Provides repository implementations.
 - Manages database context and transactions via Unit of Work.
-- Depends on **Domain**.
+- Implements connection management for role-based database access.
+- Depends on the **Domain** layer.
 
 ### EasyTrainer.Application
-- Contains business logic for use cases (application services).
-- Defines DTOs for communication between API and domain.
-- Depends on **Domain**.
+- Contains business logic for application use cases (application services).
+- Defines DTOs to communicate between the API layer and the domain models.
+- Implements services that orchestrate operations across repositories.
+- Depends on the **Domain** layer.
 
 ### EasyTrainer.API
-- Exposes HTTP endpoints via Controllers.
-- Handles incoming requests, authentication, error handling.
-- Configures services, database connections, middleware.
-- Depends on **Application** and **Infrastructure**.
+- Exposes the system through HTTP endpoints using Controllers.
+- Handles input validation, authentication, authorization, and middleware execution.
+- Delegates business processing to Application Services.
+- Depends on the **Application** and **Infrastructure** layers.
 
 ---
 ## Main Patterns Used
 |Pattern|Purpose|
-|:--|:--|
-|Clean Architecture|Separates concerns, promotes scalability and testability.|
-|Domain-Driven Design (Light)|Focuses on the core domain logic and business terms.|
-|Repository Pattern|Abstracts database access behind interfaces.|
-|Unit of Work Pattern|Manages multiple database operations as a single transaction.|
-|Service Layer Pattern|Centralizes business logic outside of controllers.|
+|---|---|
+|Clean Architecture|Separate concerns for better scalability and testability.|
+|Domain-Driven Design (Lightweight)|Focus on core domain complexity using meaningful models.|
+|Repository Pattern|Abstracts the data layer from the business layer.|
+|Unit of Work Pattern|Manages multiple database operations as a single atomic transaction.|
+|Service Layer Pattern|Encapsulates business logic outside of controllers.|
+|DTO Pattern|Decouple internal models from external-facing API contracts.|
 
 ---
 ## Key Concepts
-- **DTOs**: Keep API contracts decoupled from internal models.
-- **Entities**: Represent business objects with identity and behavior.
-- **Repositories**: Provide data access methods without exposing database technology.
-- **Unit of Work**: Allows batching multiple operations in a single transaction.
-- **Middlewares**: Handle cross-cutting concerns like error handling and authentication.
-- **Authentication**: JWT is used for securing API endpoints.
+- **DTOs**: Structures used to transport data between layers, isolating the domain model from external systems.
+- **Entities**: Represent business objects with identity, persistence, and behavior.
+- **Repositories**: Provide data access operations abstracted away from database-specific concerns.
+- **Unit of Work**: Controls transactional consistency across multiple repositories.
+- **Middlewares**: Manage cross-cutting concerns such as error handling, authentication, and logging.
+- **Authentication**: JWT-based security layer for authenticating and authorizing API access.
+- **Pagination and Filtering**: All list responses are paginated and ready for scalability.
+- **API Standardization**: All API responses follow a common `ApiResponseDTO<T>` envelope for consistency and better client handling.

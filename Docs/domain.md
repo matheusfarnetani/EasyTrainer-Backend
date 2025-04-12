@@ -680,10 +680,10 @@ public interface IConnectionManager
 ```
 
 ---
-## Generic Services
+## Generic Services Interface
 To promote **code reuse**, **clean architecture**, and **scalability** within the Application Layer, EasyTrainer adopts two types of **Generic Services**:
-- **IGenericService**: For **simple entities** not linked to a specific Instructor.
-- **IGenericInstructorOwnedService**: For **Instructor-owned entities** like Workouts, Routines, and Exercises.
+- `IGenericService`: For **simple entities** not linked to a specific Instructor.
+- `IGenericInstructorOwnedService`: For **Instructor-owned entities** like `Workouts`, `Routines`, and `Exercises`.
     
 This design follows **DRY** (Don't Repeat Yourself) and **Single Responsibility Principle** from SOLID principles.
 
@@ -742,3 +742,22 @@ public interface IGenericInstructorOwnedService<TCreateDTO, TUpdateDTO, TOutputD
 | IWorkoutService  | IGenericInstructorOwnedService<CreateWorkoutInputDTO, UpdateWorkoutInputDTO, WorkoutOutputDTO>    |
 | IRoutineService  | IGenericInstructorOwnedService<CreateRoutineInputDTO, UpdateRoutineInputDTO, RoutineOutputDTO>    |
 | IExerciseService | IGenericInstructorOwnedService<CreateExerciseInputDTO, UpdateExerciseInputDTO, ExerciseOutputDTO> |
+
+---
+## Delete Service Interface
+### IDeletionValidationService
+
+```
+public interface IDeletionValidationService
+{
+    Task<bool> CanDeleteTypeAsync(int typeId);
+    Task<bool> CanDeleteModalityAsync(int modalityId);
+    Task<bool> CanDeleteHashtagAsync(int hashtagId);
+}
+```
+
+|Item|Description|
+|---|---|
+|Purpose|Declares the validation logic that must be followed before deleting entities.|
+|Responsibility|Domain defines the rules but does not know how they are implemented.|
+|Entities Covered|`Type`, `Modality`, `Hashtag` (entities linked to workouts, routines, exercises).|
