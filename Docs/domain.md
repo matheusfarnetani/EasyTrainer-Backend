@@ -20,6 +20,7 @@
 | Routine              | Main Model         | Represents a workout routine inside a workout        |
 | Exercise             | Main Model         | Represents an individual exercise                    |
 | UserHasGoal          | Relationship Model | Links users and goals                                |
+| UserHasInstructor    | Relationship Model | Links users and instructors                          |
 | WorkoutHasType       | Relationship Model | Links workouts and types                             |
 | WorkoutHasModality   | Relationship Model | Links workouts and modalities                        |
 | WorkoutHasGoal       | Relationship Model | Links workouts and goals                             |
@@ -52,9 +53,9 @@
 - Gender *char*  
 - Password *string*
 - LevelId *int*
-- InstructorId *int*
 
 **Navigation Properties**
+- ICollection of UserHasInstructor - UserInstructor
 - ICollection of UserHasGoal - UserGoals
 - ICollection of WorkoutHasUser - WorkoutUsers
 
@@ -70,6 +71,7 @@
 - Password *string*
 
 **Navigation Properties**
+- ICollection of UserHasInstructor - UserInstructor
 - ICollection of Workout - Workouts
 - ICollection of Routine - Routines
 - ICollection of Exercise - Exercises
@@ -440,7 +442,7 @@ public interface IGenericRepository<T> where T : class
     {
         Task AddAsync(T entity);
         Task<T> GetByIdAsync(int id);
-        Task<List<T?>> GetAllAsync(bool tracked = true);
+        Task<IEnumerable<T?>> GetAllAsync(bool tracked = true);
         Task UpdateAsync(T entity);
         Task DeleteByIdAsync(int id);
         Task SaveAsync();
@@ -457,10 +459,10 @@ All main domain models have their own repository and repository interface, follo
 public interface IUserRepository : IGenericRepository<User>
 {
     Task<User> GetUserByEmailAsync(string email);
-    Task<List<User>> GetUsersByInstructorIdAsync(int instructorId);
-    Task<List<User>> GetUsersByGoalIdAsync(int goalId);
-    Task<List<User>> GetUsersByLevelIdAsync(int levelId);
-    Task<List<User>> GetUsersByWorkoutIdAsync(int workoutId);
+    Task<IEnumerable<User>> GetUsersByInstructorIdAsync(int instructorId);
+    Task<IEnumerable<User>> GetUsersByGoalIdAsync(int goalId);
+    Task<IEnumerable<User>> GetUsersByLevelIdAsync(int levelId);
+    Task<IEnumerable<User>> GetUsersByWorkoutIdAsync(int workoutId);
 }
 ```
 
@@ -470,7 +472,7 @@ public interface IUserRepository : IGenericRepository<User>
 public interface IInstructorRepository : IGenericRepository<Instructor>
 {
     Task<Instructor> GetInstructorByEmailAsync(string email);
-    Task<List<Instructor>> GetInstructorsByUserIdAsync(int userId);
+    Task<IEnumerable<Instructor>> GetInstructorsByUserIdAsync(int userId);
     Task<Instructor> GetInstructorByWorkoutIdAsync(int workoutId);
     Task<Instructor> GetInstructorByRoutineIdAsync(int routineId);
     Task<Instructor> GetInstructorByExerciseIdAsync(int exerciseId);
@@ -482,10 +484,10 @@ public interface IInstructorRepository : IGenericRepository<Instructor>
 ```
 public interface IGoalRepository : IGenericRepository<Goal>
 {
-    Task<List<Goal>> GetGoalsByUserAsync(int userId);
-    Task<List<Goal>> GetGoalsByWorkoutAsync(int workoutId);
-    Task<List<Goal>> GetGoalsByRoutineAsync(int routineId);
-    Task<List<Goal>> GetGoalsByExerciseAsync(int exerciseId);
+    Task<IEnumerable<Goal>> GetGoalsByUserAsync(int userId);
+    Task<IEnumerable<Goal>> GetGoalsByWorkoutAsync(int workoutId);
+    Task<IEnumerable<Goal>> GetGoalsByRoutineAsync(int routineId);
+    Task<IEnumerable<Goal>> GetGoalsByExerciseAsync(int exerciseId);
 }
 ```
 
@@ -508,9 +510,9 @@ public interface ILevelRepository : IGenericRepository<Level>
 ```
 public interface ITypeRepository : IGenericRepository<Type>
 {
-    Task<List<Type>> GetTypesByWorkoutAsync(int workoutId);
-    Task<List<Type>> GetTypesByRoutineAsync(int routineId);
-    Task<List<Type>> GetTypesByExerciseAsync(int exerciseId);
+    Task<IEnumerable<Type>> GetTypesByWorkoutAsync(int workoutId);
+    Task<IEnumerable<Type>> GetTypesByRoutineAsync(int routineId);
+    Task<IEnumerable<Type>> GetTypesByExerciseAsync(int exerciseId);
 }
 ```
 
@@ -520,9 +522,9 @@ public interface ITypeRepository : IGenericRepository<Type>
 ```
 public interface IModalityRepository : IGenericRepository<Modality>
 {
-    Task<List<Modality>> GetModalitiesByWorkoutAsync(int workoutId);
-    Task<List<Modality>> GetModalitiesByRoutineAsync(int routineId);
-    Task<List<Modality>> GetModalitiesByExerciseAsync(int exerciseId);
+    Task<IEnumerable<Modality>> GetModalitiesByWorkoutAsync(int workoutId);
+    Task<IEnumerable<Modality>> GetModalitiesByRoutineAsync(int routineId);
+    Task<IEnumerable<Modality>> GetModalitiesByExerciseAsync(int exerciseId);
 }
 ```
 
@@ -532,9 +534,9 @@ public interface IModalityRepository : IGenericRepository<Modality>
 ```
 public interface IHashtagRepository : IGenericRepository<Hashtag>
 {
-    Task<List<Hashtag>> GetHashtagsByWorkoutAsync(int workoutId);
-    Task<List<Hashtag>> GetHashtagsByRoutineAsync(int routineId);
-    Task<List<Hashtag>> GetHashtagsByExerciseAsync(int exerciseId);
+    Task<IEnumerable<Hashtag>> GetHashtagsByWorkoutAsync(int workoutId);
+    Task<IEnumerable<Hashtag>> GetHashtagsByRoutineAsync(int routineId);
+    Task<IEnumerable<Hashtag>> GetHashtagsByExerciseAsync(int exerciseId);
 }
 ```
 
@@ -544,14 +546,14 @@ public interface IHashtagRepository : IGenericRepository<Hashtag>
 ```
 public interface IWorkoutRepository : IGenericRepository<Workout>
 {
-	Task<List<Workout>> GetWorkoutsByUserIdAsync(int userId);
-	Task<List<Workout>> GetWorkoutsByInstructorIdAsync(int instructorId);
-	Task<List<Workout>> GetWorkoutsByGoalIdAsync(int goalId, int? instructorId = null, int? userId = null);
-	Task<List<Workout>> GetWorkoutsByLevelIdAsync(int levelId, int? instructorId = null, int? userId = null);
-	Task<List<Workout>> GetWorkoutsByModalityAsync(int modalityId, int? instructorId = null, int? userId = null);
-	Task<List<Workout>> GetWorkoutsByHashtagAsync(int hashtagId, int? instructorId = null, int? userId = null);
-	Task<List<Workout>> GetWorkoutsByRoutineAsync(int routineId, int? instructorId = null, int? userId = null);
-	Task<List<Workout>> GetWorkoutsByExerciseAsync(int exerciseId, int? instructorId = null, int? userId = null);
+	Task<IEnumerable<Workout>> GetWorkoutsByUserIdAsync(int userId);
+	Task<IEnumerable<Workout>> GetWorkoutsByInstructorIdAsync(int instructorId);
+	Task<IEnumerable<Workout>> GetWorkoutsByGoalIdAsync(int goalId, int? instructorId = null, int? userId = null);
+	Task<IEnumerable<Workout>> GetWorkoutsByLevelIdAsync(int levelId, int? instructorId = null, int? userId = null);
+	Task<IEnumerable<Workout>> GetWorkoutsByModalityAsync(int modalityId, int? instructorId = null, int? userId = null);
+	Task<IEnumerable<Workout>> GetWorkoutsByHashtagAsync(int hashtagId, int? instructorId = null, int? userId = null);
+	Task<IEnumerable<Workout>> GetWorkoutsByRoutineAsync(int routineId, int? instructorId = null, int? userId = null);
+	Task<IEnumerable<Workout>> GetWorkoutsByExerciseAsync(int exerciseId, int? instructorId = null, int? userId = null);
 }
 ```
 
@@ -561,14 +563,14 @@ public interface IWorkoutRepository : IGenericRepository<Workout>
 ```
 public interface IRoutineRepository : IGenericRepository<Routine>
 {
-	Task<List<Routine>> GetRoutinesByInstructorIdAsync(int instructorId);
-	Task<List<Routine>> GetRoutinesByGoalIdAsync(int goalId, int instructorId);
-	Task<List<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId);
-	Task<List<Routine>> GetRoutinesByTypeIdAsync(int workoutId, int instructorId);
-	Task<List<Routine>> GetRoutinesByModalityAsync(int modalityId, int instructorId);
-	Task<List<Routine>> GetRoutinesByHashtagAsync(int hashtagId, int instructorId);
-	Task<List<Routine>> GetRoutinesByWorkoutAsync(int workoutId, int instructorId);
-	Task<List<Routine>> GetRoutinesByExerciseAsync(int exerciseId, int instructorId);
+	Task<IEnumerable<Routine>> GetRoutinesByInstructorIdAsync(int instructorId);
+	Task<IEnumerable<Routine>> GetRoutinesByGoalIdAsync(int goalId, int instructorId);
+	Task<IEnumerable<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId);
+	Task<IEnumerable<Routine>> GetRoutinesByTypeIdAsync(int workoutId, int instructorId);
+	Task<IEnumerable<Routine>> GetRoutinesByModalityAsync(int modalityId, int instructorId);
+	Task<IEnumerable<Routine>> GetRoutinesByHashtagAsync(int hashtagId, int instructorId);
+	Task<IEnumerable<Routine>> GetRoutinesByWorkoutAsync(int workoutId, int instructorId);
+	Task<IEnumerable<Routine>> GetRoutinesByExerciseAsync(int exerciseId, int instructorId);
 }
 ```
 
@@ -578,15 +580,15 @@ public interface IRoutineRepository : IGenericRepository<Routine>
 ```
 public interface IExerciseRepository : IGenericRepository<Exercise>
 {
-	Task<List<Exercise>> GetExercisesByInstructorIdAsync(int instructorId);
-	Task<List<Exercise>> GetExercisesByGoalIdAsync(int goalId, int instructorId);
-	Task<List<Exercise>> GetExercisesByLevelIdAsync(int levelId, int instructorId);
-	Task<List<Exercise>> GetExercisesByTypeIdAsync(int workoutId, int instructorId);
-	Task<List<Exercise>> GetExercisesByModalityAsync(int modalityId, int instructorId);
-	Task<List<Exercise>> GetExercisesByHashtagAsync(int hashtagId, int instructorId);
-	Task<List<Exercise>> GetExercisesByRoutineAsync(int routineId, int instructorId);
-	Task<List<Exercise>> GetExercisesByExerciseAsync(int exerciseId, int instructorId);
-	Task<List<Exercise>> GetVariationsByExerciseAsync(int variationId, int instructorId);
+	Task<IEnumerable<Exercise>> GetExercisesByInstructorIdAsync(int instructorId);
+	Task<IEnumerable<Exercise>> GetExercisesByGoalIdAsync(int goalId, int instructorId);
+	Task<IEnumerable<Exercise>> GetExercisesByLevelIdAsync(int levelId, int instructorId);
+	Task<IEnumerable<Exercise>> GetExercisesByTypeIdAsync(int workoutId, int instructorId);
+	Task<IEnumerable<Exercise>> GetExercisesByModalityAsync(int modalityId, int instructorId);
+	Task<IEnumerable<Exercise>> GetExercisesByHashtagAsync(int hashtagId, int instructorId);
+	Task<IEnumerable<Exercise>> GetExercisesByRoutineAsync(int routineId, int instructorId);
+	Task<IEnumerable<Exercise>> GetExercisesByExerciseAsync(int exerciseId, int instructorId);
+	Task<IEnumerable<Exercise>> GetVariationsByExerciseAsync(int variationId, int instructorId);
 }
 ```
 
@@ -598,8 +600,8 @@ For relationships containing additional attributes, we define specific repositor
 ```
 public interface IRoutineHasExerciseRepository : IGenericRepository<RoutineHasExercise>
 {
-	Task<List<RoutineHasExercise>> GetExercisesByRoutineIdAsync(int routineId);
-	Task<List<RoutineHasExercise>> GetRoutinesByExerciseIdAsync(int exerciseId);
+	Task<IEnumerable<RoutineHasExercise>> GetExercisesByRoutineIdAsync(int routineId);
+	Task<IEnumerable<RoutineHasExercise>> GetRoutinesByExerciseIdAsync(int exerciseId);
 }
 ```
 
