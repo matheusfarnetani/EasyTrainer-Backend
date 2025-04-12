@@ -37,10 +37,10 @@ The full project documentation is separated into clear sections for easy navigat
 
 | Order | Step | Status |
 |:-----:|:-----|:------|
-| 1 | Set up the development environment (.NET, MySQL, auxiliary tools) | 🔲 |
-| 2 | Create the folder and project structure according to the architecture documentation | 🔲 |
-| 3 | Implement the Entities and Models in **Domain** | 🔲 |
-| 4 | Define and implement all **Repository Interfaces** and **Service Interfaces** in **Domain** | 🔲 |
+| 1 | Set up the development environment (.NET, MySQL, auxiliary tools) | ✅ |
+| 2 | Create the folder and project structure according to the architecture documentation | ✅ |
+| 3 | Implement the Entities and Models in **Domain** | ✅ |
+| 4 | Define and implement all **Repository Interfaces** and **Service Interfaces** in **Domain** | ✅ |
 | 5 | Implement **DTOs** in **Application** | 🔲 |
 | 6 | Implement **Application Services** in **Application** | 🔲 |
 | 7 | Implement the **Generic Repository** and **Specific Repositories** in **Infrastructure** | 🔲 |
