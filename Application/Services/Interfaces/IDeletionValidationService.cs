@@ -1,4 +1,4 @@
-﻿namespace Domain.ServiceInterfaces
+﻿namespace Application.Services.Interfaces
 {
     public interface IDeletionValidationService
     {

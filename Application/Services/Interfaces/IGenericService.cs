@@ -1,6 +1,6 @@
-﻿using Application.DTOs.Pagination;
+﻿using Application.DTOs;
 
-namespace Domain.ServiceInterfaces
+namespace Application.Services.Interfaces
 {
     public interface IGenericService<TCreateDTO, TUpdateDTO, TOutputDTO>
     {
