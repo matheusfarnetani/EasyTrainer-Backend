@@ -7,5 +7,6 @@ namespace Domain.RepositoryInterfaces
         Task<IEnumerable<TrainingType>> GetTypesByWorkoutAsync(int workoutId);
         Task<IEnumerable<TrainingType>> GetTypesByRoutineAsync(int routineId);
         Task<IEnumerable<TrainingType>> GetTypesByExerciseAsync(int exerciseId);
+        Task<bool> ExistsByIdAsync(int id);
     }
 }

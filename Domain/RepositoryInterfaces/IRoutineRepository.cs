@@ -4,7 +4,6 @@ namespace Domain.RepositoryInterfaces
 {
     public interface IRoutineRepository : IGenericRepository<Routine>
     {
-        // General Queries
         Task<IEnumerable<Routine>> GetRoutinesByInstructorIdAsync(int instructorId);
         Task<IEnumerable<Routine>> GetRoutinesByGoalIdAsync(int goalId, int instructorId);
         Task<IEnumerable<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId);
@@ -13,5 +12,26 @@ namespace Domain.RepositoryInterfaces
         Task<IEnumerable<Routine>> GetRoutinesByHashtagIdAsync(int hashtagId, int instructorId);
         Task<IEnumerable<Routine>> GetRoutinesByWorkoutIdAsync(int workoutId, int instructorId);
         Task<IEnumerable<Routine>> GetRoutinesByExerciseIdAsync(int exerciseId, int instructorId);
+
+        Task<Routine?> GetByIdAsync(int id);
+        Task DeleteByIdAsync(int id);
+        Task<bool> ExistsByIdAsync(int id);
+
+        Task AddGoalToRoutineAsync(int routineId, int goalId, int instructorId);
+        Task RemoveGoalFromRoutineAsync(int routineId, int goalId, int instructorId);
+
+        Task AddTypeToRoutineAsync(int routineId, int typeId, int instructorId);
+        Task RemoveTypeFromRoutineAsync(int routineId, int typeId, int instructorId);
+
+        Task AddModalityToRoutineAsync(int routineId, int modalityId, int instructorId);
+        Task RemoveModalityFromRoutineAsync(int routineId, int modalityId, int instructorId);
+
+        Task AddHashtagToRoutineAsync(int routineId, int hashtagId, int instructorId);
+        Task RemoveHashtagFromRoutineAsync(int routineId, int hashtagId, int instructorId);
+
+        Task AddExerciseToRoutineAsync(int routineId, int exerciseId, int instructorId);
+        Task RemoveExerciseFromRoutineAsync(int routineId, int exerciseId, int instructorId);
+
+        Task<Instructor?> GetInstructorByRoutineIdAsync(int routineId);
     }
 }

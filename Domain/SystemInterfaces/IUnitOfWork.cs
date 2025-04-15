@@ -20,5 +20,7 @@ namespace Domain.SystemInterfaces
         Task BeginTransactionAsync(int userId);
         Task CommitAsync();
         Task RollbackAsync();
+        Task SaveAsync();
+        Task DeleteAsync();
     }
 }

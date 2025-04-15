@@ -8,5 +8,6 @@ namespace Domain.RepositoryInterfaces
         Task<IEnumerable<Goal>> GetGoalsByWorkoutAsync(int workoutId);
         Task<IEnumerable<Goal>> GetGoalsByRoutineAsync(int routineId);
         Task<IEnumerable<Goal>> GetGoalsByExerciseAsync(int exerciseId);
+        Task<bool> ExistsByIdAsync(int id);
     }
 }

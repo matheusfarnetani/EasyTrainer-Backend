@@ -9,5 +9,9 @@ namespace Domain.RepositoryInterfaces
         Task<Instructor?> GetInstructorByWorkoutIdAsync(int workoutId);
         Task<Instructor?> GetInstructorByRoutineIdAsync(int routineId);
         Task<Instructor?> GetInstructorByExerciseIdAsync(int exerciseId);
+        Task<bool> ExistsByIdAsync(int id);
+        Task<bool> ExistsByEmailAsync(string email);
+        Task<bool> IsEmailTakenByOtherAsync(string email, int currentId);
+
     }
 }

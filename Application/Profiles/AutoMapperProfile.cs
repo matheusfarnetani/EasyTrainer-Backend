@@ -7,6 +7,9 @@ using Application.DTOs.Level;
 using Application.DTOs.TrainingType;
 using Application.DTOs.Modality;
 using Application.DTOs.Hashtag;
+using Application.DTOs.Workout;
+using Application.DTOs.Routine;
+using Application.DTOs.Exercise;
 
 namespace Application.Profiles
 {
@@ -51,6 +54,21 @@ namespace Application.Profiles
             CreateMap<Hashtag, HashtagOutputDTO>();
             CreateMap<CreateHashtagInputDTO, Hashtag>();
             CreateMap<UpdateHashtagInputDTO, Hashtag>();
+
+            // Workout mappings
+            CreateMap<Workout, WorkoutOutputDTO>();
+            CreateMap<CreateWorkoutInputDTO, Workout>();
+            CreateMap<UpdateWorkoutInputDTO, Workout>();
+
+            // Routine mappings
+            CreateMap<Routine, RoutineOutputDTO>();
+            CreateMap<CreateRoutineInputDTO, Routine>();
+            CreateMap<UpdateRoutineInputDTO, Routine>();
+
+            // Exercise mappings
+            CreateMap<Exercise, ExerciseOutputDTO>();
+            CreateMap<CreateExerciseInputDTO, Exercise>();
+            CreateMap<UpdateExerciseInputDTO, Exercise>();
         }
     }
 }

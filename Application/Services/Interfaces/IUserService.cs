@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.DTOs.User;
+using Application.DTOs.Workout;
 
 namespace Application.Services.Interfaces
 {
@@ -10,5 +11,7 @@ namespace Application.Services.Interfaces
         Task<PaginationResponseDTO<UserOutputDTO>> GetByGoalIdAsync(int goalId, PaginationRequestDTO pagination);
         Task<PaginationResponseDTO<UserOutputDTO>> GetByLevelIdAsync(int levelId, PaginationRequestDTO pagination);
         Task<PaginationResponseDTO<UserOutputDTO>> GetByWorkoutIdAsync(int workoutId, PaginationRequestDTO pagination);
+        Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsAsync(int userId, PaginationRequestDTO pagination);
+
     }
 }

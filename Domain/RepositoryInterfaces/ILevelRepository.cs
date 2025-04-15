@@ -8,5 +8,6 @@ namespace Domain.RepositoryInterfaces
         Task<Level?> GetLevelByWorkoutAsync(int workoutId);
         Task<Level?> GetLevelByRoutineAsync(int routineId);
         Task<Level?> GetLevelByExerciseAsync(int exerciseId);
+        Task<bool> ExistsByIdAsync(int id);
     }
 }
