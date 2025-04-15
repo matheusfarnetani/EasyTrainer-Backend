@@ -103,7 +103,7 @@
 - ICollection of Exercise - Exercises
 
 ---
-### Type
+### TrainingType
 **Properties**
 - Id *int*
 - Name *string*  
@@ -550,6 +550,7 @@ public interface IWorkoutRepository : IGenericRepository<Workout>
 	Task<IEnumerable<Workout>> GetWorkoutsByInstructorIdAsync(int instructorId);
 	Task<IEnumerable<Workout>> GetWorkoutsByGoalIdAsync(int goalId, int? instructorId = null, int? userId = null);
 	Task<IEnumerable<Workout>> GetWorkoutsByLevelIdAsync(int levelId, int? instructorId = null, int? userId = null);
+	Task<IEnumerable<Workout>> GetWorkoutsByTypeIdAsync(int typeId, int? instructorId = null, int? userId = null);
 	Task<IEnumerable<Workout>> GetWorkoutsByModalityAsync(int modalityId, int? instructorId = null, int? userId = null);
 	Task<IEnumerable<Workout>> GetWorkoutsByHashtagAsync(int hashtagId, int? instructorId = null, int? userId = null);
 	Task<IEnumerable<Workout>> GetWorkoutsByRoutineAsync(int routineId, int? instructorId = null, int? userId = null);
@@ -566,7 +567,7 @@ public interface IRoutineRepository : IGenericRepository<Routine>
 	Task<IEnumerable<Routine>> GetRoutinesByInstructorIdAsync(int instructorId);
 	Task<IEnumerable<Routine>> GetRoutinesByGoalIdAsync(int goalId, int instructorId);
 	Task<IEnumerable<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId);
-	Task<IEnumerable<Routine>> GetRoutinesByTypeIdAsync(int workoutId, int instructorId);
+	Task<IEnumerable<Routine>> GetRoutinesByTypeIdAsync(int typeId, int instructorId);
 	Task<IEnumerable<Routine>> GetRoutinesByModalityAsync(int modalityId, int instructorId);
 	Task<IEnumerable<Routine>> GetRoutinesByHashtagAsync(int hashtagId, int instructorId);
 	Task<IEnumerable<Routine>> GetRoutinesByWorkoutAsync(int workoutId, int instructorId);
@@ -583,7 +584,7 @@ public interface IExerciseRepository : IGenericRepository<Exercise>
 	Task<IEnumerable<Exercise>> GetExercisesByInstructorIdAsync(int instructorId);
 	Task<IEnumerable<Exercise>> GetExercisesByGoalIdAsync(int goalId, int instructorId);
 	Task<IEnumerable<Exercise>> GetExercisesByLevelIdAsync(int levelId, int instructorId);
-	Task<IEnumerable<Exercise>> GetExercisesByTypeIdAsync(int workoutId, int instructorId);
+	Task<IEnumerable<Exercise>> GetExercisesByTypeIdAsync(int typeId, int instructorId);
 	Task<IEnumerable<Exercise>> GetExercisesByModalityAsync(int modalityId, int instructorId);
 	Task<IEnumerable<Exercise>> GetExercisesByHashtagAsync(int hashtagId, int instructorId);
 	Task<IEnumerable<Exercise>> GetExercisesByRoutineAsync(int routineId, int instructorId);

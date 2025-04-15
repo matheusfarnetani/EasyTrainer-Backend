@@ -61,7 +61,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await _dbSet.FindAsync(id);
     }
 
-    public async Task<List<T>> GetAllAsync(bool tracked = true)
+    public async Task<IEnumerable<T>> GetAllAsync(bool tracked = true)
     {
         IQueryable<T> query = _dbSet;
         if (!tracked)
