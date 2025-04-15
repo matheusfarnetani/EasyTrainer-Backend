@@ -1,8 +1,8 @@
-﻿using Application.DTOs.Exercise;
+﻿using Application.DTOs;
 using Application.DTOs.Goal;
+using Application.DTOs.Exercise;
 using Application.DTOs.Routine;
 using Application.DTOs.Workout;
-using Application.DTOs;
 using Application.Services.Interfaces;
 
 public interface IGoalService : IGenericService<CreateGoalInputDTO, UpdateGoalInputDTO, GoalOutputDTO>

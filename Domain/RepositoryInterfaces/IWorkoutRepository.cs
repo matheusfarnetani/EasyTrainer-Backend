@@ -9,12 +9,10 @@ namespace Domain.RepositoryInterfaces
         Task<IEnumerable<Workout>> GetWorkoutsByInstructorIdAsync(int instructorId);
         Task<IEnumerable<Workout>> GetWorkoutsByGoalIdAsync(int goalId, int? instructorId = null, int? userId = null);
         Task<IEnumerable<Workout>> GetWorkoutsByLevelIdAsync(int levelId, int? instructorId = null, int? userId = null);
+        Task<IEnumerable<Workout>> GetWorkoutsByTypeIdAsync(int typeId, int? instructorId = null, int? userId = null);
+        Task<IEnumerable<Workout>> GetWorkoutsByModalityIdAsync(int modalityId, int? instructorId = null, int? userId = null);
+        Task<IEnumerable<Workout>> GetWorkoutsByHashtagIdAsync(int hashtagId, int? instructorId = null, int? userId = null);
         Task<IEnumerable<Workout>> GetWorkoutsByRoutineIdAsync(int routineId, int? instructorId = null, int? userId = null);
-        Task<IEnumerable<Workout>> GetWorkoutsByExerciseIdAsync(int exerciseId, int? instructorId = null, int? userId = null);
-
-        // Direct Queries for Deletion Validation
-        Task<IEnumerable<Workout>> GetWorkoutsByTypeIdAsync(int typeId);
-        Task<IEnumerable<Workout>> GetWorkoutsByModalityIdAsync(int modalityId);
-        Task<IEnumerable<Workout>> GetWorkoutsByHashtagIdAsync(int hashtagId);
+        Task<IEnumerable<Workout>> GetWorkoutsByExerciseIdAsync(int exerciseId, int? instructorId = null, int? userId = null)
     }
 }

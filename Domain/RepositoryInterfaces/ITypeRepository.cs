@@ -2,10 +2,10 @@
 
 namespace Domain.RepositoryInterfaces
 {
-    public interface ITypeRepository : IGenericRepository<Type>
+    public interface ITypeRepository : IGenericRepository<TrainingType>
     {
-        Task<IEnumerable<Type>> GetTypesByWorkoutAsync(int workoutId);
-        Task<IEnumerable<Type>> GetTypesByRoutineAsync(int routineId);
-        Task<IEnumerable<Type>> GetTypesByExerciseAsync(int exerciseId);
+        Task<IEnumerable<TrainingType>> GetTypesByWorkoutAsync(int workoutId);
+        Task<IEnumerable<TrainingType>> GetTypesByRoutineAsync(int routineId);
+        Task<IEnumerable<TrainingType>> GetTypesByExerciseAsync(int exerciseId);
     }
 }

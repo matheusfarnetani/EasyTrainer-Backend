@@ -3,6 +3,10 @@ using AutoMapper;
 using Application.DTOs.User;
 using Application.DTOs.Instructor;
 using Application.DTOs.Goal;
+using Application.DTOs.Level;
+using Application.DTOs.TrainingType;
+using Application.DTOs.Modality;
+using Application.DTOs.Hashtag;
 
 namespace Application.Profiles
 {
@@ -27,6 +31,26 @@ namespace Application.Profiles
             CreateMap<Goal, GoalOutputDTO>();
             CreateMap<CreateGoalInputDTO, Goal>();
             CreateMap<UpdateGoalInputDTO, Goal>();
+
+            // Level mappings
+            CreateMap<Level, LevelOutputDTO>();
+            CreateMap<CreateLevelInputDTO, Level>();
+            CreateMap<UpdateLevelInputDTO, Level>();
+
+            // Type mappings
+            CreateMap<TrainingType, TypeOutputDTO>();
+            CreateMap<CreateTypeInputDTO, TrainingType>();
+            CreateMap<UpdateTypeInputDTO, TrainingType>();
+
+            // Modality mappings
+            CreateMap<Modality, ModalityOutputDTO>();
+            CreateMap<CreateModalityInputDTO, Modality>();
+            CreateMap<UpdateModalityInputDTO, Modality>();
+
+            // Hashtag mappings
+            CreateMap<Hashtag, HashtagOutputDTO>();
+            CreateMap<CreateHashtagInputDTO, Hashtag>();
+            CreateMap<UpdateHashtagInputDTO, Hashtag>();
         }
     }
 }

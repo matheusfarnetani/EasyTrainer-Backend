@@ -4,7 +4,7 @@ using Domain.Entities.Relations;
 
 namespace Domain.Entities.Main
 {
-    public class Type
+    public class TrainingType
     {
         // Primary Key
         public int Id { get; set; }

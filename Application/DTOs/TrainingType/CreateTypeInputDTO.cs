@@ -1,4 +1,4 @@
-﻿namespace Application.DTOs.Type
+﻿namespace Application.DTOs.TrainingType
 {
     public class CreateTypeInputDTO
     {
