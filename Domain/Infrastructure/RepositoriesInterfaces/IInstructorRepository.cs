@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Main;
 
-namespace Domain.RepositoryInterfaces
+namespace Domain.Infrastructure.RepositoriesInterfaces
 {
     public interface IInstructorRepository : IGenericRepository<Instructor>
     {
@@ -12,6 +12,5 @@ namespace Domain.RepositoryInterfaces
         Task<bool> ExistsByIdAsync(int id);
         Task<bool> ExistsByEmailAsync(string email);
         Task<bool> IsEmailTakenByOtherAsync(string email, int currentId);
-
     }
 }

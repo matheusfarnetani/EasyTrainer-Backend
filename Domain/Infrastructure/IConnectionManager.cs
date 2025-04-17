@@ -1,4 +1,4 @@
-﻿namespace Domain.SystemInterfaces
+﻿namespace Domain.Infrastructure
 {
     public interface IConnectionManager
     {

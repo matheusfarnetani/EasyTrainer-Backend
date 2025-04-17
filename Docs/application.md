@@ -57,7 +57,7 @@
 - DTOs: `PaginationRequestDTO`, `PaginationResponseDTO<T>`
 - Purpose: Improve scalability by supporting paging in list operations.
 
-```
+```csharp
 public class PaginationRequestDTO
 {
     public int PageNumber { get; set; } = 1;  // Default to first page
@@ -65,7 +65,7 @@ public class PaginationRequestDTO
 }
 ```
 
-```
+```csharp
 public class PaginationResponseDTO<T>
 {
     public int CurrentPage { get; set; }
@@ -80,7 +80,7 @@ public class PaginationResponseDTO<T>
 - DTO: `ApiResponseDTO<T>`
 - Purpose: Standardize API responses for better frontend and integration consistency.
 
-```
+```csharp
 public class ApiResponseDTO<T>
 {
     public bool Success { get; set; }
@@ -104,7 +104,90 @@ public class ApiResponseDTO<T>
 - Combine **multiple repositories** when necessary.
 - Handle **transactions** (possibly via `UnitOfWork`).
 
+### Generic Services Interface
+To promote **code reuse**, **clean architecture**, and **scalability** within the Application Layer, EasyTrainer adopts two types of **Generic Services**:
+- `IGenericService`: For **simple entities** not linked to a specific Instructor.
+- `IGenericInstructorOwnedService`: For **Instructor-owned entities** like `Workouts`, `Routines`, and `Exercises`.
+    
+This design follows **DRY** (Don't Repeat Yourself) and **Single Responsibility Principle** from SOLID principles.
+
+#### IGenericService
+Handles standard CRUD operations for simple models.
+
+```csharp
+public interface IGenericService<TCreateDTO, TUpdateDTO, TOutputDTO>
+{
+    Task<TOutputDTO> CreateAsync(TCreateDTO dto);
+    Task<TOutputDTO> UpdateAsync(TUpdateDTO dto);
+    Task DeleteAsync(int id);
+    Task<TOutputDTO> GetByIdAsync(int id);
+    Task<PaginationResponseDTO<TOutputDTO>> GetAllAsync(PaginationRequestDTO pagination);
+}
+```
+
+**Responsibilities:**
+- Handle basic Create, Update, Delete, Get by ID, and Paginated List operations.
+- Abstracts common CRUD behavior into a shared, reusable interface.
+
+|Service|Interface|
+|---|---|
+|IUserService|IGenericService<CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO>|
+|IInstructorService|IGenericService<CreateInstructorInputDTO, UpdateInstructorInputDTO, InstructorOutputDTO>|
+|IGoalService|IGenericService<CreateGoalInputDTO, UpdateGoalInputDTO, GoalOutputDTO>|
+|ITypeService|IGenericService<CreateTypeInputDTO, UpdateTypeInputDTO, TypeOutputDTO>|
+|ILevelService|IGenericService<CreateLevelInputDTO, UpdateLevelInputDTO, LevelOutputDTO>|
+|IModalityService|IGenericService<CreateModalityInputDTO, UpdateModalityInputDTO, ModalityOutputDTO>|
+|IHashtagService|IGenericService<CreateHashtagInputDTO, UpdateHashtagInputDTO, HashtagOutputDTO>|
+
+---
+#### IGenericInstructorOwnedService
+**Use case:**  
+For entities that **must be owned** and **controlled by an Instructor**, such as `Workout`, `Routine`, and `Exercise`.
+
+**Interface:**
+
+```csharp
+public interface IGenericInstructorOwnedService<TCreateDTO, TUpdateDTO, TOutputDTO>
+{
+    Task<TOutputDTO> CreateAsync(TCreateDTO dto, int instructorId);
+    Task<TOutputDTO> UpdateAsync(TUpdateDTO dto, int instructorId);
+    Task DeleteAsync(int id, int instructorId);
+    Task<TOutputDTO> GetByIdAsync(int id, int instructorId);
+    Task<PaginationResponseDTO<TOutputDTO>> GetAllAsync(int instructorId, PaginationRequestDTO pagination);
+}
+```
+
+**Responsibilities:**
+- Same as `IGenericService`, but every operation explicitly receives the `instructorId` to enforce ownership.
+- Adds security and control, ensuring that instructors can only manage their own resources.
+
+| Service          | Interface                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| IWorkoutService  | IGenericInstructorOwnedService<CreateWorkoutInputDTO, UpdateWorkoutInputDTO, WorkoutOutputDTO>    |
+| IRoutineService  | IGenericInstructorOwnedService<CreateRoutineInputDTO, UpdateRoutineInputDTO, RoutineOutputDTO>    |
+| IExerciseService | IGenericInstructorOwnedService<CreateExerciseInputDTO, UpdateExerciseInputDTO, ExerciseOutputDTO> |
+
+---
 ### Delete Service
+#### IDeletionValidationService
+
+```csharp
+public interface IDeletionValidationService
+{
+    Task<bool> CanDeleteTypeAsync(int typeId);
+    Task<bool> CanDeleteModalityAsync(int modalityId);
+    Task<bool> CanDeleteHashtagAsync(int hashtagId);
+}
+```
+
+|Item|Description|
+|---|---|
+|Purpose|Declares the validation logic that must be followed before deleting entities.|
+|Responsibility|Domain defines the rules but does not know how they are implemented.|
+|Entities Covered|`Type`, `Modality`, `Hashtag` (entities linked to workouts, routines, exercises).|
+
+---
+#### DeletionValidationService
 **Purpose:** The `DeletionValidationService` is responsible for ensuring **safe deletions** of auxiliary entities like `Type`, `Modality`, and `Hashtag`.  
 It verifies that an entity is **not being referenced** in other related tables (such as `Workouts`, `Routines`, or `Exercises`) before allowing its deletion.
 
@@ -115,7 +198,7 @@ This service helps prevent:
 
 It enforces **business rules** that protect data integrity.
 
-```
+```csharp
 public class DeletionValidationService : IDeletionValidationService
 {
     private readonly IWorkoutRepository _workoutRepository;
@@ -165,7 +248,7 @@ public class DeletionValidationService : IDeletionValidationService
 ### Services Interfaces
 - `IUserService`
 
-```
+```csharp
 public interface IUserService : IGenericService<CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO>
 {
     Task AddGoalToUserAsync(int userId, int goalId);
@@ -184,7 +267,7 @@ public interface IUserService : IGenericService<CreateUserInputDTO, UpdateUserIn
 
 - `IInstructorService`
 
-```
+```csharp
 public interface IInstructorService : IGenericService<CreateInstructorInputDTO, UpdateInstructorInputDTO, InstructorOutputDTO>
 {
 	
@@ -198,7 +281,7 @@ public interface IInstructorService : IGenericService<CreateInstructorInputDTO, 
 
 - `IGoalService`
 
-```
+```csharp
 public interface IGoalService : IGenericService<CreateGoalInputDTO, UpdateGoalInputDTO, GoalOutputDTO>
 {
     // Relationships
@@ -210,7 +293,7 @@ public interface IGoalService : IGenericService<CreateGoalInputDTO, UpdateGoalIn
 
 - `ILevelService`
 
-```
+```csharp
 public interface ILevelService : IGenericService<CreateLevelInputDTO, UpdateLevelInputDTO, LevelOutputDTO>
 {
     // Relationships
@@ -222,7 +305,7 @@ public interface ILevelService : IGenericService<CreateLevelInputDTO, UpdateLeve
 
 - `ITypeService`
 
-```
+```csharp
 public interface ITypeService : IGenericService<CreateTypeInputDTO, UpdateTypeInputDTO, TypeOutputDTO>
 {
     // Relationships
@@ -234,7 +317,7 @@ public interface ITypeService : IGenericService<CreateTypeInputDTO, UpdateTypeIn
 
 - `IModalityService`
 
-```
+```csharp
 public interface IModalityService : IGenericService<CreateModalityInputDTO, UpdateModalityInputDTO, ModalityOutputDTO>
 {
     // Relationships
@@ -246,7 +329,7 @@ public interface IModalityService : IGenericService<CreateModalityInputDTO, Upda
 
 - `IHashtagService`
 
-```
+```csharp
 public interface IHashtagService : IGenericService<CreateHashtagInputDTO, UpdateHashtagInputDTO, HashtagOutputDTO>
 {
     // Relationships
@@ -258,7 +341,7 @@ public interface IHashtagService : IGenericService<CreateHashtagInputDTO, Update
 
 - `IWorkoutService`
 
-```
+```csharp
 public interface IWorkoutService : IGenericInstructorOwnedService<CreateWorkoutInputDTO, UpdateWorkoutInputDTO, WorkoutOutputDTO>
 {
     Task AddGoalToWorkoutAsync(int workoutId, int goalId, int instructorId);
@@ -287,7 +370,7 @@ public interface IWorkoutService : IGenericInstructorOwnedService<CreateWorkoutI
 
 - `IRoutineService`
 
-```
+```csharp
 public interface IRoutineService : IGenericInstructorOwnedService<CreateRoutineInputDTO, UpdateRoutineInputDTO, RoutineOutputDTO>
 {
     Task AddGoalToRoutineAsync(int routineId, int goalId, int instructorId);
@@ -313,7 +396,7 @@ public interface IRoutineService : IGenericInstructorOwnedService<CreateRoutineI
 
 - `IExerciseService`
 
-```
+```csharp
 public interface IExerciseService : IGenericInstructorOwnedService<CreateExerciseInputDTO, UpdateExerciseInputDTO, ExerciseOutputDTO>
 {
     Task AddGoalToExerciseAsync(int exerciseId, int goalId, int instructorId);
@@ -339,7 +422,7 @@ public interface IExerciseService : IGenericInstructorOwnedService<CreateExercis
 
 - `IUserHasGoalService`
 
-```
+```csharp
 public interface IUserHasGoalService
 {
     Task<UserHasGoalOutputDTO> CreateUserHasGoalAsync(CreateUserHasGoalInputDTO dto);
@@ -352,7 +435,7 @@ public interface IUserHasGoalService
 
 - `IWorkoutHasUserService`
 
-```
+```csharp
 public interface IWorkoutHasUserService
 {
     Task<WorkoutHasUserOutputDTO> CreateWorkoutHasUserAsync(CreateWorkoutHasUserInputDTO dto);
@@ -365,7 +448,7 @@ public interface IWorkoutHasUserService
 
 - `IRoutineHasExerciseService`
 
-```
+```csharp
 public interface IRoutineHasExerciseService
 {
     Task<RoutineHasExerciseOutputDTO> CreateRoutineHasExerciseAsync(CreateRoutineHasExerciseInputDTO dto);
@@ -406,141 +489,3 @@ public interface IRoutineHasExerciseService
 | Routine            | RoutineProfile            |
 | Exercise           | ExerciseProfile           |
 | RoutineHasExercise | RoutineHasExerciseProfile |
-
----
-## UnitOfWork Class
-The `UnitOfWork` class is the concrete implementation of `IUnitOfWork`.
-- Manages a single instance of DbContext.
-- Manages a single database transaction.
-- Ensures that all changes across multiple repositories are committed or rolled back atomically.
-- Provides an integration point to set database session variables (e.g., `SET @user_id = ...`) during a transaction.
-
-**Benefits:**
-- Promotes clean, scalable, and maintainable data access.
-- Avoids inconsistent data states.
-- Provides better transaction management and control.
-- Centralizes access to all repositories through a single object.
-
-```
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using System.Threading.Tasks;
-
-public class UnitOfWork : IUnitOfWork
-{
-    private readonly AppDbContext _context;
-    private IDbContextTransaction _transaction;
-    private int? _currentUserId;
-
-    public IUserRepository Users { get; private set; }
-    public IInstructorRepository Instructors { get; private set; }
-    public IGoalRepository Goals { get; private set; }
-    public ILevelRepository Levels { get; private set; }
-    public ITypeRepository Types { get; private set; }
-    public IModalityRepository Modalities { get; private set; }
-    public IHashtagRepository Hashtags { get; private set; }
-    public IWorkoutRepository Workouts { get; private set; }
-    public IRoutineRepository Routines { get; private set; }
-    public IExerciseRepository Exercises { get; private set; }
-    public IRoutineHasExerciseRepository RoutineHasExercises { get; private set; }
-
-    public UnitOfWork(AppDbContext context,
-                      IUserRepository users,
-                      IInstructorRepository instructors,
-                      IGoalRepository goals,
-                      ILevelRepository levels,
-                      ITypeRepository types,
-                      IModalityRepository modalities,
-                      IHashtagRepository hashtags,
-                      IWorkoutRepository workouts,
-                      IRoutineRepository routines,
-                      IExerciseRepository exercises,
-                      IRoutineHasExerciseRepository routineHasExercises)
-    {
-        _context = context;
-        Users = users;
-        Instructors = instructors;
-        Goals = goals;
-        Levels = levels;
-        Types = types;
-        Modalities = modalities;
-        Hashtags = hashtags;
-        Workouts = workouts;
-        Routines = routines;
-        Exercises = exercises;
-        RoutineHasExercises = routineHasExercises;
-    }
-
-    /// <summary>
-    /// Sets the user ID for the current transaction context.
-    /// Must be called before any Create, Update, or Delete operations.
-    /// </summary>
-    public async Task BeginTransactionAsync(int userId)
-    {
-        if (_transaction != null)
-            return;
-
-        _transaction = await _context.Database.BeginTransactionAsync();
-
-        _currentUserId = userId;
-
-        // Sets the @user_id variable inside the MySQL session
-        await _context.Database.ExecuteSqlRawAsync($"SET @user_id = {_currentUserId};");
-    }
-
-    public async Task CommitAsync()
-    {
-        try
-        {
-            await _context.SaveChangesAsync();
-            if (_transaction != null)
-            {
-                await _transaction.CommitAsync();
-            }
-        }
-        catch
-        {
-            await RollbackAsync();
-            throw;
-        }
-        finally
-        {
-            if (_transaction != null)
-            {
-                await _transaction.DisposeAsync();
-                _transaction = null;
-            }
-            _currentUserId = null;
-        }
-    }
-
-    public async Task RollbackAsync()
-    {
-        if (_transaction != null)
-        {
-            await _transaction.RollbackAsync();
-            await _transaction.DisposeAsync();
-            _transaction = null;
-        }
-        _currentUserId = null;
-    }
-
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
-}
-```
-
-> Every Create, Update or Delete operation must be wrapped with a `BeginTransactionAsync(currentUserId)` followed by `CommitAsync()`.
-
-Usage on services:
-
-```
-await _unitOfWork.BeginTransactionAsync(currentUserId);
-
-await _unitOfWork.Users.AddAsync(newUser);
-await _unitOfWork.Goals.AddAsync(newGoal);
-
-await _unitOfWork.CommitAsync();
-```

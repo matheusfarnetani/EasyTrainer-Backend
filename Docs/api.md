@@ -91,7 +91,7 @@ Controllers must remain **thin**:
 
 ### Controller Model (Template)
 
-```
+```csharp
 [ApiController]
 [Route("easytrainer/api/v1/[controller]")]
 public class EntityNameController : ControllerBase
@@ -361,7 +361,7 @@ In the `Startup.cs` or `Program.cs` (depending on your .NET version), all servic
 
 Example:
 
-```
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     // Application Services

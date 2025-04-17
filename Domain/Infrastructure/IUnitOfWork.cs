@@ -1,10 +1,11 @@
 ﻿using System;
-using Domain.RepositoryInterfaces;
+using Domain.Infrastructure.RepositoriesInterfaces;
 
-namespace Domain.SystemInterfaces
+namespace Domain.Infrastructure
 {
     public interface IUnitOfWork : IDisposable
     {
+        // Repositories
         IUserRepository Users { get; }
         IInstructorRepository Instructors { get; }
         IGoalRepository Goals { get; }
@@ -17,10 +18,18 @@ namespace Domain.SystemInterfaces
         IExerciseRepository Exercises { get; }
         IRoutineHasExerciseRepository RoutineHasExercises { get; }
 
+        // Transaction management
         Task BeginTransactionAsync(int userId);
         Task CommitAsync();
         Task RollbackAsync();
+
+        // Persistence
         Task SaveAsync();
-        Task DeleteAsync();
+        Task SaveAndCommitAsync();
+
+        // Utility
+        Task<TResult> BeginAndCommitAsync<TResult>(int userId, Func<Task<TResult>> operation);
+        Task BeginAndCommitAsync(int userId, Func<Task> operation);
+        bool HasPendingChanges();
     }
 }

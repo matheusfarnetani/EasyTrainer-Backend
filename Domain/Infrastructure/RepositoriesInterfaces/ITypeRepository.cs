@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Main;
 
-namespace Domain.RepositoryInterfaces
+namespace Domain.Infrastructure.RepositoriesInterfaces
 {
     public interface ITypeRepository : IGenericRepository<TrainingType>
     {

@@ -11,8 +11,9 @@ using Application.Validators.Instructor;
 using Application.Validators.User;
 using AutoMapper;
 using Domain.Entities.Main;
+using Domain.Infrastructure;
+using Domain.Infrastructure.RepositoriesInterfaces;
 using Domain.RepositoryInterfaces;
-using Domain.SystemInterfaces;
 using FluentValidation;
 
 namespace Application.Services.Implementations

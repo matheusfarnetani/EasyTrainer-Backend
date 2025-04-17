@@ -7,9 +7,10 @@ using Application.Exceptions;
 using Application.Helpers;
 using Domain.Entities.Main;
 using Domain.RepositoryInterfaces;
-using Domain.SystemInterfaces;
 using AutoMapper;
 using FluentValidation;
+using Domain.Infrastructure.RepositoriesInterfaces;
+using Domain.Infrastructure;
 
 namespace Application.Services.Implementations
 {
