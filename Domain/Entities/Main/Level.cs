@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Domain.Entities.Relations;
-
-namespace Domain.Entities.Main
+﻿namespace Domain.Entities.Main
 {
     public class Level
     {

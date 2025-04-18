@@ -1,5 +1,4 @@
-﻿using System;
-using Domain.Infrastructure.RepositoriesInterfaces;
+﻿using Domain.Infrastructure.RepositoriesInterfaces;
 
 namespace Domain.Infrastructure
 {

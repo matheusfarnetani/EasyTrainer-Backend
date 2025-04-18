@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Domain.Entities.Relations;
+﻿using Domain.Entities.Relations;
 
 namespace Domain.Entities.Main
 {
@@ -18,6 +16,8 @@ namespace Domain.Entities.Main
         public int LevelId { get; set; }
 
         // Navigation Properties
+        public Instructor Instructor { get; set; } = null!;
+        public Level Level { get; set; } = null!;
         public ICollection<RoutineHasType> RoutineTypes { get; set; } = new List<RoutineHasType>();
         public ICollection<RoutineHasModality> RoutineModalities { get; set; } = new List<RoutineHasModality>();
         public ICollection<RoutineHasGoal> RoutineGoals { get; set; } = new List<RoutineHasGoal>();

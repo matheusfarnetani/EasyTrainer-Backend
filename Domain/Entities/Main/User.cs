@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Domain.Entities.Relations;
+﻿using Domain.Entities.Relations;
 
 namespace Domain.Entities.Main
 {
@@ -20,27 +18,18 @@ namespace Domain.Entities.Main
         public string Password { get; set; } = string.Empty;
 
         // Computed Property
-        public int Age
-        {
-            get
-            {
-                var today = DateTime.Today;
-                var age = today.Year - Birthday.Year;
+        public int Age => DateTime.Today.Year - Birthday.Year - (Birthday.Date > DateTime.Today.AddYears(-(DateTime.Today.Year - Birthday.Year)) ? 1 : 0);
 
-                if (Birthday.Date > today.AddYears(-age))
-                    age--;
-
-                return age;
-            }
-        }
-
-        // Foreign Keys
+        // Foreign Key
         public int LevelId { get; set; }
-        public int InstructorId { get; set; }
 
-        // Navigation Properties
+        // Navigation
+        public Level Level { get; set; } = null!;
+
+        // Many-to-Many via junction tables
         public ICollection<UserHasInstructor> UserInstructors { get; set; } = new List<UserHasInstructor>();
         public ICollection<UserHasGoal> UserGoals { get; set; } = new List<UserHasGoal>();
-        public ICollection<WorkoutHasUser> UsersWorkout { get; set; } = new List<WorkoutHasUser>();
+        public ICollection<WorkoutHasUser> Workouts { get; set; } = new List<WorkoutHasUser>();
+        public ICollection<WorkoutHasUser> WorkoutUsers { get; set; } = new List<WorkoutHasUser>();
     }
 }

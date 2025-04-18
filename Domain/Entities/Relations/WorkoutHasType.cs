@@ -9,6 +9,6 @@ namespace Domain.Entities.Relations
 
         // Navigation Properties
         public Workout Workout { get; set; } = null!;
-        public Type Type { get; set; } = null!;
+        public TrainingType Type { get; set; } = null!;
     }
 }

@@ -8,6 +8,6 @@ namespace Domain.Entities.Relations
         public int TypeId { get; set; }
 
         public Exercise Exercise { get; set; } = null!;
-        public Type Type { get; set; } = null!;
+        public TrainingType Type { get; set; } = null!;
     }
 }

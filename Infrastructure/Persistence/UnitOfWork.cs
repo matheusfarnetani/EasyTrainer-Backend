@@ -1,10 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using Domain.RepositoryInterfaces;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
+﻿using Domain.Infrastructure;
 using Domain.Infrastructure.RepositoriesInterfaces;
-using Domain.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Persistence
 {
@@ -12,6 +10,19 @@ namespace Infrastructure.Persistence
     {
         private readonly AppDbContext _context;
         private readonly ILogger<UnitOfWork> _logger;
+        private IDbContextTransaction? _currentTransaction;
+
+        public IUserRepository Users { get; }
+        public IInstructorRepository Instructors { get; }
+        public IGoalRepository Goals { get; }
+        public ILevelRepository Levels { get; }
+        public ITypeRepository Types { get; }
+        public IModalityRepository Modalities { get; }
+        public IHashtagRepository Hashtags { get; }
+        public IWorkoutRepository Workouts { get; }
+        public IRoutineRepository Routines { get; }
+        public IExerciseRepository Exercises { get; }
+        public IRoutineHasExerciseRepository RoutineHasExercises { get; }
 
         public UnitOfWork(
             AppDbContext context,
@@ -30,6 +41,7 @@ namespace Infrastructure.Persistence
         {
             _context = context;
             _logger = logger;
+
             Users = users;
             Instructors = instructors;
             Goals = goals;
@@ -43,27 +55,11 @@ namespace Infrastructure.Persistence
             RoutineHasExercises = routineHasExercises;
         }
 
-        public IUserRepository Users { get; }
-        public IInstructorRepository Instructors { get; }
-        public IGoalRepository Goals { get; }
-        public ILevelRepository Levels { get; }
-        public ITypeRepository Types { get; }
-        public IModalityRepository Modalities { get; }
-        public IHashtagRepository Hashtags { get; }
-        public IWorkoutRepository Workouts { get; }
-        public IRoutineRepository Routines { get; }
-        public IExerciseRepository Exercises { get; }
-        public IRoutineHasExerciseRepository RoutineHasExercises { get; }
-
-        private IDbContextTransaction? _currentTransaction;
-
         public async Task BeginTransactionAsync(int userId)
         {
-            if (_currentTransaction != null)
-                return;
-
+            if (_currentTransaction != null) return;
             _currentTransaction = await _context.Database.BeginTransactionAsync();
-            await _context.Database.ExecuteSqlRawAsync($"SET @user_id = {userId};");
+            await _context.Database.ExecuteSqlAsync($"SET @user_id = {userId};");
         }
 
         public async Task CommitAsync()
@@ -72,6 +68,7 @@ namespace Infrastructure.Persistence
             {
                 if (_currentTransaction != null)
                 {
+                    await _context.SaveChangesAsync();
                     await _currentTransaction.CommitAsync();
                     await _currentTransaction.DisposeAsync();
                     _currentTransaction = null;
@@ -79,7 +76,7 @@ namespace Infrastructure.Persistence
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during CommitAsync");
+                _logger.LogError(ex, "Commit failed. Rolling back.");
                 await RollbackAsync();
                 throw;
             }
@@ -95,7 +92,10 @@ namespace Infrastructure.Persistence
             }
         }
 
-        public async Task SaveAsync() => await _context.SaveChangesAsync();
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
 
         public async Task SaveAndCommitAsync()
         {
@@ -136,7 +136,10 @@ namespace Infrastructure.Persistence
             }
         }
 
-        public bool HasPendingChanges() => _context.ChangeTracker.HasChanges();
+        public bool HasPendingChanges()
+        {
+            return _context.ChangeTracker.HasChanges();
+        }
 
         public void Dispose()
         {

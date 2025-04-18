@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Domain.Entities.Relations;
+﻿using Domain.Entities.Relations;
 
 namespace Domain.Entities.Main
 {
@@ -18,19 +16,7 @@ namespace Domain.Entities.Main
         public string Password { get; set; } = string.Empty;
 
         // Computed Property
-        public int Age
-        {
-            get
-            {
-                var today = DateTime.Today;
-                var age = today.Year - Birthday.Year;
-
-                if (Birthday.Date > today.AddYears(-age))
-                    age--;
-
-                return age;
-            }
-        }
+        public int Age => DateTime.Today.Year - Birthday.Year - (Birthday.Date > DateTime.Today.AddYears(-(DateTime.Today.Year - Birthday.Year)) ? 1 : 0);
 
         // Navigation Properties
         public ICollection<UserHasInstructor> UserInstructors { get; set; } = new List<UserHasInstructor>();

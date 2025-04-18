@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Domain.Entities.Relations;
+﻿using Domain.Entities.Relations;
 
 namespace Domain.Entities.Main
 {
@@ -30,6 +28,8 @@ namespace Domain.Entities.Main
         public int LevelId { get; set; }
 
         // Navigation Properties
+        public Instructor Instructor { get; set; } = null!;
+        public Level Level { get; set; } = null!;
         public ICollection<ExerciseHasType> ExerciseTypes { get; set; } = new List<ExerciseHasType>();
         public ICollection<ExerciseHasModality> ExerciseModalities { get; set; } = new List<ExerciseHasModality>();
         public ICollection<ExerciseHasGoal> ExerciseGoals { get; set; } = new List<ExerciseHasGoal>();
@@ -37,5 +37,6 @@ namespace Domain.Entities.Main
         public ICollection<ExerciseHasVariation> ExerciseVariations { get; set; } = new List<ExerciseHasVariation>();
         public ICollection<RoutineHasExercise> RoutineExercises { get; set; } = new List<RoutineHasExercise>();
         public ICollection<WorkoutHasExercise> WorkoutExercises { get; set; } = new List<WorkoutHasExercise>();
+        public ICollection<ExerciseHasVariation> IsVariationOf { get; set; } = new List<ExerciseHasVariation>();
     }
 }

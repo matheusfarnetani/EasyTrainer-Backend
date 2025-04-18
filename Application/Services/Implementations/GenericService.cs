@@ -1,5 +1,5 @@
 ﻿using Application.DTOs;
-using Domain.RepositoryInterfaces;
+using Domain.Infrastructure.RepositoriesInterfaces;
 using Application.Services.Interfaces;
 using AutoMapper;
 using Application.Exceptions;

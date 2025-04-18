@@ -1,14 +1,15 @@
 ﻿using Domain.Entities.Main;
 using Domain.Entities.Relations;
+using Domain.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace Infrastructure.Persistence
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IAppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        // DbSets: entidades principais
         public DbSet<User> Users { get; set; }
         public DbSet<Instructor> Instructors { get; set; }
         public DbSet<Goal> Goals { get; set; }
@@ -20,26 +21,36 @@ namespace Infrastructure.Persistence
         public DbSet<Routine> Routines { get; set; }
         public DbSet<Exercise> Exercises { get; set; }
 
-        // DbSets: relações
+        public DbSet<WorkoutHasUser> WorkoutHasUsers { get; set; }
+        public DbSet<WorkoutHasRoutine> WorkoutHasRoutines { get; set; }
+        public DbSet<WorkoutHasExercise> WorkoutHasExercises { get; set; }
+        public DbSet<WorkoutHasGoal> WorkoutHasGoals { get; set; }
+        public DbSet<WorkoutHasType> WorkoutHasTypes { get; set; }
+        public DbSet<WorkoutHasModality> WorkoutHasModalities { get; set; }
+        public DbSet<WorkoutHasHashtag> WorkoutHasHashtags { get; set; }
+
+        public DbSet<RoutineHasGoal> RoutineHasGoals { get; set; }
+        public DbSet<RoutineHasType> RoutineHasTypes { get; set; }
+        public DbSet<RoutineHasModality> RoutineHasModalities { get; set; }
+        public DbSet<RoutineHasHashtag> RoutineHasHashtags { get; set; }
         public DbSet<RoutineHasExercise> RoutineHasExercises { get; set; }
+
+        public DbSet<ExerciseHasGoal> ExerciseHasGoals { get; set; }
+        public DbSet<ExerciseHasType> ExerciseHasTypes { get; set; }
+        public DbSet<ExerciseHasModality> ExerciseHasModalities { get; set; }
+        public DbSet<ExerciseHasHashtag> ExerciseHasHashtags { get; set; }
+        public DbSet<ExerciseHasVariation> ExerciseHasVariations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
             base.OnModelCreating(modelBuilder);
+        }
 
-            // Chave composta para a relação many-to-many personalizada
-            modelBuilder.Entity<RoutineHasExercise>()
-                .HasKey(x => new { x.RoutineId, x.ExerciseId });
-
-            modelBuilder.Entity<RoutineHasExercise>()
-                .HasOne(rhe => rhe.Routine)
-                .WithMany(r => r.UsersWorkout)
-                .HasForeignKey(rhe => rhe.RoutineId);
-
-            modelBuilder.Entity<RoutineHasExercise>()
-                .HasOne(rhe => rhe.Exercise)
-                .WithMany(e => e.Routines)
-                .HasForeignKey(rhe => rhe.ExerciseId);
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return base.SaveChangesAsync(cancellationToken);
         }
     }
 }

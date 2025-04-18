@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Domain.Entities.Relations;
+﻿using Domain.Entities.Relations;
 
 namespace Domain.Entities.Main
 {
@@ -20,6 +18,8 @@ namespace Domain.Entities.Main
         public int LevelId { get; set; }
 
         // Navigation Properties
+        public Level Level { get; set; } = null!;
+        public Instructor Instructor { get; set; } = null!;
         public ICollection<WorkoutHasType> WorkoutTypes { get; set; } = new List<WorkoutHasType>();
         public ICollection<WorkoutHasModality> WorkoutModalities { get; set; } = new List<WorkoutHasModality>();
         public ICollection<WorkoutHasGoal> WorkoutGoals { get; set; } = new List<WorkoutHasGoal>();
