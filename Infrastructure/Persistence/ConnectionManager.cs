@@ -1,5 +1,5 @@
 ﻿using Domain.Application.Interfaces;
-using Domain.Infrastructure;
+using Domain.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Persistence

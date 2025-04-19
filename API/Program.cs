@@ -19,19 +19,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
-builder.Services.AddScoped<IConnectionManager, ConnectionManager>();
-builder.Services.AddDbContext<AppDbContext>((provider, options) =>
-{
-    var connectionManager = provider.GetRequiredService<IConnectionManager>();
-    var connStr = connectionManager.GetCurrentConnectionString();
 
-    options.UseMySql(connStr, ServerVersion.AutoDetect(connStr));
-});
-
-
-
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureRepositories();
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure();
 
 
 var app = builder.Build();
@@ -46,6 +36,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// Health Check
+app.MapHealthChecks("/health");
 
 app.MapControllers();
 

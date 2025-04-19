@@ -1,6 +1,6 @@
 ﻿using Domain.Infrastructure.RepositoriesInterfaces;
 
-namespace Domain.Infrastructure
+namespace Domain.Infrastructure.Persistence
 {
     public interface IUnitOfWork : IDisposable
     {

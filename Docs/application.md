@@ -489,3 +489,4 @@ public interface IRoutineHasExerciseService
 | Routine            | RoutineProfile            |
 | Exercise           | ExerciseProfile           |
 | RoutineHasExercise | RoutineHasExerciseProfile |
+

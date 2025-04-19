@@ -11,16 +11,16 @@ It is designed following modern backend architecture principles:
 
 ---
 ## API Structure
-|Component|Description|
-|---|---|
-|**Routes**|Define the available HTTP endpoints following REST conventions|
-|**Controllers**|Thin controllers responsible only for input validation and service orchestration|
-|**Middlewares**|Cross-cutting layers for error handling, authentication, logging|
-|**Dependency Injection**|All components are wired via the native .NET DI container|
-|**Response Envelopes**|All responses are wrapped in standardized formats (`ApiResponseDTO<T>`)|
-|**Pagination**|Pagination supported in all list endpoints|
-|**Authentication**|JWT authentication applied where necessary|
-|**Caching/Future**|Ready for adding Caching, Rate-Limiting, API Gateway|
+| Component                | Description                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| **Routes**               | Define the available HTTP endpoints following REST conventions                   |
+| **Controllers**          | Thin controllers responsible only for input validation and service orchestration |
+| **Middlewares**          | Cross-cutting layers for error handling, authentication, logging                 |
+| **Dependency Injection** | All components are wired via the native .NET DI container                        |
+| **Response Envelopes**   | All responses are wrapped in standardized formats (`ApiResponseDTO<T>`)          |
+| **Pagination**           | Pagination supported in all list endpoints                                       |
+| **Authentication**       | JWT authentication applied where necessary                                       |
+| **Caching/Future**       | Ready for adding Caching, Rate-Limiting, API Gateway                             |
 
 ---
 ## Middlewares

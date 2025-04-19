@@ -1,4 +1,4 @@
-﻿namespace Domain.Infrastructure
+﻿namespace Domain.Infrastructure.Persistence
 {
     public interface IConnectionManager
     {

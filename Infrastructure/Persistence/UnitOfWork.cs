@@ -1,8 +1,8 @@
-﻿using Domain.Infrastructure;
-using Domain.Infrastructure.RepositoriesInterfaces;
+﻿using Domain.Infrastructure.RepositoriesInterfaces;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Domain.Infrastructure.Persistence;
 
 namespace Infrastructure.Persistence
 {

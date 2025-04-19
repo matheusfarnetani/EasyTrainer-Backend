@@ -2,7 +2,7 @@
 using Domain.Entities.Relations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Infrastructure
+namespace Domain.Infrastructure.Persistence
 {
     public interface IAppDbContext
     {

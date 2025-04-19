@@ -343,12 +343,12 @@ public class UserHasGoalConfiguration : IEntityTypeConfiguration<UserHasGoal>
         builder.HasKey(x => new { x.UserId, x.GoalId });
 
         builder.HasOne(x => x.User)
-               .WithMany()
+               .WithMany(u => u.UserGoals)
                .HasForeignKey(x => x.UserId)
                .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Goal)
-               .WithMany()
+               .WithMany(g => g.UserGoals)
                .HasForeignKey(x => x.GoalId)
                .OnDelete(DeleteBehavior.Cascade);
     }
@@ -367,12 +367,12 @@ public class UserHasInstructorConfiguration : IEntityTypeConfiguration<UserHasIn
         builder.HasKey(x => new { x.UserId, x.InstructorId });
 
         builder.HasOne(x => x.User)
-               .WithMany()
+               .WithMany(u => u.UserInstructors)
                .HasForeignKey(x => x.UserId)
                .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Instructor)
-               .WithMany()
+               .WithMany(i => i.UserInstructors)
                .HasForeignKey(x => x.InstructorId)
                .OnDelete(DeleteBehavior.Cascade);
     }
@@ -389,6 +389,16 @@ public class WorkoutHasTypeConfiguration : IEntityTypeConfiguration<WorkoutHasTy
         builder.ToTable("workout_has_type");
 
         builder.HasKey(x => new { x.WorkoutId, x.TypeId });
+
+        builder.HasOne(x => x.Workout)
+               .WithMany(w => w.WorkoutTypes)
+               .HasForeignKey(x => x.WorkoutId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Type)
+               .WithMany(t => t.WorkoutTypes)
+               .HasForeignKey(x => x.TypeId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -403,6 +413,16 @@ public class WorkoutHasModalityConfiguration : IEntityTypeConfiguration<WorkoutH
         builder.ToTable("workout_has_modality");
 
         builder.HasKey(x => new { x.WorkoutId, x.ModalityId });
+
+        builder.HasOne(x => x.Workout)
+               .WithMany(w => w.WorkoutModalities)
+               .HasForeignKey(x => x.WorkoutId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Modality)
+               .WithMany(m => m.WorkoutModalities)
+               .HasForeignKey(x => x.ModalityId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -417,6 +437,16 @@ public class WorkoutHasGoalConfiguration : IEntityTypeConfiguration<WorkoutHasGo
         builder.ToTable("workout_has_goal");
 
         builder.HasKey(x => new { x.WorkoutId, x.GoalId });
+
+        builder.HasOne(x => x.Workout)
+               .WithMany(w => w.WorkoutGoals)
+               .HasForeignKey(x => x.WorkoutId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Goal)
+               .WithMany(g => g.WorkoutGoals)
+               .HasForeignKey(x => x.GoalId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -431,6 +461,16 @@ public class WorkoutHasHashtagConfiguration : IEntityTypeConfiguration<WorkoutHa
         builder.ToTable("workout_has_hashtag");
 
         builder.HasKey(x => new { x.WorkoutId, x.HashtagId });
+
+        builder.HasOne(x => x.Workout)
+               .WithMany(w => w.WorkoutHashtags)
+               .HasForeignKey(x => x.WorkoutId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Hashtag)
+               .WithMany(h => h.WorkoutHashtags)
+               .HasForeignKey(x => x.HashtagId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -445,6 +485,16 @@ public class WorkoutHasUserConfiguration : IEntityTypeConfiguration<WorkoutHasUs
         builder.ToTable("workout_has_user");
 
         builder.HasKey(x => new { x.WorkoutId, x.UserId });
+
+        builder.HasOne(x => x.Workout)
+               .WithMany(w => w.WorkoutUsers)
+               .HasForeignKey(x => x.WorkoutId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.User)
+               .WithMany(u => u.WorkoutUsers)
+               .HasForeignKey(x => x.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -459,6 +509,16 @@ public class WorkoutHasRoutineConfiguration : IEntityTypeConfiguration<WorkoutHa
         builder.ToTable("workout_has_routine");
 
         builder.HasKey(x => new { x.WorkoutId, x.RoutineId });
+
+        builder.HasOne(x => x.Workout)
+               .WithMany(w => w.WorkoutRoutines)
+               .HasForeignKey(x => x.WorkoutId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Routine)
+               .WithMany(r => r.WorkoutRoutines)
+               .HasForeignKey(x => x.RoutineId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -473,6 +533,16 @@ public class WorkoutHasExerciseConfiguration : IEntityTypeConfiguration<WorkoutH
         builder.ToTable("workout_has_exercise");
 
         builder.HasKey(x => new { x.WorkoutId, x.ExerciseId });
+
+        builder.HasOne(x => x.Workout)
+               .WithMany(w => w.WorkoutExercises)
+               .HasForeignKey(x => x.WorkoutId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Exercise)
+               .WithMany(e => e.WorkoutExercises)
+               .HasForeignKey(x => x.ExerciseId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -487,6 +557,16 @@ public class RoutineHasTypeConfiguration : IEntityTypeConfiguration<RoutineHasTy
         builder.ToTable("routine_has_type");
 
         builder.HasKey(x => new { x.RoutineId, x.TypeId });
+
+        builder.HasOne(x => x.Routine)
+               .WithMany(r => r.RoutineTypes)
+               .HasForeignKey(x => x.RoutineId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Type)
+               .WithMany(t => t.RoutineTypes)
+               .HasForeignKey(x => x.TypeId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -501,11 +581,21 @@ public class RoutineHasModalityConfiguration : IEntityTypeConfiguration<RoutineH
         builder.ToTable("routine_has_modality");
 
         builder.HasKey(x => new { x.RoutineId, x.ModalityId });
+
+        builder.HasOne(x => x.Routine)
+               .WithMany(r => r.RoutineModalities)
+               .HasForeignKey(x => x.RoutineId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Modality)
+               .WithMany(m => m.RoutineModalities)
+               .HasForeignKey(x => x.ModalityId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
 
-- `RoutineHasGoaIConfiguration`
+- `RoutineHasGoalConfiguration`
 
 ```csharp
 public class RoutineHasGoalConfiguration : IEntityTypeConfiguration<RoutineHasGoal>
@@ -515,6 +605,16 @@ public class RoutineHasGoalConfiguration : IEntityTypeConfiguration<RoutineHasGo
         builder.ToTable("routine_has_goal");
 
         builder.HasKey(x => new { x.RoutineId, x.GoalId });
+
+        builder.HasOne(x => x.Routine)
+               .WithMany(r => r.RoutineGoals)
+               .HasForeignKey(x => x.RoutineId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Goal)
+               .WithMany(g => g.RoutineGoals)
+               .HasForeignKey(x => x.GoalId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -538,6 +638,16 @@ public class RoutineHasExerciseConfiguration : IEntityTypeConfiguration<RoutineH
         builder.Property(x => x.Day).IsRequired();
         builder.Property(x => x.Week).IsRequired();
         builder.Property(x => x.IsOptional).IsRequired();
+
+        builder.HasOne(x => x.Routine)
+               .WithMany(r => r.RoutineExercises)
+               .HasForeignKey(x => x.RoutineId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Exercise)
+               .WithMany(e => e.RoutineExercises)
+               .HasForeignKey(x => x.ExerciseId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -552,6 +662,16 @@ public class RoutineHasHashtagConfiguration : IEntityTypeConfiguration<RoutineHa
         builder.ToTable("routine_has_hashtag");
 
         builder.HasKey(x => new { x.RoutineId, x.HashtagId });
+
+        builder.HasOne(x => x.Routine)
+               .WithMany(r => r.RoutineHashtags)
+               .HasForeignKey(x => x.RoutineId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Hashtag)
+               .WithMany(h => h.RoutineHashtags)
+               .HasForeignKey(x => x.HashtagId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -566,6 +686,16 @@ public class ExerciseHasTypeConfiguration : IEntityTypeConfiguration<ExerciseHas
         builder.ToTable("exercise_has_type");
 
         builder.HasKey(x => new { x.ExerciseId, x.TypeId });
+
+        builder.HasOne(x => x.Exercise)
+               .WithMany(e => e.ExerciseTypes)
+               .HasForeignKey(x => x.ExerciseId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Type)
+               .WithMany(t => t.ExerciseTypes)
+               .HasForeignKey(x => x.TypeId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -580,11 +710,21 @@ public class ExerciseHasModalityConfiguration : IEntityTypeConfiguration<Exercis
         builder.ToTable("exercise_has_modality");
 
         builder.HasKey(x => new { x.ExerciseId, x.ModalityId });
+
+        builder.HasOne(x => x.Exercise)
+               .WithMany(e => e.ExerciseModalities)
+               .HasForeignKey(x => x.ExerciseId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Modality)
+               .WithMany(m => m.ExerciseModalities)
+               .HasForeignKey(x => x.ModalityId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
 
-- `ExerciseHasGoaIConfiguration`
+- `ExerciseHasGoalConfiguration`
 
 ```csharp
 public class ExerciseHasGoalConfiguration : IEntityTypeConfiguration<ExerciseHasGoal>
@@ -594,6 +734,16 @@ public class ExerciseHasGoalConfiguration : IEntityTypeConfiguration<ExerciseHas
         builder.ToTable("exercise_has_goal");
 
         builder.HasKey(x => new { x.ExerciseId, x.GoalId });
+
+        builder.HasOne(x => x.Exercise)
+               .WithMany(e => e.ExerciseGoals)
+               .HasForeignKey(x => x.ExerciseId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Goal)
+               .WithMany(g => g.ExerciseGoals)
+               .HasForeignKey(x => x.GoalId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -608,6 +758,16 @@ public class ExerciseHasHashtagConfiguration : IEntityTypeConfiguration<Exercise
         builder.ToTable("exercise_has_hashtag");
 
         builder.HasKey(x => new { x.ExerciseId, x.HashtagId });
+
+        builder.HasOne(x => x.Exercise)
+               .WithMany(e => e.ExerciseHashtags)
+               .HasForeignKey(x => x.ExerciseId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Hashtag)
+               .WithMany(h => h.ExerciseHashtags)
+               .HasForeignKey(x => x.HashtagId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
@@ -622,6 +782,16 @@ public class ExerciseHasVariationConfiguration : IEntityTypeConfiguration<Exerci
         builder.ToTable("exercise_has_variation");
 
         builder.HasKey(x => new { x.ExerciseId, x.VariationId });
+
+        builder.HasOne(x => x.Exercise)
+               .WithMany(e => e.ExerciseVariations)
+               .HasForeignKey(x => x.ExerciseId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Variation)
+               .WithMany(e => e.IsVariationOf)
+               .HasForeignKey(x => x.VariationId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```

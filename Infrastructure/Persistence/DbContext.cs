@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Main;
 using Domain.Entities.Relations;
-using Domain.Infrastructure;
+using Domain.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 

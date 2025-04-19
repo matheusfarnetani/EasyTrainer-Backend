@@ -10,7 +10,7 @@ using Domain.RepositoryInterfaces;
 using AutoMapper;
 using FluentValidation;
 using Domain.Infrastructure.RepositoriesInterfaces;
-using Domain.Infrastructure;
+using Domain.Infrastructure.Persistence;
 
 namespace Application.Services.Implementations
 {

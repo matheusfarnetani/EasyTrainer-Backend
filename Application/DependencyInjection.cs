@@ -6,10 +6,10 @@ namespace Application
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            // Services
             services.AddScoped<IDeletionValidationService, DeleteValidationService>();
-
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IInstructorService, InstructorService>();
             services.AddScoped<IGoalService, GoalService>();
