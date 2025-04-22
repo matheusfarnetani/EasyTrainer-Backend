@@ -1,68 +1,104 @@
 ﻿using Application.DTOs;
-using Domain.Infrastructure.RepositoriesInterfaces;
-using Application.Services.Interfaces;
+using Application.Helpers;
 using AutoMapper;
-using Application.Exceptions;
+using Domain.Entities.Main;
+using Domain.Entities.Relations;
+using Domain.Infrastructure.Persistence;
+using Domain.Infrastructure.RepositoriesInterfaces;
 
 namespace Application.Services.Implementations
 {
-    public abstract class GenericService<TEntity, TCreateDTO, TUpdateDTO, TOutputDTO> : IGenericService<TCreateDTO, TUpdateDTO, TOutputDTO>
+    public class GenericService<TEntity, TCreateDTO, TUpdateDTO, TOutputDTO>
         where TEntity : class
     {
+        protected readonly IUnitOfWork _unitOfWork;
         protected readonly IGenericRepository<TEntity> _repository;
         protected readonly IMapper _mapper;
 
-        protected GenericService(IGenericRepository<TEntity> repository, IMapper mapper)
+        public GenericService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _repository = repository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _repository = ResolveRepository();
         }
 
-        public virtual async Task<TOutputDTO> CreateAsync(TCreateDTO dto)
+        /// <summary>
+        /// Creates a new entity based on the input DTO and returns the result.
+        /// </summary>
+        public virtual async Task<ServiceResponseDTO<TOutputDTO>> CreateAsync(TCreateDTO dto)
         {
             var entity = _mapper.Map<TEntity>(dto);
             await _repository.AddAsync(entity);
-            await _repository.SaveAsync();
-            return _mapper.Map<TOutputDTO>(entity);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<TOutputDTO>.CreateSuccess(_mapper.Map<TOutputDTO>(entity));
         }
 
-        public virtual async Task<TOutputDTO> UpdateAsync(TUpdateDTO dto)
+        /// <summary>
+        /// Updates an existing entity based on the input DTO and returns the updated result.
+        /// </summary>
+        public virtual async Task<ServiceResponseDTO<TOutputDTO>> UpdateAsync(TUpdateDTO dto)
         {
             var entity = _mapper.Map<TEntity>(dto);
             await _repository.UpdateAsync(entity);
-            await _repository.SaveAsync();
-            return _mapper.Map<TOutputDTO>(entity);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<TOutputDTO>.CreateSuccess(_mapper.Map<TOutputDTO>(entity));
         }
 
-        public virtual async Task DeleteAsync(int id)
+        /// <summary>
+        /// Deletes an entity by its ID.
+        /// </summary>
+        public virtual async Task<ServiceResponseDTO<bool>> DeleteAsync(int id)
         {
             await _repository.DeleteByIdAsync(id);
-            await _repository.SaveAsync();
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
-        public virtual async Task<TOutputDTO> GetByIdAsync(int id)
+        /// <summary>
+        /// Retrieves an entity by its ID.
+        /// </summary>
+        public virtual async Task<ServiceResponseDTO<TOutputDTO>> GetByIdAsync(int id)
         {
-            var entity = await _repository.GetByIdAsync(id)
-                ?? throw new EntityNotFoundException(typeof(TEntity).Name, id);
+            var entity = await _repository.GetByIdAsync(id);
+            if (entity == null)
+                return ServiceResponseDTO<TOutputDTO>.CreateFailure("Item not found.");
 
-            return _mapper.Map<TOutputDTO>(entity);
+            return ServiceResponseDTO<TOutputDTO>.CreateSuccess(_mapper.Map<TOutputDTO>(entity));
         }
 
-        public virtual async Task<PaginationResponseDTO<TOutputDTO>> GetAllAsync(PaginationRequestDTO pagination)
+        /// <summary>
+        /// Returns a paginated list of all entities.
+        /// </summary>
+        public virtual async Task<ServiceResponseDTO<PaginationResponseDTO<TOutputDTO>>> GetAllAsync(PaginationRequestDTO pagination)
         {
             var entities = await _repository.GetAllAsync();
+            var paginated = PaginationHelper.Paginate<TEntity, TOutputDTO>(entities, pagination, _mapper);
 
-            var paginated = entities
-                .Skip((pagination.Page - 1) * pagination.PageSize)
-                .Take(pagination.PageSize)
-                .ToList();
+            return ServiceResponseDTO<PaginationResponseDTO<TOutputDTO>>.CreateSuccess(paginated);
+        }
 
-            return new PaginationResponseDTO<TOutputDTO>
+        /// <summary>
+        /// Resolves the correct repository based on the generic entity type.
+        /// </summary>
+        protected IGenericRepository<TEntity> ResolveRepository()
+        {
+            return typeof(TEntity).Name switch
             {
-                Page = pagination.Page,
-                PageSize = pagination.PageSize,
-                TotalCount = entities.Count(),
-                Data = _mapper.Map<List<TOutputDTO>>(paginated)
+                nameof(User) => (IGenericRepository<TEntity>)_unitOfWork.Users,
+                nameof(Instructor) => (IGenericRepository<TEntity>)_unitOfWork.Instructors,
+                nameof(Goal) => (IGenericRepository<TEntity>)_unitOfWork.Goals,
+                nameof(Level) => (IGenericRepository<TEntity>)_unitOfWork.Levels,
+                nameof(Type) => (IGenericRepository<TEntity>)_unitOfWork.Types,
+                nameof(Modality) => (IGenericRepository<TEntity>)_unitOfWork.Modalities,
+                nameof(Hashtag) => (IGenericRepository<TEntity>)_unitOfWork.Hashtags,
+                nameof(Workout) => (IGenericRepository<TEntity>)_unitOfWork.Workouts,
+                nameof(Routine) => (IGenericRepository<TEntity>)_unitOfWork.Routines,
+                nameof(Exercise) => (IGenericRepository<TEntity>)_unitOfWork.Exercises,
+                nameof(RoutineHasExercise) => (IGenericRepository<TEntity>)_unitOfWork.RoutineHasExercises,
+                _ => throw new InvalidOperationException($"No repository configured for {typeof(TEntity).Name}")
             };
         }
     }

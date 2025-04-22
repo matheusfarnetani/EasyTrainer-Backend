@@ -8,8 +8,11 @@ namespace Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            // Auth
+            services.AddScoped<IAuthService, AuthService>();
+
             // Services
-            services.AddScoped<IDeletionValidationService, DeleteValidationService>();
+            services.AddScoped<IDeletionValidationService, DeletionValidationService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IInstructorService, InstructorService>();
             services.AddScoped<IGoalService, GoalService>();

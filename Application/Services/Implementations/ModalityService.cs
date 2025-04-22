@@ -4,23 +4,18 @@ using Application.DTOs.Workout;
 using Application.DTOs.Routine;
 using Application.DTOs.Exercise;
 using Application.Helpers;
-using Domain.Entities.Main;
-using Domain.RepositoryInterfaces;
+using Application.Services.Interfaces;
 using AutoMapper;
-using FluentValidation;
-using Domain.Infrastructure.RepositoriesInterfaces;
+using Domain.Entities.Main;
 using Domain.Infrastructure.Persistence;
+using FluentValidation;
 
 namespace Application.Services.Implementations
 {
     public class ModalityService : GenericService<Modality, CreateModalityInputDTO, UpdateModalityInputDTO, ModalityOutputDTO>, IModalityService
     {
-        private readonly IModalityRepository _modalityRepository;
-        private readonly IWorkoutRepository _workoutRepository;
-        private readonly IRoutineRepository _routineRepository;
-        private readonly IExerciseRepository _exerciseRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
+        private new readonly IUnitOfWork _unitOfWork;
+        private new readonly IMapper _mapper;
 
         private readonly IValidator<CreateModalityInputDTO> _createValidator;
         private readonly IValidator<UpdateModalityInputDTO> _updateValidator;
@@ -28,22 +23,14 @@ namespace Application.Services.Implementations
         private readonly IValidator<IdInputDTO> _instructorIdValidator;
 
         public ModalityService(
-            IModalityRepository modalityRepository,
-            IWorkoutRepository workoutRepository,
-            IRoutineRepository routineRepository,
-            IExerciseRepository exerciseRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IValidator<CreateModalityInputDTO> createValidator,
             IValidator<UpdateModalityInputDTO> updateValidator,
             IValidator<IdInputDTO> modalityIdValidator,
             IValidator<IdInputDTO> instructorIdValidator)
-            : base(modalityRepository, mapper)
+            : base(unitOfWork, mapper)
         {
-            _modalityRepository = modalityRepository;
-            _workoutRepository = workoutRepository;
-            _routineRepository = routineRepository;
-            _exerciseRepository = exerciseRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _createValidator = createValidator;
@@ -52,62 +39,83 @@ namespace Application.Services.Implementations
             _instructorIdValidator = instructorIdValidator;
         }
 
-        public override async Task<ModalityOutputDTO> CreateAsync(CreateModalityInputDTO dto)
+        // General
+        public override async Task<ServiceResponseDTO<ModalityOutputDTO>> CreateAsync(CreateModalityInputDTO dto)
         {
             await _createValidator.ValidateAndThrowAsync(dto);
 
             var entity = _mapper.Map<Modality>(dto);
-            await _modalityRepository.AddAsync(entity);
-            await _unitOfWork.SaveAsync();
-            return _mapper.Map<ModalityOutputDTO>(entity);
+            await _unitOfWork.Modalities.AddAsync(entity);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<ModalityOutputDTO>.CreateSuccess(_mapper.Map<ModalityOutputDTO>(entity));
         }
 
-        public override async Task<ModalityOutputDTO> UpdateAsync(UpdateModalityInputDTO dto)
+        public override async Task<ServiceResponseDTO<ModalityOutputDTO>> UpdateAsync(UpdateModalityInputDTO dto)
         {
             await _updateValidator.ValidateAndThrowAsync(dto);
 
-            var modality = await _modalityRepository.GetByIdAsync(dto.Id);
+            var modality = await _unitOfWork.Modalities.GetByIdAsync(dto.Id);
+            if (modality == null)
+                return ServiceResponseDTO<ModalityOutputDTO>.CreateFailure("Modality not found.");
 
             if (dto.Name != null) modality.Name = dto.Name;
+            if (dto.Description != null) modality.Description = dto.Description;
 
-            await _modalityRepository.UpdateAsync(modality);
-            await _unitOfWork.SaveAsync();
-            return _mapper.Map<ModalityOutputDTO>(modality);
+            await _unitOfWork.Modalities.UpdateAsync(modality);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<ModalityOutputDTO>.CreateSuccess(_mapper.Map<ModalityOutputDTO>(modality));
         }
 
-        public override async Task DeleteAsync(int id)
+        public override async Task<ServiceResponseDTO<bool>> DeleteAsync(int id)
         {
             await _modalityIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = id });
 
-            await _modalityRepository.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAsync();
+            var modality = await _unitOfWork.Modalities.GetByIdAsync(id);
+            if (modality == null)
+                return ServiceResponseDTO<bool>.CreateFailure("Modality not found.");
+
+            await _unitOfWork.Modalities.DeleteByIdAsync(id);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
-        public async Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination)
+        // Workout
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination)
         {
             await _modalityIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = modalityId });
             await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var workouts = await _workoutRepository.GetWorkoutsByModalityIdAsync(modalityId, instructorId);
-            return PaginationHelper.Paginate<Workout, WorkoutOutputDTO>(workouts, pagination, _mapper);
+            var workouts = await _unitOfWork.Workouts.GetWorkoutsByModalityIdAsync(modalityId, instructorId);
+            var result = PaginationHelper.Paginate<Workout, WorkoutOutputDTO>(workouts, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>.CreateSuccess(result);
         }
 
-        public async Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination)
+        // Routine
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination)
         {
             await _modalityIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = modalityId });
             await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var routines = await _routineRepository.GetRoutinesByModalityIdAsync(modalityId, instructorId);
-            return PaginationHelper.Paginate<Routine, RoutineOutputDTO>(routines, pagination, _mapper);
+            var routines = await _unitOfWork.Routines.GetRoutinesByModalityIdAsync(modalityId, instructorId);
+            var result = PaginationHelper.Paginate<Routine, RoutineOutputDTO>(routines, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>.CreateSuccess(result);
         }
 
-        public async Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination)
+        // Exercise
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination)
         {
             await _modalityIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = modalityId });
             await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var exercises = await _exerciseRepository.GetExercisesByModalityIdAsync(modalityId, instructorId);
-            return PaginationHelper.Paginate<Exercise, ExerciseOutputDTO>(exercises, pagination, _mapper);
+            var exercises = await _unitOfWork.Exercises.GetExercisesByModalityIdAsync(modalityId, instructorId);
+            var result = PaginationHelper.Paginate<Exercise, ExerciseOutputDTO>(exercises, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>.CreateSuccess(result);
         }
     }
 }

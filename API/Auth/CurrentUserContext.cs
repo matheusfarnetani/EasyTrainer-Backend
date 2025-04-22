@@ -1,5 +1,5 @@
-﻿using Domain.Application.Interfaces;
-using System.Security.Claims;
+﻿using System.Security.Claims;
+using Domain.API.Interfaces;
 
 namespace API.Auth
 {
@@ -12,9 +12,13 @@ namespace API.Auth
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public string GetCurrentRole()
-        {
-            return _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value?.ToLower() ?? "user";
-        }
+        public int Id =>
+            int.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+        public string Role =>
+            _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+
+        public string Email =>
+            _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
     }
 }

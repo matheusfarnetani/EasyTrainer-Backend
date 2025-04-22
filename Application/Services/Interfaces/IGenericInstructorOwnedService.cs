@@ -4,10 +4,10 @@ namespace Application.Services.Interfaces
 {
     public interface IGenericInstructorOwnedService<TCreateDTO, TUpdateDTO, TOutputDTO>
     {
-        Task<TOutputDTO> CreateAsync(TCreateDTO dto, int instructorId);
-        Task<TOutputDTO> UpdateAsync(TUpdateDTO dto, int instructorId);
-        Task DeleteAsync(int id, int instructorId);
-        Task<TOutputDTO> GetByIdAsync(int id, int instructorId);
-        Task<PaginationResponseDTO<TOutputDTO>> GetAllAsync(int instructorId, PaginationRequestDTO pagination);
+        Task<ServiceResponseDTO<TOutputDTO>> CreateAsync(TCreateDTO dto, int instructorId);
+        Task<ServiceResponseDTO<TOutputDTO>> UpdateAsync(TUpdateDTO dto, int instructorId);
+        Task<ServiceResponseDTO<bool>> DeleteAsync(int id, int instructorId);
+        Task<ServiceResponseDTO<TOutputDTO>> GetByIdAsync(int id, int instructorId);
+        Task<ServiceResponseDTO<PaginationResponseDTO<TOutputDTO>>> GetAllAsync(int instructorId, PaginationRequestDTO pagination);
     }
 }

@@ -1,10 +1,8 @@
 using API.Auth;
 using Application;
 using Infrastructure;
-using Domain.Application.Interfaces;
-using Domain.Infrastructure;
-using Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using Domain.API.Interfaces;
+using API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,14 +13,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//
+// Auth
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAdminCredentialProvider, AdminCredentialProvider>();
 
+
+// Application and Infrastructure
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
-
 
 var app = builder.Build();
 
@@ -36,6 +36,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// Middleware
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 // Health Check
 app.MapHealthChecks("/health");

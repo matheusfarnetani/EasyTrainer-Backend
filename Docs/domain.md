@@ -573,13 +573,30 @@ All main domain models have their own repository and repository interface, follo
 public interface IUserRepository : IGenericRepository<User>
 {
 	Task<User?> GetUserByEmailAsync(string email);
-	Task<IEnumerable<User>> GetUsersByInstructorIdAsync(int instructorId);
-	Task<IEnumerable<User>> GetUsersByGoalIdAsync(int goalId);
-	Task<IEnumerable<User>> GetUsersByLevelIdAsync(int levelId);
-	Task<IEnumerable<User>> GetUsersByWorkoutIdAsync(int workoutId);
 	Task<bool> ExistsByEmailAsync(string email);
 	Task<bool> ExistsByIdAsync(int id);
 	Task<bool> IsEmailTakenByOtherUserAsync(string email, int currentUserId);
+
+	// Instructor
+	Task AddInstructorToUserAsync(int userId, int instructorId);
+	Task RemoveInstructorFromUserAsync(int userId, int instructorId);
+	Task<IEnumerable<Instructor>> GetInstructorsByUserIdAsync(int userId);
+	Task<IEnumerable<User>> GetUsersByInstructorIdAsync(int instructorId);
+
+	// Level
+	Task<IEnumerable<User>> GetUsersByLevelIdAsync(int levelId);
+
+	// Goal
+	Task AddGoalToUserAsync(int userId, int goalId);
+	Task RemoveGoalFromUserAsync(int userId, int goalId);
+	Task<IEnumerable<Goal>> GetGoalsByUserIdAsync(int userId);
+	Task<IEnumerable<User>> GetUsersByGoalIdAsync(int goalId);
+
+	// Workout
+	Task AddWorkoutToUserAsync(int userId, int workoutId, int instructorId);
+	Task RemoveWorkoutFromUserAsync(int userId, int workoutId, int instructorId);
+	Task<IEnumerable<Workout>> GetWorkoutsByUserIdAsync(int userId);
+	Task<IEnumerable<User>> GetUsersByWorkoutIdAsync(int workoutId);
 }
 ```
 
@@ -710,16 +727,36 @@ public interface IWorkoutRepository : IGenericRepository<Workout>
 - `IRoutineRepository`
 
 ```csharp
-public interface IRoutineRepository : IGenericRepository<Routine>
+public interface IRoutineService : IGenericInstructorOwnedService<CreateRoutineInputDTO, UpdateRoutineInputDTO, RoutineOutputDTO>
 {
-	Task<IEnumerable<Routine>> GetRoutinesByInstructorIdAsync(int instructorId);
-	Task<IEnumerable<Routine>> GetRoutinesByGoalIdAsync(int goalId, int instructorId);
-	Task<IEnumerable<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId);
-	Task<IEnumerable<Routine>> GetRoutinesByTypeIdAsync(int typeId, int instructorId);
-	Task<IEnumerable<Routine>> GetRoutinesByModalityAsync(int modalityId, int instructorId);
-	Task<IEnumerable<Routine>> GetRoutinesByHashtagAsync(int hashtagId, int instructorId);
-	Task<IEnumerable<Routine>> GetRoutinesByWorkoutAsync(int workoutId, int instructorId);
-	Task<IEnumerable<Routine>> GetRoutinesByExerciseAsync(int exerciseId, int instructorId);
+	// Relationship management
+	Task<ServiceResponseDTO<bool>> AddGoalToRoutineAsync(int routineId, int goalId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveGoalFromRoutineAsync(int routineId, int goalId, int instructorId);
+
+	Task<ServiceResponseDTO<bool>> AddTypeToRoutineAsync(int routineId, int typeId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveTypeFromRoutineAsync(int routineId, int typeId, int instructorId);
+
+	Task<ServiceResponseDTO<bool>> AddModalityToRoutineAsync(int routineId, int modalityId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveModalityFromRoutineAsync(int routineId, int modalityId, int instructorId);
+
+	Task<ServiceResponseDTO<bool>> AddHashtagToRoutineAsync(int routineId, int hashtagId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveHashtagFromRoutineAsync(int routineId, int hashtagId, int instructorId);
+
+	Task<ServiceResponseDTO<bool>> AddExerciseToRoutineAsync(int routineId, int exerciseId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveExerciseFromRoutineAsync(int routineId, int exerciseId, int instructorId);
+
+	// Data retrieval
+	Task<ServiceResponseDTO<InstructorOutputDTO>> GetInstructorByRoutineIdAsync(int routineId);
+	Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination);
+
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetByWorkoutIdAsync(int workoutId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetByExerciseIdAsync(int exerciseId, int instructorId, PaginationRequestDTO pagination);
 }
 ```
 

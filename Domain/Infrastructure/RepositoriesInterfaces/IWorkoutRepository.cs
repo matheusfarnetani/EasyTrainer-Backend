@@ -23,9 +23,8 @@ namespace Domain.Infrastructure.RepositoriesInterfaces
 
         Task AddExerciseToWorkoutAsync(int workoutId, int exerciseId, int instructorId);
         Task RemoveExerciseFromWorkoutAsync(int workoutId, int exerciseId, int instructorId);
-
-        Task<Workout?> GetByIdAsync(int id);
-        Task DeleteByIdAsync(int id);
+        new Task<Workout?> GetByIdAsync(int id);
+        new Task DeleteByIdAsync(int id);
         Task<bool> ExistsByIdAsync(int id);
 
         Task<IEnumerable<Workout>> GetWorkoutsByUserIdAsync(int userId);

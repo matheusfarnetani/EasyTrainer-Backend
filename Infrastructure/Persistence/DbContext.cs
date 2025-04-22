@@ -21,6 +21,9 @@ namespace Infrastructure.Persistence
         public DbSet<Routine> Routines { get; set; }
         public DbSet<Exercise> Exercises { get; set; }
 
+        public DbSet<UserHasGoal> UserHasGoals { get; set; } = null!;
+        public DbSet<UserHasInstructor> UserHasInstructors { get; set; } = null!;
+
         public DbSet<WorkoutHasUser> WorkoutHasUsers { get; set; }
         public DbSet<WorkoutHasRoutine> WorkoutHasRoutines { get; set; }
         public DbSet<WorkoutHasExercise> WorkoutHasExercises { get; set; }

@@ -60,35 +60,70 @@
 ```csharp
 public class PaginationRequestDTO
 {
-    public int PageNumber { get; set; } = 1;  // Default to first page
-    public int PageSize { get; set; } = 10;   // Default page size
+	private int _page = 1;
+	private int _pageSize = 10;
+	public int Page
+	{
+		get => _page;
+		set => _page = (value <= 0) ? 1 : value;
+	}
+	public int PageSize
+	{
+		get => _pageSize;
+		set => _pageSize = (value <= 0) ? 10 : (value > 100 ? 100 : value);
+	}
+	public string? Search { get; set; }
+	public string? OrderBy { get; set; }
+	public bool Ascending { get; set; } = true;
 }
 ```
 
 ```csharp
 public class PaginationResponseDTO<T>
 {
-    public int CurrentPage { get; set; }
-    public int TotalPages { get; set; }
-    public int TotalRecords { get; set; }
-    public List<T> Items { get; set; }
+	public List<T> Data { get; set; } = new List<T>();
+	public int Page { get; set; }
+	public int PageSize { get; set; }
+	public int TotalCount { get; set; }
+	public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
 }
 ```
 
 ---
-#### API Response Envelope
-- DTO: `ApiResponseDTO<T>`
+#### Service Response Envelope
+- DTO: `ServiceResponseDTO<T>`
 - Purpose: Standardize API responses for better frontend and integration consistency.
 
 ```csharp
-public class ApiResponseDTO<T>
+public class ServiceResponseDTO<T>
 {
     public bool Success { get; set; }
-    public string Message { get; set; }
-    public T Data { get; set; }
-    public List<string> Errors { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public T? Data { get; set; }
+    public List<string>? Errors { get; set; }
     public int? StatusCode { get; set; }
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+    public static ServiceResponseDTO<T> CreateSuccess(T data, string message = "Success")
+    {
+        return new ServiceResponseDTO<T>
+        {
+            Success = true,
+            Data = data,
+            Message = message
+        };
+    }
+
+    public static ServiceResponseDTO<T> CreateFailure(string message, List<string>? errors = null, int? statusCode = null)
+    {
+        return new ServiceResponseDTO<T>
+        {
+            Success = false,
+            Message = message,
+            Errors = errors,
+            StatusCode = statusCode
+        };
+    }
 }
 ```
 
@@ -117,11 +152,11 @@ Handles standard CRUD operations for simple models.
 ```csharp
 public interface IGenericService<TCreateDTO, TUpdateDTO, TOutputDTO>
 {
-    Task<TOutputDTO> CreateAsync(TCreateDTO dto);
-    Task<TOutputDTO> UpdateAsync(TUpdateDTO dto);
-    Task DeleteAsync(int id);
-    Task<TOutputDTO> GetByIdAsync(int id);
-    Task<PaginationResponseDTO<TOutputDTO>> GetAllAsync(PaginationRequestDTO pagination);
+    Task<ServiceResponseDTO<TOutputDTO>> CreateAsync(TCreateDTO dto);
+    Task<ServiceResponseDTO<TOutputDTO>> UpdateAsync(TUpdateDTO dto);
+    Task<ServiceResponseDTO<bool>> DeleteAsync(int id);
+    Task<ServiceResponseDTO<TOutputDTO>> GetByIdAsync(int id);
+    Task<ServiceResponseDTO<PaginationResponseDTO<TOutputDTO>>> GetAllAsync(PaginationRequestDTO pagination);
 }
 ```
 
@@ -149,11 +184,11 @@ For entities that **must be owned** and **controlled by an Instructor**, such as
 ```csharp
 public interface IGenericInstructorOwnedService<TCreateDTO, TUpdateDTO, TOutputDTO>
 {
-    Task<TOutputDTO> CreateAsync(TCreateDTO dto, int instructorId);
-    Task<TOutputDTO> UpdateAsync(TUpdateDTO dto, int instructorId);
-    Task DeleteAsync(int id, int instructorId);
-    Task<TOutputDTO> GetByIdAsync(int id, int instructorId);
-    Task<PaginationResponseDTO<TOutputDTO>> GetAllAsync(int instructorId, PaginationRequestDTO pagination);
+    Task<ServiceResponseDTO<TOutputDTO>> CreateAsync(TCreateDTO dto, int instructorId);
+    Task<ServiceResponseDTO<TOutputDTO>> UpdateAsync(TUpdateDTO dto, int instructorId);
+    Task<ServiceResponseDTO<bool>> DeleteAsync(int id, int instructorId);
+    Task<ServiceResponseDTO<TOutputDTO>> GetByIdAsync(int id, int instructorId);
+    Task<ServiceResponseDTO<PaginationResponseDTO<TOutputDTO>>> GetAllAsync(int instructorId, PaginationRequestDTO pagination);
 }
 ```
 
@@ -174,9 +209,10 @@ public interface IGenericInstructorOwnedService<TCreateDTO, TUpdateDTO, TOutputD
 ```csharp
 public interface IDeletionValidationService
 {
-    Task<bool> CanDeleteTypeAsync(int typeId);
-    Task<bool> CanDeleteModalityAsync(int modalityId);
-    Task<bool> CanDeleteHashtagAsync(int hashtagId);
+    Task<bool> CanDeleteTypeAsync(int typeId, int instructorId);
+    Task<bool> CanDeleteModalityAsync(int modalityId, int instructorId);
+    Task<bool> CanDeleteHashtagAsync(int hashtagId, int instructorId);
+    Task<bool> CanDeleteGoalAsync(int goalId, int instructorId);
 }
 ```
 
@@ -199,7 +235,7 @@ This service helps prevent:
 It enforces **business rules** that protect data integrity.
 
 ```csharp
-public class DeletionValidationService : IDeletionValidationService
+ublic class DeletionValidationService : IDeletionValidationService
 {
     private readonly IWorkoutRepository _workoutRepository;
     private readonly IRoutineRepository _routineRepository;
@@ -215,33 +251,42 @@ public class DeletionValidationService : IDeletionValidationService
         _exerciseRepository = exerciseRepository;
     }
 
-    public async Task<bool> CanDeleteTypeAsync(int typeId)
+    public async Task<bool> CanDeleteTypeAsync(int typeId, int instructorId)
     {
-        var workouts = await _workoutRepository.GetWorkoutsByTypeIdAsync(typeId);
-        var routines = await _routineRepository.GetRoutinesByTypeIdAsync(typeId);
-        var exercises = await _exerciseRepository.GetExercisesByTypeIdAsync(typeId);
+        var workouts = await _workoutRepository.GetWorkoutsByTypeIdAsync(typeId, instructorId);
+        var routines = await _routineRepository.GetRoutinesByTypeIdAsync(typeId, instructorId);
+        var exercises = await _exerciseRepository.GetExercisesByTypeIdAsync(typeId, instructorId);
 
-        return workouts.Count == 0 && routines.Count == 0 && exercises.Count == 0;
+        return !workouts.Any() && !routines.Any() && !exercises.Any();
     }
 
-    public async Task<bool> CanDeleteModalityAsync(int modalityId)
+    public async Task<bool> CanDeleteModalityAsync(int modalityId, int instructorId)
     {
-        var workouts = await _workoutRepository.GetWorkoutsByModalityIdAsync(modalityId);
-        var routines = await _routineRepository.GetRoutinesByModalityIdAsync(modalityId);
-        var exercises = await _exerciseRepository.GetExercisesByModalityIdAsync(modalityId);
+        var workouts = await _workoutRepository.GetWorkoutsByModalityIdAsync(modalityId, instructorId);
+        var routines = await _routineRepository.GetRoutinesByModalityIdAsync(modalityId, instructorId);
+        var exercises = await _exerciseRepository.GetExercisesByModalityIdAsync(modalityId, instructorId);
 
-        return workouts.Count == 0 && routines.Count == 0 && exercises.Count == 0;
+        return !workouts.Any() && !routines.Any() && !exercises.Any();
     }
 
-    public async Task<bool> CanDeleteHashtagAsync(int hashtagId)
+    public async Task<bool> CanDeleteHashtagAsync(int hashtagId, int instructorId)
     {
-        var workouts = await _workoutRepository.GetWorkoutsByHashtagIdAsync(hashtagId);
-        var routines = await _routineRepository.GetRoutinesByHashtagIdAsync(hashtagId);
-        var exercises = await _exerciseRepository.GetExercisesByHashtagIdAsync(hashtagId);
+        var workouts = await _workoutRepository.GetWorkoutsByHashtagIdAsync(hashtagId, instructorId);
+        var routines = await _routineRepository.GetRoutinesByHashtagIdAsync(hashtagId, instructorId);
+        var exercises = await _exerciseRepository.GetExercisesByHashtagIdAsync(hashtagId, instructorId);
 
-        return workouts.Count == 0 && routines.Count == 0 && exercises.Count == 0;
+        return !workouts.Any() && !routines.Any() && !exercises.Any();
     }
-	}
+
+    public async Task<bool> CanDeleteGoalAsync(int goalId, int instructorId)
+    {
+        var workouts = await _workoutRepository.GetWorkoutsByGoalIdAsync(goalId, instructorId);
+        var routines = await _routineRepository.GetRoutinesByGoalIdAsync(goalId, instructorId);
+        var exercises = await _exerciseRepository.GetExercisesByGoalIdAsync(goalId, instructorId);
+
+        return !workouts.Any() && !routines.Any() && !exercises.Any();
+    }
+}
 ```
 
 ---
@@ -249,19 +294,30 @@ public class DeletionValidationService : IDeletionValidationService
 - `IUserService`
 
 ```csharp
-public interface IUserService : IGenericService<CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO>
+ublic interface IUserService : IGenericService<CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO>
 {
-    Task AddGoalToUserAsync(int userId, int goalId);
-    Task RemoveGoalFromUserAsync(int userId, int goalId);
-    Task<PaginationResponseDTO<GoalOutputDTO>> GetGoalsByUserIdAsync(int userId, PaginationRequestDTO pagination);
-
+    Task<ServiceResponseDTO<UserOutputDTO>> GetByEmailAsync(string email);
+    
+    // Instructor
     Task AddInstructorToUserAsync(int userId, int instructorId);
     Task RemoveInstructorFromUserAsync(int userId, int instructorId);
-    Task<PaginationResponseDTO<InstructorOutputDTO>> GetInstructorsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+    Task<ServiceResponseDTO<PaginationResponseDTO<InstructorOutputDTO>>> GetInstructorsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+    Task<ServiceResponseDTO<PaginationResponseDTO<UserOutputDTO>>> GetByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
+    
+    // Level
+    Task<ServiceResponseDTO<PaginationResponseDTO<UserOutputDTO>>> GetByLevelIdAsync(int levelId, PaginationRequestDTO pagination);
 
-	Task AddWorkoutToUserAsync(int userId, int workoutId);
-	Task RemoveWorkoutFromUserAsync(int userId, int workoutId);
-    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+    // Goal
+    Task AddGoalToUserAsync(int userId, int goalId);
+    Task RemoveGoalFromUserAsync(int userId, int goalId);
+    Task<ServiceResponseDTO<PaginationResponseDTO<GoalOutputDTO>>> GetGoalsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+    Task<ServiceResponseDTO<PaginationResponseDTO<UserOutputDTO>>> GetByGoalIdAsync(int goalId, PaginationRequestDTO pagination);
+
+    // Workout
+    Task AddWorkoutToUserAsync(int userId, int workoutId, int instructorId);
+    Task RemoveWorkoutFromUserAsync(int userId, int workoutId, int instructorId);
+    Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByUserIdAsync(int userId, PaginationRequestDTO pagination);
+    Task<ServiceResponseDTO<PaginationResponseDTO<UserOutputDTO>>> GetByWorkoutIdAsync(int workoutId, PaginationRequestDTO pagination);
 }
 ```
 
@@ -270,13 +326,25 @@ public interface IUserService : IGenericService<CreateUserInputDTO, UpdateUserIn
 ```csharp
 public interface IInstructorService : IGenericService<CreateInstructorInputDTO, UpdateInstructorInputDTO, InstructorOutputDTO>
 {
-	
-    Task<PaginationResponseDTO<UserOutputDTO>> GetUsersByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);
-}
+	Task<ServiceResponseDTO<InstructorOutputDTO>> GetByEmailAsync(string email);
 
+	// User
+	Task<ServiceResponseDTO<bool>> AddUserToInstructorAsync(int instructorId, int userId);
+	Task<ServiceResponseDTO<bool>> RemoveUserFromInstructorAsync(int instructorId, int userId);
+	Task<ServiceResponseDTO<PaginationResponseDTO<InstructorOutputDTO>>> GetByUserIdAsync(int userId, PaginationRequestDTO pagination);
+
+	// Workout
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsAsync(int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<InstructorOutputDTO>> GetByWorkoutIdAsync(int workoutId);
+
+	// Routine
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesAsync(int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<InstructorOutputDTO>> GetByRoutineIdAsync(int routineId);
+
+	// Exercise
+	Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesAsync(int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<InstructorOutputDTO>> GetByExerciseIdAsync(int exerciseId);
+}
 ```
 
 - `IGoalService`
@@ -284,10 +352,14 @@ public interface IInstructorService : IGenericService<CreateInstructorInputDTO, 
 ```csharp
 public interface IGoalService : IGenericService<CreateGoalInputDTO, UpdateGoalInputDTO, GoalOutputDTO>
 {
-    // Relationships
-    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
+	// Workout
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
+
+	// Routine
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
+
+	// Exercise
+	Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
 }
 ```
 
@@ -296,10 +368,14 @@ public interface IGoalService : IGenericService<CreateGoalInputDTO, UpdateGoalIn
 ```csharp
 public interface ILevelService : IGenericService<CreateLevelInputDTO, UpdateLevelInputDTO, LevelOutputDTO>
 {
-    // Relationships
-    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
+	// Workout
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
+
+	// Routine
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
+
+	// Exercise
+	Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
 }
 ```
 
@@ -308,10 +384,14 @@ public interface ILevelService : IGenericService<CreateLevelInputDTO, UpdateLeve
 ```csharp
 public interface ITypeService : IGenericService<CreateTypeInputDTO, UpdateTypeInputDTO, TypeOutputDTO>
 {
-    // Relationships
-    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
+	// Workout
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
+
+	// Routine
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
+
+	// Exercise
+	Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
 }
 ```
 
@@ -320,10 +400,14 @@ public interface ITypeService : IGenericService<CreateTypeInputDTO, UpdateTypeIn
 ```csharp
 public interface IModalityService : IGenericService<CreateModalityInputDTO, UpdateModalityInputDTO, ModalityOutputDTO>
 {
-    // Relationships
-    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
+	// Workout
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
+
+	// Routine
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
+
+	// Exercise
+	Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
 }
 ```
 
@@ -332,10 +416,14 @@ public interface IModalityService : IGenericService<CreateModalityInputDTO, Upda
 ```csharp
 public interface IHashtagService : IGenericService<CreateHashtagInputDTO, UpdateHashtagInputDTO, HashtagOutputDTO>
 {
-    // Relationships
-    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
+	// Workout
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
+
+	// Routine
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
+
+	// Exercise
+	Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
 }
 ```
 
@@ -344,27 +432,37 @@ public interface IHashtagService : IGenericService<CreateHashtagInputDTO, Update
 ```csharp
 public interface IWorkoutService : IGenericInstructorOwnedService<CreateWorkoutInputDTO, UpdateWorkoutInputDTO, WorkoutOutputDTO>
 {
-    Task AddGoalToWorkoutAsync(int workoutId, int goalId, int instructorId);
-    Task RemoveGoalFromWorkoutAsync(int workoutId, int goalId, int instructorId);
+	// Relationship management: Add/Remove
+	Task<ServiceResponseDTO<bool>> AddGoalToWorkoutAsync(int workoutId, int goalId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveGoalFromWorkoutAsync(int workoutId, int goalId, int instructorId);
 
-    Task AddTypeToWorkoutAsync(int workoutId, int typeId, int instructorId);
-    Task RemoveTypeFromWorkoutAsync(int workoutId, int typeId, int instructorId);
+	Task<ServiceResponseDTO<bool>> AddTypeToWorkoutAsync(int workoutId, int typeId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveTypeFromWorkoutAsync(int workoutId, int typeId, int instructorId);
 
-    Task AddModalityToWorkoutAsync(int workoutId, int modalityId, int instructorId);
-    Task RemoveModalityFromWorkoutAsync(int workoutId, int modalityId, int instructorId);
+	Task<ServiceResponseDTO<bool>> AddModalityToWorkoutAsync(int workoutId, int modalityId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveModalityFromWorkoutAsync(int workoutId, int modalityId, int instructorId);
 
-    Task AddHashtagToWorkoutAsync(int workoutId, int hashtagId, int instructorId);
-    Task RemoveHashtagFromWorkoutAsync(int workoutId, int hashtagId, int instructorId);
+	Task<ServiceResponseDTO<bool>> AddHashtagToWorkoutAsync(int workoutId, int hashtagId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveHashtagFromWorkoutAsync(int workoutId, int hashtagId, int instructorId);
 
-    Task AddRoutineToWorkoutAsync(int workoutId, int routineId, int instructorId);
-    Task RemoveRoutineFromWorkoutAsync(int workoutId, int routineId, int instructorId);
+	Task<ServiceResponseDTO<bool>> AddRoutineToWorkoutAsync(int workoutId, int routineId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveRoutineFromWorkoutAsync(int workoutId, int routineId, int instructorId);
 
-    Task AddExerciseToWorkoutAsync(int workoutId, int exerciseId, int instructorId);
-    Task RemoveExerciseFromWorkoutAsync(int workoutId, int exerciseId, int instructorId);
+	Task<ServiceResponseDTO<bool>> AddExerciseToWorkoutAsync(int workoutId, int exerciseId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveExerciseFromWorkoutAsync(int workoutId, int exerciseId, int instructorId);
 
-    Task<InstructorOutputDTO> GetInstructorByWorkoutIdAsync(int workoutId);
-    Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByWorkoutIdAsync(int workoutId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByWorkoutIdAsync(int workoutId, int instructorId, PaginationRequestDTO pagination);
+	// Retrievals
+	Task<ServiceResponseDTO<InstructorOutputDTO>> GetInstructorByWorkoutIdAsync(int workoutId);
+	Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByWorkoutIdAsync(int workoutId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesByWorkoutIdAsync(int workoutId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetByUserIdAsync(int userId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetByLevelIdAsync(int levelId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetByTypeIdAsync(int typeId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetByModalityIdAsync(int modalityId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetByHashtagIdAsync(int hashtagId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination);
+	Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetByExerciseIdAsync(int exerciseId, int instructorId, PaginationRequestDTO pagination);
 }
 ```
 
@@ -373,24 +471,25 @@ public interface IWorkoutService : IGenericInstructorOwnedService<CreateWorkoutI
 ```csharp
 public interface IRoutineService : IGenericInstructorOwnedService<CreateRoutineInputDTO, UpdateRoutineInputDTO, RoutineOutputDTO>
 {
-    Task AddGoalToRoutineAsync(int routineId, int goalId, int instructorId);
-    Task RemoveGoalFromRoutineAsync(int routineId, int goalId, int instructorId);
+	// Add/Remove Relationships
+	Task<ServiceResponseDTO<bool>> AddGoalToRoutineAsync(int routineId, int goalId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveGoalFromRoutineAsync(int routineId, int goalId, int instructorId);
 
-    Task AddTypeToRoutineAsync(int routineId, int typeId, int instructorId);
-    Task RemoveTypeFromRoutineAsync(int routineId, int typeId, int instructorId);
+	Task<ServiceResponseDTO<bool>> AddTypeToRoutineAsync(int routineId, int typeId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveTypeFromRoutineAsync(int routineId, int typeId, int instructorId);
 
-    Task AddModalityToRoutineAsync(int routineId, int modalityId, int instructorId);
-    Task RemoveModalityFromRoutineAsync(int routineId, int modalityId, int instructorId);
+	Task<ServiceResponseDTO<bool>> AddModalityToRoutineAsync(int routineId, int modalityId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveModalityFromRoutineAsync(int routineId, int modalityId, int instructorId);
 
-    Task AddHashtagToRoutineAsync(int routineId, int hashtagId, int instructorId);
-    Task RemoveHashtagFromRoutineAsync(int routineId, int hashtagId, int instructorId);
+	Task<ServiceResponseDTO<bool>> AddHashtagToRoutineAsync(int routineId, int hashtagId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveHashtagFromRoutineAsync(int routineId, int hashtagId, int instructorId);
 
-    Task AddExerciseToRoutineAsync(int routineId, int exerciseId, int order, int sets, int reps, TimeSpan restTime, string note, int day, int week, bool isOptional);
-    Task RemoveExerciseFromRoutineAsync(int routineId, int exerciseId);
+	Task<ServiceResponseDTO<bool>> AddExerciseToRoutineAsync(int routineId, int exerciseId, int instructorId);
+	Task<ServiceResponseDTO<bool>> RemoveExerciseFromRoutineAsync(int routineId, int exerciseId, int instructorId);
 
-    Task<InstructorOutputDTO> GetInstructorByRoutineIdAsync(int routineId);
-    Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination);
-    Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination);
+	// Getters
+	Task<ServiceResponseDTO<InstructorOutputDTO>> GetInstructorByRoutineIdAsync(int routineId);
+	Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination);
 }
 ```
 

@@ -2,8 +2,9 @@
 {
     public interface IDeletionValidationService
     {
-        Task<bool> CanDeleteTypeAsync(int typeId);
-        Task<bool> CanDeleteModalityAsync(int modalityId);
-        Task<bool> CanDeleteHashtagAsync(int hashtagId);
+        Task<bool> CanDeleteTypeAsync(int typeId, int instructorId);
+        Task<bool> CanDeleteModalityAsync(int modalityId, int instructorId);
+        Task<bool> CanDeleteHashtagAsync(int hashtagId, int instructorId);
+        Task<bool> CanDeleteGoalAsync(int goalId, int instructorId);
     }
 }

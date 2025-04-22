@@ -8,14 +8,23 @@ namespace Application.Services.Interfaces
 {
     public interface IInstructorService : IGenericService<CreateInstructorInputDTO, UpdateInstructorInputDTO, InstructorOutputDTO>
     {
-        Task<InstructorOutputDTO> GetByEmailAsync(string email);
-        Task<PaginationResponseDTO<InstructorOutputDTO>> GetByUserIdAsync(int userId, PaginationRequestDTO pagination);
-        Task<InstructorOutputDTO> GetByWorkoutIdAsync(int workoutId);
-        Task<InstructorOutputDTO> GetByRoutineIdAsync(int routineId);
-        Task<InstructorOutputDTO> GetByExerciseIdAsync(int exerciseId);
-        Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsAsync(int instructorId, PaginationRequestDTO pagination);
-        Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesAsync(int instructorId, PaginationRequestDTO pagination);
-        Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesAsync(int instructorId, PaginationRequestDTO pagination);
+        Task<ServiceResponseDTO<InstructorOutputDTO>> GetByEmailAsync(string email);
 
+        // User
+        Task<ServiceResponseDTO<bool>> AddUserToInstructorAsync(int instructorId, int userId);
+        Task<ServiceResponseDTO<bool>> RemoveUserFromInstructorAsync(int instructorId, int userId);
+        Task<ServiceResponseDTO<PaginationResponseDTO<InstructorOutputDTO>>> GetByUserIdAsync(int userId, PaginationRequestDTO pagination);
+
+        // Workout
+        Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsAsync(int instructorId, PaginationRequestDTO pagination);
+        Task<ServiceResponseDTO<InstructorOutputDTO>> GetByWorkoutIdAsync(int workoutId);
+
+        // Routine
+        Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesAsync(int instructorId, PaginationRequestDTO pagination);
+        Task<ServiceResponseDTO<InstructorOutputDTO>> GetByRoutineIdAsync(int routineId);
+
+        // Exercise
+        Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesAsync(int instructorId, PaginationRequestDTO pagination);
+        Task<ServiceResponseDTO<InstructorOutputDTO>> GetByExerciseIdAsync(int exerciseId);
     }
 }

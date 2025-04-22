@@ -1,8 +1,9 @@
-﻿namespace Domain.Application.Interfaces
+﻿namespace Domain.API.Interfaces
 {
     public interface ICurrentUserContext
     {
-        string GetCurrentRole();
+        int Id { get; }
+        string Role { get; }
+        string Email { get; }
     }
-
 }

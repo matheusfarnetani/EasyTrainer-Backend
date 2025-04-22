@@ -4,23 +4,18 @@ using Application.DTOs.Workout;
 using Application.DTOs.Routine;
 using Application.DTOs.Exercise;
 using Application.Helpers;
-using Domain.Entities.Main;
-using Domain.RepositoryInterfaces;
+using Application.Services.Interfaces;
 using AutoMapper;
-using FluentValidation;
-using Domain.Infrastructure.RepositoriesInterfaces;
+using Domain.Entities.Main;
 using Domain.Infrastructure.Persistence;
+using FluentValidation;
 
 namespace Application.Services.Implementations
 {
     public class GoalService : GenericService<Goal, CreateGoalInputDTO, UpdateGoalInputDTO, GoalOutputDTO>, IGoalService
     {
-        private readonly IGoalRepository _goalRepository;
-        private readonly IWorkoutRepository _workoutRepository;
-        private readonly IRoutineRepository _routineRepository;
-        private readonly IExerciseRepository _exerciseRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
+        private new readonly IUnitOfWork _unitOfWork;
+        private new readonly IMapper _mapper;
 
         private readonly IValidator<CreateGoalInputDTO> _createValidator;
         private readonly IValidator<UpdateGoalInputDTO> _updateValidator;
@@ -28,87 +23,99 @@ namespace Application.Services.Implementations
         private readonly IValidator<IdInputDTO> _instructorIdValidator;
 
         public GoalService(
-            IGoalRepository goalRepository,
-            IWorkoutRepository workoutRepository,
-            IRoutineRepository routineRepository,
-            IExerciseRepository exerciseRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IValidator<CreateGoalInputDTO> createValidator,
             IValidator<UpdateGoalInputDTO> updateValidator,
             IValidator<IdInputDTO> goalIdValidator,
             IValidator<IdInputDTO> instructorIdValidator)
-            : base(goalRepository, mapper)
+            : base(unitOfWork, mapper)
         {
-            _goalRepository = goalRepository;
-            _workoutRepository = workoutRepository;
-            _routineRepository = routineRepository;
-            _exerciseRepository = exerciseRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
             _goalIdValidator = goalIdValidator;
+            _instructorIdValidator = instructorIdValidator;
         }
 
-        public override async Task<GoalOutputDTO> CreateAsync(CreateGoalInputDTO dto)
+        // General
+        public override async Task<ServiceResponseDTO<GoalOutputDTO>> CreateAsync(CreateGoalInputDTO dto)
         {
             await _createValidator.ValidateAndThrowAsync(dto);
 
             var entity = _mapper.Map<Goal>(dto);
-            await _goalRepository.AddAsync(entity);
-            await _unitOfWork.SaveAsync();
-            return _mapper.Map<GoalOutputDTO>(entity);
+            await _unitOfWork.Goals.AddAsync(entity);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<GoalOutputDTO>.CreateSuccess(_mapper.Map<GoalOutputDTO>(entity));
         }
 
-        public override async Task<GoalOutputDTO> UpdateAsync(UpdateGoalInputDTO dto)
+        public override async Task<ServiceResponseDTO<GoalOutputDTO>> UpdateAsync(UpdateGoalInputDTO dto)
         {
             await _updateValidator.ValidateAndThrowAsync(dto);
 
-            var goal = await _goalRepository.GetByIdAsync(dto.Id);
+            var goal = await _unitOfWork.Goals.GetByIdAsync(dto.Id);
+            if (goal == null)
+                return ServiceResponseDTO<GoalOutputDTO>.CreateFailure("Goal not found.");
 
             if (dto.Name != null) goal.Name = dto.Name;
             if (dto.Description != null) goal.Description = dto.Description;
 
-            await _goalRepository.UpdateAsync(goal);
-            await _unitOfWork.SaveAsync();
+            await _unitOfWork.Goals.UpdateAsync(goal);
+            await _unitOfWork.SaveAndCommitAsync();
 
-            return _mapper.Map<GoalOutputDTO>(goal);
+            return ServiceResponseDTO<GoalOutputDTO>.CreateSuccess(_mapper.Map<GoalOutputDTO>(goal));
         }
 
-        public override async Task DeleteAsync(int id)
+        public override async Task<ServiceResponseDTO<bool>> DeleteAsync(int id)
         {
             await _goalIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = id });
 
-            await _goalRepository.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAsync();
+            var goal = await _unitOfWork.Goals.GetByIdAsync(id);
+            if (goal == null)
+                return ServiceResponseDTO<bool>.CreateFailure("Goal not found.");
+
+            await _unitOfWork.Goals.DeleteByIdAsync(id);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
-        public async Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination)
+        // Workout
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination)
         {
             await _goalIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = goalId });
             await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var workouts = await _workoutRepository.GetWorkoutsByGoalIdAsync(goalId, instructorId);
-            return PaginationHelper.Paginate<Workout, WorkoutOutputDTO>(workouts, pagination, _mapper);
+            var workouts = await _unitOfWork.Workouts.GetWorkoutsByGoalIdAsync(goalId, instructorId);
+            var result = PaginationHelper.Paginate<Workout, WorkoutOutputDTO>(workouts, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>.CreateSuccess(result);
         }
 
-        public async Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination)
+        // Routine
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination)
         {
             await _goalIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = goalId });
             await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var routines = await _routineRepository.GetRoutinesByGoalIdAsync(goalId, instructorId);
-            return PaginationHelper.Paginate<Routine, RoutineOutputDTO>(routines, pagination, _mapper);
+            var routines = await _unitOfWork.Routines.GetRoutinesByGoalIdAsync(goalId, instructorId);
+            var result = PaginationHelper.Paginate<Routine, RoutineOutputDTO>(routines, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>.CreateSuccess(result);
         }
 
-        public async Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination)
+        // Exercise
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByGoalIdAsync(int goalId, int instructorId, PaginationRequestDTO pagination)
         {
             await _goalIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = goalId });
             await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var exercises = await _exerciseRepository.GetExercisesByGoalIdAsync(goalId, instructorId);
-            return PaginationHelper.Paginate<Exercise, ExerciseOutputDTO>(exercises, pagination, _mapper);
+            var exercises = await _unitOfWork.Exercises.GetExercisesByGoalIdAsync(goalId, instructorId);
+            var result = PaginationHelper.Paginate<Exercise, ExerciseOutputDTO>(exercises, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>.CreateSuccess(result);
         }
     }
 }

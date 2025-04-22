@@ -2,90 +2,62 @@
 using Application.DTOs.Exercise;
 using Application.DTOs.Instructor;
 using Application.DTOs.Routine;
-using Application.DTOs.User;
 using Application.DTOs.Workout;
-using Application.Exceptions;
 using Application.Helpers;
 using Application.Services.Interfaces;
-using Application.Validators.Instructor;
-using Application.Validators.User;
 using AutoMapper;
 using Domain.Entities.Main;
 using Domain.Infrastructure.Persistence;
-using Domain.Infrastructure.RepositoriesInterfaces;
-using Domain.RepositoryInterfaces;
 using FluentValidation;
 
 namespace Application.Services.Implementations
 {
     public class InstructorService : GenericService<Instructor, CreateInstructorInputDTO, UpdateInstructorInputDTO, InstructorOutputDTO>, IInstructorService
     {
-        private readonly IInstructorRepository _instructorRepository;
-        private readonly IWorkoutRepository _workoutRepository;
-        private readonly IRoutineRepository _routineRepository;
-        private readonly IExerciseRepository _exerciseRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
+        private new readonly IUnitOfWork _unitOfWork;
+        private new readonly IMapper _mapper;
 
         private readonly IValidator<CreateInstructorInputDTO> _createValidator;
         private readonly IValidator<UpdateInstructorInputDTO> _updateValidator;
-
-        private readonly IValidator<IdInputDTO> _userIdValidator;
-        private readonly IValidator<IdInputDTO> _instructorIdValidator;
-        private readonly IValidator<EmailInputDTO> _instructorEmailValidator;
-        private readonly IValidator<IdInputDTO> _workoutIdValidator;
-        private readonly IValidator<IdInputDTO> _routineIdValidator;
-        private readonly IValidator<IdInputDTO> _exerciseIdValidator;
+        private readonly IValidator<IdInputDTO> _idValidator;
+        private readonly IValidator<EmailInputDTO> _emailValidator;
 
         public InstructorService(
-            IInstructorRepository instructorRepository,
-            IWorkoutRepository workoutRepository,
-            IRoutineRepository routineRepository,
-            IExerciseRepository exerciseRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IValidator<CreateInstructorInputDTO> createValidator,
             IValidator<UpdateInstructorInputDTO> updateValidator,
-            IValidator<IdInputDTO> userIdValidator,
-            IValidator<IdInputDTO> instructorIdValidator,
-            IValidator<EmailInputDTO> instructorEmailValidator,
-            IValidator<IdInputDTO> workoutIdValidator,
-            IValidator<IdInputDTO> routineIdValidator,
-            IValidator<IdInputDTO> exerciseIdValidator)
-            : base(instructorRepository, mapper)
+            IValidator<IdInputDTO> idValidator,
+            IValidator<EmailInputDTO> emailValidator)
+            : base(unitOfWork, mapper)
         {
-            _instructorRepository = instructorRepository;
-            _workoutRepository = workoutRepository;
-            _routineRepository = routineRepository;
-            _exerciseRepository = exerciseRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-
             _createValidator = createValidator;
             _updateValidator = updateValidator;
-
-            _userIdValidator = userIdValidator;
-            _instructorIdValidator = instructorIdValidator;
-            _workoutIdValidator = workoutIdValidator;
-            _routineIdValidator = routineIdValidator;
-            _exerciseIdValidator = exerciseIdValidator;
+            _idValidator = idValidator;
+            _emailValidator = emailValidator;
         }
 
-        public override async Task<InstructorOutputDTO> CreateAsync(CreateInstructorInputDTO dto)
+        // General
+        public override async Task<ServiceResponseDTO<InstructorOutputDTO>> CreateAsync(CreateInstructorInputDTO dto)
         {
             await _createValidator.ValidateAndThrowAsync(dto);
 
             var entity = _mapper.Map<Instructor>(dto);
-            await _instructorRepository.AddAsync(entity);
-            await _unitOfWork.SaveAsync();
-            return _mapper.Map<InstructorOutputDTO>(entity);
+            await _unitOfWork.Instructors.AddAsync(entity);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<InstructorOutputDTO>.CreateSuccess(_mapper.Map<InstructorOutputDTO>(entity));
         }
 
-        public override async Task<InstructorOutputDTO> UpdateAsync(UpdateInstructorInputDTO dto)
+        public override async Task<ServiceResponseDTO<InstructorOutputDTO>> UpdateAsync(UpdateInstructorInputDTO dto)
         {
             await _updateValidator.ValidateAndThrowAsync(dto);
 
-            var instructor = await _instructorRepository.GetByIdAsync(dto.Id);
+            var instructor = await _unitOfWork.Instructors.GetByIdAsync(dto.Id);
+            if (instructor == null)
+                return ServiceResponseDTO<InstructorOutputDTO>.CreateFailure("Instructor not found.");
 
             if (dto.Name != null) instructor.Name = dto.Name;
             if (dto.Email != null) instructor.Email = dto.Email;
@@ -94,87 +66,134 @@ namespace Application.Services.Implementations
             if (dto.Birthday.HasValue) instructor.Birthday = dto.Birthday.Value;
             if (dto.Gender.HasValue) instructor.Gender = dto.Gender.Value;
 
-            await _instructorRepository.UpdateAsync(instructor);
-            await _unitOfWork.SaveAsync();
-            return _mapper.Map<InstructorOutputDTO>(instructor);
+            await _unitOfWork.Instructors.UpdateAsync(instructor);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<InstructorOutputDTO>.CreateSuccess(_mapper.Map<InstructorOutputDTO>(instructor));
         }
 
-        public override async Task DeleteAsync(int id)
+        public override async Task<ServiceResponseDTO<bool>> DeleteAsync(int id)
         {
-            await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = id });
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = id });
 
-            await _instructorRepository.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAsync();
+            var entity = await _unitOfWork.Instructors.GetByIdAsync(id);
+            if (entity == null)
+                return ServiceResponseDTO<bool>.CreateFailure("Instructor not found.");
+
+            await _unitOfWork.Instructors.DeleteByIdAsync(id);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
-        public async Task<InstructorOutputDTO> GetByEmailAsync(string email)
+        public async Task<ServiceResponseDTO<InstructorOutputDTO>> GetByEmailAsync(string email)
         {
-            await _instructorEmailValidator.ValidateAndThrowAsync(new EmailInputDTO { Email = email });
+            await _emailValidator.ValidateAndThrowAsync(new EmailInputDTO { Email = email });
 
-            var instructor = await _instructorRepository.GetInstructorByEmailAsync(email);
-            return _mapper.Map<InstructorOutputDTO>(instructor);
+            var instructor = await _unitOfWork.Instructors.GetInstructorByEmailAsync(email);
+            if (instructor == null)
+                return ServiceResponseDTO<InstructorOutputDTO>.CreateFailure("Instructor not found.");
+
+            return ServiceResponseDTO<InstructorOutputDTO>.CreateSuccess(_mapper.Map<InstructorOutputDTO>(instructor));
         }
 
-        public async Task<PaginationResponseDTO<InstructorOutputDTO>> GetByUserIdAsync(int userId, PaginationRequestDTO pagination)
+        // User
+        public async Task<ServiceResponseDTO<bool>> AddUserToInstructorAsync(int instructorId, int userId)
         {
-            await _userIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = userId });
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = userId });
 
-            var instructors = await _instructorRepository.GetInstructorsByUserIdAsync(userId);
-            return PaginationHelper.Paginate<Instructor, InstructorOutputDTO>(instructors, pagination, _mapper);
+            await _unitOfWork.Users.AddInstructorToUserAsync(userId, instructorId);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
-        public async Task<InstructorOutputDTO> GetByWorkoutIdAsync(int workoutId)
+        public async Task<ServiceResponseDTO<bool>> RemoveUserFromInstructorAsync(int instructorId, int userId)
         {
-            await _workoutIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = workoutId });
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = userId });
 
-            var instructor = await _instructorRepository.GetInstructorByWorkoutIdAsync(workoutId)
-                ?? throw new EntityNotFoundException(nameof(Instructor), 0);
+            await _unitOfWork.Users.RemoveInstructorFromUserAsync(userId, instructorId);
+            await _unitOfWork.SaveAndCommitAsync();
 
-            return _mapper.Map<InstructorOutputDTO>(instructor);
+            return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
-        public async Task<InstructorOutputDTO> GetByRoutineIdAsync(int routineId)
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<InstructorOutputDTO>>> GetByUserIdAsync(int userId, PaginationRequestDTO pagination)
         {
-            await _routineIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = routineId });
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = userId });
 
-            var instructor = await _instructorRepository.GetInstructorByRoutineIdAsync(routineId)
-                ?? throw new EntityNotFoundException(nameof(Instructor), 0);
+            var instructors = await _unitOfWork.Instructors.GetInstructorsByUserIdAsync(userId);
+            var result = PaginationHelper.Paginate<Instructor, InstructorOutputDTO>(instructors, pagination, _mapper);
 
-            return _mapper.Map<InstructorOutputDTO>(instructor);
+            return ServiceResponseDTO<PaginationResponseDTO<InstructorOutputDTO>>.CreateSuccess(result);
         }
 
-        public async Task<InstructorOutputDTO> GetByExerciseIdAsync(int exerciseId)
+        // Workout
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsAsync(int instructorId, PaginationRequestDTO pagination)
         {
-            await _exerciseIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = exerciseId });
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var instructor = await _instructorRepository.GetInstructorByExerciseIdAsync(exerciseId)
-                ?? throw new EntityNotFoundException(nameof(Instructor), 0);
+            var workouts = await _unitOfWork.Workouts.GetWorkoutsByInstructorIdAsync(instructorId);
+            var result = PaginationHelper.Paginate<Workout, WorkoutOutputDTO>(workouts, pagination, _mapper);
 
-            return _mapper.Map<InstructorOutputDTO>(instructor);
+            return ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>.CreateSuccess(result);
         }
 
-        public async Task<PaginationResponseDTO<WorkoutOutputDTO>> GetWorkoutsAsync(int instructorId, PaginationRequestDTO pagination)
+        public async Task<ServiceResponseDTO<InstructorOutputDTO>> GetByWorkoutIdAsync(int workoutId)
         {
-            await _instructorRepository.ExistsByIdAsync(instructorId);
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = workoutId });
 
-            var workouts = await _workoutRepository.GetWorkoutsByInstructorIdAsync(instructorId);
-            return PaginationHelper.Paginate<Workout, WorkoutOutputDTO>(workouts, pagination, _mapper);
+            var instructor = await _unitOfWork.Instructors.GetInstructorByWorkoutIdAsync(workoutId);
+            if (instructor == null)
+                return ServiceResponseDTO<InstructorOutputDTO>.CreateFailure("Instructor not found for this workout.");
+
+            return ServiceResponseDTO<InstructorOutputDTO>.CreateSuccess(_mapper.Map<InstructorOutputDTO>(instructor));
         }
 
-        public async Task<PaginationResponseDTO<RoutineOutputDTO>> GetRoutinesAsync(int instructorId, PaginationRequestDTO pagination)
+        // Routine
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetRoutinesAsync(int instructorId, PaginationRequestDTO pagination)
         {
-            await _instructorRepository.ExistsByIdAsync(instructorId);
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var routines = await _routineRepository.GetRoutinesByInstructorIdAsync(instructorId);
-            return PaginationHelper.Paginate<Routine, RoutineOutputDTO>(routines, pagination, _mapper);
+            var routines = await _unitOfWork.Routines.GetRoutinesByInstructorIdAsync(instructorId);
+            var result = PaginationHelper.Paginate<Routine, RoutineOutputDTO>(routines, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>.CreateSuccess(result);
         }
 
-        public async Task<PaginationResponseDTO<ExerciseOutputDTO>> GetExercisesAsync(int instructorId, PaginationRequestDTO pagination)
+        public async Task<ServiceResponseDTO<InstructorOutputDTO>> GetByRoutineIdAsync(int routineId)
         {
-            await _instructorRepository.ExistsByIdAsync(instructorId);
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = routineId });
 
-            var exercises = await _exerciseRepository.GetExercisesByInstructorIdAsync(instructorId);
-            return PaginationHelper.Paginate<Exercise, ExerciseOutputDTO>(exercises, pagination, _mapper);
+            var instructor = await _unitOfWork.Instructors.GetInstructorByRoutineIdAsync(routineId);
+            if (instructor == null)
+                return ServiceResponseDTO<InstructorOutputDTO>.CreateFailure("Instructor not found for this routine.");
+
+            return ServiceResponseDTO<InstructorOutputDTO>.CreateSuccess(_mapper.Map<InstructorOutputDTO>(instructor));
+        }
+
+        // Exercise
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesAsync(int instructorId, PaginationRequestDTO pagination)
+        {
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
+
+            var exercises = await _unitOfWork.Exercises.GetExercisesByInstructorIdAsync(instructorId);
+            var result = PaginationHelper.Paginate<Exercise, ExerciseOutputDTO>(exercises, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>.CreateSuccess(result);
+        }
+
+        public async Task<ServiceResponseDTO<InstructorOutputDTO>> GetByExerciseIdAsync(int exerciseId)
+        {
+            await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = exerciseId });
+
+            var instructor = await _unitOfWork.Instructors.GetInstructorByExerciseIdAsync(exerciseId);
+            if (instructor == null)
+                return ServiceResponseDTO<InstructorOutputDTO>.CreateFailure("Instructor not found for this exercise.");
+
+            return ServiceResponseDTO<InstructorOutputDTO>.CreateSuccess(_mapper.Map<InstructorOutputDTO>(instructor));
         }
     }
 }
