@@ -822,3 +822,37 @@ public interface IRoutineHasExerciseRepository
 #### Notes
 - Only `RoutineHasExercise` has a dedicated repository because it contains additional business attributes (order, sets, reps, rest time, notes, day, week, is_optional).
 - All other relationship tables (simple many-to-many links) are handled through entity navigation and do not require separate repositories.
+
+---
+## API
+### Administrator's Credential Provider 
+
+```csharp
+public interface IAdminCredentialProvider
+{
+	string Email { get; }
+	string PasswordHash { get; }
+}
+```
+
+---
+### Current User Context
+
+```csharp
+public interface ICurrentUserContext
+{
+	int Id { get; }
+	string Role { get; }
+	string Email { get; }
+}
+```
+
+---
+### JWT Service
+
+```csharp
+public interface IJwtService
+{
+	string GenerateToken(int userId, string role, string email);
+}
+```

@@ -9,9 +9,15 @@ namespace Application.Exceptions
         {
         }
 
+        public EntityNotFoundException(string entityName, string compositeKey)
+            : base($"Entity '{entityName}' with composite key '{compositeKey}' was not found.")
+        {
+        }
+
         public EntityNotFoundException(string message)
             : base(message)
         {
         }
     }
+
 }

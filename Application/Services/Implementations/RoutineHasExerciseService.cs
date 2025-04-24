@@ -5,74 +5,115 @@ using Application.Services.Interfaces;
 using AutoMapper;
 using Domain.Entities.Relations;
 using Domain.Infrastructure.Persistence;
-using Domain.Infrastructure.RepositoriesInterfaces;
-using Domain.RepositoryInterfaces;
 using FluentValidation;
 
 namespace Application.Services.Implementations
 {
     public class RoutineHasExerciseService : IRoutineHasExerciseService
     {
-        private readonly IRoutineHasExerciseRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
         private readonly IValidator<IdInputDTO> _routineIdValidator;
         private readonly IValidator<IdInputDTO> _exerciseIdValidator;
 
         public RoutineHasExerciseService(
-            IRoutineHasExerciseRepository repository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IValidator<IdInputDTO> routineIdValidator,
             IValidator<IdInputDTO> exerciseIdValidator)
         {
-            _repository = repository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _routineIdValidator = routineIdValidator;
             _exerciseIdValidator = exerciseIdValidator;
         }
 
-        public async Task<IEnumerable<RoutineHasExerciseOutputDTO>> GetExercisesByRoutineIdAsync(int routineId)
-        {
-            await _routineIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = routineId });
-            var items = await _repository.GetExercisesByRoutineIdAsync(routineId);
-            return _mapper.Map<IEnumerable<RoutineHasExerciseOutputDTO>>(items);
-        }
-
-        public async Task<IEnumerable<RoutineHasExerciseOutputDTO>> GetRoutinesByExerciseIdAsync(int exerciseId)
-        { 
-            await _exerciseIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = exerciseId });
-            var items = await _repository.GetRoutinesByExerciseIdAsync(exerciseId);
-            return _mapper.Map<IEnumerable<RoutineHasExerciseOutputDTO>>(items);
-        }
-
-        public async Task<RoutineHasExerciseOutputDTO> AddAsync(CreateRoutineHasExerciseDTO dto)
+        public async Task<ServiceResponseDTO<RoutineHasExerciseOutputDTO>> AddAsync(CreateRoutineHasExerciseDTO dto)
         {
             var entity = _mapper.Map<RoutineHasExercise>(dto);
-            await _repository.AddAsync(entity);
-            await _unitOfWork.SaveAsync();
-            return _mapper.Map<RoutineHasExerciseOutputDTO>(entity);
+            await _unitOfWork.RoutineHasExercises.AddAsync(entity);
+            await _unitOfWork.SaveAndCommitAsync();
+            return ServiceResponseDTO<RoutineHasExerciseOutputDTO>.CreateSuccess(_mapper.Map<RoutineHasExerciseOutputDTO>(entity));
         }
 
-        public async Task<RoutineHasExerciseOutputDTO> UpdateAsync(UpdateRoutineHasExerciseDTO dto)
+        public async Task<ServiceResponseDTO<RoutineHasExerciseOutputDTO>> UpdateAsync(UpdateRoutineHasExerciseDTO dto)
         {
-            var entity = await _repository.GetByIdAsync(dto.RoutineId, dto.ExerciseId)
-                ?? throw new EntityNotFoundException(nameof(RoutineHasExercise), dto.RoutineId);
+            var entity = await GetOrThrowAsync(dto.RoutineId, dto.ExerciseId);
 
-            _mapper.Map(dto, entity);
+            if (dto.Order.HasValue) entity.Order = dto.Order.Value;
+            if (dto.Sets.HasValue) entity.Sets = dto.Sets.Value;
+            if (dto.Reps.HasValue) entity.Reps = dto.Reps.Value;
+            if (dto.RestTime.HasValue) entity.RestTime = dto.RestTime.Value;
+            if (dto.Note != null) entity.Note = dto.Note;
+            if (dto.Day.HasValue) entity.Day = dto.Day.Value;
+            if (dto.Week.HasValue) entity.Week = dto.Week.Value;
+            if (dto.IsOptional.HasValue) entity.IsOptional = dto.IsOptional.Value;
 
-            await _repository.UpdateAsync(entity);
-            await _repository.SaveAsync();
+            await _unitOfWork.RoutineHasExercises.UpdateAsync(entity);
+            await _unitOfWork.SaveAndCommitAsync();
 
-
-            return _mapper.Map<RoutineHasExerciseOutputDTO>(entity);
+            return ServiceResponseDTO<RoutineHasExerciseOutputDTO>.CreateSuccess(_mapper.Map<RoutineHasExerciseOutputDTO>(entity));
         }
 
-        public async Task DeleteAsync(int routineId, int exerciseId)
+        public async Task<ServiceResponseDTO<RoutineHasExerciseOutputDTO>> GetByIdAsync(int routineId, int exerciseId)
         {
-            await _repository.DeleteByIdAsync(routineId, exerciseId);
-            await _repository.SaveAsync();
+            await ValidateIds(routineId, exerciseId);
+            var entity = await _unitOfWork.RoutineHasExercises.GetByIdAsync(routineId, exerciseId);
+
+            if (entity == null)
+                return ServiceResponseDTO<RoutineHasExerciseOutputDTO>.CreateFailure("Relation not found.");
+
+            return ServiceResponseDTO<RoutineHasExerciseOutputDTO>.CreateSuccess(_mapper.Map<RoutineHasExerciseOutputDTO>(entity));
+        }
+
+        public async Task<ServiceResponseDTO<bool>> DeleteAsync(int routineId, int exerciseId)
+        {
+            var entity = await GetOrThrowAsync(routineId, exerciseId);
+
+            await _unitOfWork.RoutineHasExercises.DeleteByIdAsync(routineId, exerciseId);
+            await _unitOfWork.SaveAndCommitAsync();
+
+            return ServiceResponseDTO<bool>.CreateSuccess(true);
+        }
+
+        public async Task<ServiceResponseDTO<IEnumerable<RoutineHasExerciseOutputDTO>>> GetExercisesByRoutineIdAsync(int routineId)
+        {
+            await _routineIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = routineId });
+
+            var items = await _unitOfWork.RoutineHasExercises.GetExercisesByRoutineIdAsync(routineId);
+            var dtos = _mapper.Map<IEnumerable<RoutineHasExerciseOutputDTO>>(items);
+
+            return ServiceResponseDTO<IEnumerable<RoutineHasExerciseOutputDTO>>.CreateSuccess(dtos);
+        }
+
+        public async Task<ServiceResponseDTO<IEnumerable<RoutineHasExerciseOutputDTO>>> GetRoutinesByExerciseIdAsync(int exerciseId)
+        {
+            await _exerciseIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = exerciseId });
+
+            var items = await _unitOfWork.RoutineHasExercises.GetRoutinesByExerciseIdAsync(exerciseId);
+            var dtos = _mapper.Map<IEnumerable<RoutineHasExerciseOutputDTO>>(items);
+
+            return ServiceResponseDTO<IEnumerable<RoutineHasExerciseOutputDTO>>.CreateSuccess(dtos);
+        }
+
+        // 🔁 Métodos auxiliares reutilizáveis
+
+        private async Task<RoutineHasExercise> GetOrThrowAsync(int routineId, int exerciseId)
+        {
+            await ValidateIds(routineId, exerciseId);
+
+            var entity = await _unitOfWork.RoutineHasExercises.GetByIdAsync(routineId, exerciseId);
+            if (entity == null)
+                throw new EntityNotFoundException(nameof(RoutineHasExercise), $"{routineId},{exerciseId}");
+
+
+            return entity;
+        }
+
+        private async Task ValidateIds(int routineId, int exerciseId)
+        {
+            await _routineIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = routineId });
+            await _exerciseIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = exerciseId });
         }
     }
 }
