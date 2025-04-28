@@ -8,10 +8,13 @@ namespace Infrastructure.Configurations.Entities
     {
         public void Configure(EntityTypeBuilder<Hashtag> builder)
         {
-            builder.ToTable("hashtags");
+            builder.ToTable("hashtag");
 
             builder.HasKey(h => h.Id);
-            builder.Property(h => h.Name).IsRequired().HasMaxLength(100);
+
+            builder.Property(h => h.Name)
+                .IsRequired()
+                .HasMaxLength(100);
         }
     }
 }

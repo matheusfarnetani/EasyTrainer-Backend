@@ -22,9 +22,11 @@ namespace Domain.Entities.Main
 
         // Foreign Key
         public int LevelId { get; set; }
+        public int InstructorId { get; set; }
 
         // Navigation
         public Level Level { get; set; } = null!;
+        public Instructor Instructor { get; set; } = null!;
 
         // Many-to-Many via junction tables
         public ICollection<UserHasInstructor> UserInstructors { get; set; } = new List<UserHasInstructor>();

@@ -12,6 +12,9 @@ namespace Infrastructure.Configurations.Relations
 
             builder.HasKey(x => new { x.RoutineId, x.ExerciseId });
 
+            builder.Property(x => x.RoutineId).HasColumnName("routine_id");
+            builder.Property(x => x.ExerciseId).HasColumnName("exercise_id");
+
             builder.Property(x => x.Order).IsRequired();
             builder.Property(x => x.Sets).IsRequired();
             builder.Property(x => x.Reps).IsRequired();
@@ -24,12 +27,14 @@ namespace Infrastructure.Configurations.Relations
             builder.HasOne(x => x.Routine)
                    .WithMany(r => r.RoutineExercises)
                    .HasForeignKey(x => x.RoutineId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_routinehasexercise_routine");
 
             builder.HasOne(x => x.Exercise)
                    .WithMany(e => e.RoutineExercises)
                    .HasForeignKey(x => x.ExerciseId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_routinehasexercise_exercise");
         }
     }
 }

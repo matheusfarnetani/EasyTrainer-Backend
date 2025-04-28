@@ -1,10 +1,12 @@
 ﻿using Domain.Entities.Main;
-using Domain.Infrastructure.RepositoriesInterfaces;
 
-public interface IModalityRepository : IGenericRepository<Modality>
+namespace Domain.Infrastructure.RepositoriesInterfaces
 {
-    Task<IEnumerable<Modality>> GetModalitiesByWorkoutAsync(int workoutId);
-    Task<IEnumerable<Modality>> GetModalitiesByRoutineAsync(int routineId);
-    Task<IEnumerable<Modality>> GetModalitiesByExerciseAsync(int exerciseId);
-    Task<bool> ExistsByIdAsync(int id);
+    public interface IModalityRepository : IGenericRepository<Modality>
+    {
+        Task<IEnumerable<Modality>> GetModalitiesByWorkoutAsync(int workoutId);
+        Task<IEnumerable<Modality>> GetModalitiesByRoutineAsync(int routineId);
+        Task<IEnumerable<Modality>> GetModalitiesByExerciseAsync(int exerciseId);
+        Task<bool> ExistsByIdAsync(int id);
+    }
 }

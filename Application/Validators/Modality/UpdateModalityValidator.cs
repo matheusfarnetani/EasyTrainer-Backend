@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.Modality;
-using Domain.RepositoryInterfaces;
+using Domain.Infrastructure.RepositoriesInterfaces;
 using FluentValidation;
 
 namespace Application.Validators.Modality

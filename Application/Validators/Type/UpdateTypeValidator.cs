@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.TrainingType;
-using Domain.RepositoryInterfaces;
+using Domain.Infrastructure.RepositoriesInterfaces;
 using FluentValidation;
 
 namespace Application.Validators.Type

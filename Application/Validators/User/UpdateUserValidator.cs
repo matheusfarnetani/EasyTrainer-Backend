@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.User;
-using Domain.RepositoryInterfaces;
+using Domain.Infrastructure.RepositoriesInterfaces;
 using FluentValidation;
 
 namespace Application.Validators.User
@@ -37,7 +37,7 @@ namespace Application.Validators.User
                 .When(x => x.Height.HasValue);
 
             RuleFor(x => x.LevelId)
-                .MustAsync(async (levelId, _) => levelId == null || await levelRepository.ExistsAsync(levelId.Value))
+                .MustAsync(async (levelId, _) => levelId == null || await levelRepository.ExistsByIdAsync(levelId.Value))
                 .WithMessage("LevelId does not exist.")
                 .When(x => x.LevelId.HasValue);
         }

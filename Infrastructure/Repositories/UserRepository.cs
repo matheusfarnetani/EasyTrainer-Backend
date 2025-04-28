@@ -15,9 +15,25 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
+        public new async Task<User?> GetByIdAsync(int id)
+        {
+            return await _context.Users
+                .Include(u => u.Level)
+                .Include(u => u.Instructor)
+                .Include(u => u.UserGoals)
+                    .ThenInclude(ug => ug.Goal)
+                .Include(u => u.UserInstructors)
+                    .ThenInclude(ui => ui.Instructor)
+                .Include(u => u.Workouts)
+                    .ThenInclude(wu => wu.Workout)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await _context.Users
+                .Include(u => u.UserGoals)
+                .Include(u => u.UserInstructors)
                 .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
         }
 
@@ -157,6 +173,5 @@ namespace Infrastructure.Repositories
                 .Where(u => u.WorkoutUsers.Any(w => w.WorkoutId == workoutId))
                 .ToListAsync();
         }
-
     }
 }

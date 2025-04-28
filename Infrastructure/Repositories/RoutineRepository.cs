@@ -16,6 +16,11 @@ namespace Infrastructure.Repositories
         }
 
         // Basic Queries
+        public async Task<bool> ExistsByIdAsync(int id)
+        {
+            return await _context.Routines.AnyAsync(r => r.Id == id);
+        }
+
         public async Task<IEnumerable<Routine>> GetRoutinesByInstructorIdAsync(int instructorId)
         {
             return await _context.Routines

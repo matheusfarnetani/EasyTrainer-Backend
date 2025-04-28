@@ -12,15 +12,20 @@ namespace Infrastructure.Configurations.Relations
 
             builder.HasKey(x => new { x.RoutineId, x.ModalityId });
 
+            builder.Property(x => x.RoutineId).HasColumnName("routine_id");
+            builder.Property(x => x.ModalityId).HasColumnName("modality_id");
+
             builder.HasOne(x => x.Routine)
                    .WithMany(r => r.RoutineModalities)
                    .HasForeignKey(x => x.RoutineId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_routinehasmodality_routine");
 
             builder.HasOne(x => x.Modality)
                    .WithMany(m => m.RoutineModalities)
                    .HasForeignKey(x => x.ModalityId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_routinehasmodality_modality");
         }
     }
 }

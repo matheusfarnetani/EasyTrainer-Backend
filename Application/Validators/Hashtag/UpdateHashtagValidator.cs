@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.Hashtag;
-using Domain.RepositoryInterfaces;
+using Domain.Infrastructure.RepositoriesInterfaces;
 using FluentValidation;
 
 namespace Application.Validators.Hashtag

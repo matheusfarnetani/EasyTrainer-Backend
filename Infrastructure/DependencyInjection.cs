@@ -33,8 +33,20 @@ namespace Infrastructure
             {
                 var connectionManager = provider.GetRequiredService<IConnectionManager>();
                 var connStr = connectionManager.GetCurrentConnectionString();
-                options.UseMySql(connStr, ServerVersion.AutoDetect(connStr));
+
+                options.UseMySql(
+                    connStr,
+                    new MySqlServerVersion(new Version(8, 0, 41)),
+                    mySqlOptions =>
+                    {
+                        mySqlOptions.EnableRetryOnFailure(
+                            maxRetryCount: 3,
+                            maxRetryDelay: TimeSpan.FromSeconds(5),
+                            errorNumbersToAdd: null
+                        );
+                    });
             });
+
 
             // Health Check
             services.AddHealthChecks().AddDbContextCheck<AppDbContext>("Database");

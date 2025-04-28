@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.User;
-using Domain.RepositoryInterfaces;
+using Domain.Infrastructure.RepositoriesInterfaces;
 using FluentValidation;
 
 namespace Application.Validators.User
@@ -33,7 +33,7 @@ namespace Application.Validators.User
                 .NotEmpty().WithMessage("Password is required.");
 
             RuleFor(x => x.LevelId)
-                .MustAsync(async (levelId, _) => await levelRepository.ExistsAsync(levelId))
+                .MustAsync(async (levelId, _) => await levelRepository.ExistsByIdAsync(levelId))
                 .WithMessage("LevelId does not exist.");
         }
     }

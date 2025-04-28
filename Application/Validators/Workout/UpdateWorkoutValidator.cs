@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Workout;
+using Domain.Infrastructure.RepositoriesInterfaces;
 using FluentValidation;
 
 namespace Application.Validators.Workout

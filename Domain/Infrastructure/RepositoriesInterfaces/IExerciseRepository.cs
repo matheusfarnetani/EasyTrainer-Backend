@@ -13,9 +13,8 @@ namespace Domain.Infrastructure.RepositoriesInterfaces
         Task<IEnumerable<Exercise>> GetExercisesByRoutineIdAsync(int routineId, int instructorId);
         Task<IEnumerable<Exercise>> GetExercisesByWorkoutIdAsync(int workoutId, int instructorId);
         Task<IEnumerable<Exercise>> GetVariationsByExerciseAsync(int exerciseId, int instructorId);
-
-        Task<Exercise?> GetByIdAsync(int id);
-        Task DeleteByIdAsync(int id);
+        new Task<Exercise?> GetByIdAsync(int id);
+        new Task DeleteByIdAsync(int id);
         Task<bool> ExistsByIdAsync(int id);
 
         Task AddGoalToExerciseAsync(int exerciseId, int goalId, int instructorId);

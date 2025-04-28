@@ -12,15 +12,20 @@ namespace Infrastructure.Configurations.Relations
 
             builder.HasKey(x => new { x.WorkoutId, x.HashtagId });
 
+            builder.Property(x => x.WorkoutId).HasColumnName("workout_id");
+            builder.Property(x => x.HashtagId).HasColumnName("hashtag_id");
+
             builder.HasOne(x => x.Workout)
                    .WithMany(w => w.WorkoutHashtags)
                    .HasForeignKey(x => x.WorkoutId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_workouthashashtag_workout");
 
             builder.HasOne(x => x.Hashtag)
                    .WithMany(h => h.WorkoutHashtags)
                    .HasForeignKey(x => x.HashtagId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_workouthashashtag_hashtag");
         }
     }
 }

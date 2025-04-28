@@ -1,5 +1,4 @@
 ﻿using Domain.API.Interfaces;
-using Domain.Application.Interfaces;
 using Domain.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 
@@ -18,7 +17,7 @@ namespace Infrastructure.Persistence
 
         public string GetCurrentConnectionString()
         {
-            var role = _userContext.GetCurrentRole();
+            var role = _userContext.Role;
             return GetConnectionString(role);
         }
 

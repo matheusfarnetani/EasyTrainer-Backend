@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Main;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.Entities
 {
@@ -8,24 +8,34 @@ namespace Infrastructure.Configurations.Entities
     {
         public void Configure(EntityTypeBuilder<Routine> builder)
         {
-            builder.ToTable("routines");
+            builder.ToTable("routine");
 
             builder.HasKey(r => r.Id);
 
-            builder.Property(r => r.Name).IsRequired().HasMaxLength(100);
-            builder.Property(r => r.Description).HasMaxLength(300);
-            builder.Property(r => r.ImageUrl).HasMaxLength(300);
-            builder.Property(r => r.Duration).IsRequired();
+            builder.Property(r => r.Name)
+                   .IsRequired()
+                   .HasMaxLength(100);
+
+            builder.Property(r => r.Description)
+                   .HasMaxLength(300);
+
+            builder.Property(r => r.ImageUrl)
+                   .HasMaxLength(300);
+
+            builder.Property(r => r.Duration)
+                   .HasColumnName("duration");
 
             builder.HasOne(r => r.Instructor)
                    .WithMany()
                    .HasForeignKey(r => r.InstructorId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.Restrict)
+                   .HasConstraintName("fk_routine_instructor");
 
             builder.HasOne(r => r.Level)
                    .WithMany()
                    .HasForeignKey(r => r.LevelId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.Restrict)
+                   .HasConstraintName("fk_routine_level");
         }
     }
 }

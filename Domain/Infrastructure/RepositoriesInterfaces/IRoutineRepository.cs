@@ -28,5 +28,7 @@ namespace Domain.Infrastructure.RepositoriesInterfaces
 
         Task AddExerciseToRoutineAsync(int routineId, int exerciseId, int instructorId);
         Task RemoveExerciseFromRoutineAsync(int routineId, int exerciseId, int instructorId);
+        Task<bool> ExistsByIdAsync(int id);
+
     }
 }

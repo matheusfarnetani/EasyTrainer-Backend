@@ -12,15 +12,20 @@ namespace Infrastructure.Configurations.Relations
 
             builder.HasKey(x => new { x.WorkoutId, x.GoalId });
 
+            builder.Property(x => x.WorkoutId).HasColumnName("workout_id");
+            builder.Property(x => x.GoalId).HasColumnName("goal_id");
+
             builder.HasOne(x => x.Workout)
                    .WithMany(w => w.WorkoutGoals)
                    .HasForeignKey(x => x.WorkoutId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_workouthasgoal_workout");
 
             builder.HasOne(x => x.Goal)
                    .WithMany(g => g.WorkoutGoals)
                    .HasForeignKey(x => x.GoalId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_workouthasgoal_goal");
         }
     }
 }

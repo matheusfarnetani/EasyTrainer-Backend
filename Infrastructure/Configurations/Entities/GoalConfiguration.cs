@@ -8,11 +8,16 @@ namespace Infrastructure.Configurations.Entities
     {
         public void Configure(EntityTypeBuilder<Goal> builder)
         {
-            builder.ToTable("goals");
+            builder.ToTable("goal");
 
             builder.HasKey(g => g.Id);
-            builder.Property(g => g.Name).IsRequired().HasMaxLength(100);
-            builder.Property(g => g.Description).HasMaxLength(300);
+
+            builder.Property(g => g.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            builder.Property(g => g.Description)
+                .HasMaxLength(255);
         }
     }
 }

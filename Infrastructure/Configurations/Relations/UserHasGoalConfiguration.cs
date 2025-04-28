@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Relations;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.Relations
 {
@@ -12,16 +12,20 @@ namespace Infrastructure.Configurations.Relations
 
             builder.HasKey(x => new { x.UserId, x.GoalId });
 
+            builder.Property(x => x.UserId).HasColumnName("user_id");
+            builder.Property(x => x.GoalId).HasColumnName("goal_id");
+
             builder.HasOne(x => x.User)
                    .WithMany(u => u.UserGoals)
                    .HasForeignKey(x => x.UserId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_userhasgoal_user");
 
             builder.HasOne(x => x.Goal)
                    .WithMany(g => g.UserGoals)
                    .HasForeignKey(x => x.GoalId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasConstraintName("fk_userhasgoal_goal");
         }
     }
-
 }
