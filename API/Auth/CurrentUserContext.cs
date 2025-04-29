@@ -3,14 +3,9 @@ using Domain.API.Interfaces;
 
 namespace API.Auth
 {
-    public class CurrentUserContext : ICurrentUserContext
+    public class CurrentUserContext(IHttpContextAccessor httpContextAccessor) : ICurrentUserContext
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public CurrentUserContext(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public int Id => 1;
         public string Role => "admin"; // ou "instructor", "user"

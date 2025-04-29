@@ -3,18 +3,13 @@ using Application.DTOs.User;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EasyTrainer.API.Controllers
+namespace API.Controllers
 {
     [ApiController]
     [Route("easytrainer/api/v1/[controller]")]
-    public class UserController : ControllerBase
+    public class UserController(IUserService userService) : ControllerBase
     {
-        private readonly IUserService _userService;
-
-        public UserController(IUserService userService)
-        {
-            _userService = userService;
-        }
+        private readonly IUserService _userService = userService;
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)

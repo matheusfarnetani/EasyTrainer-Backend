@@ -1,4 +1,4 @@
-﻿namespace Application.DTOs.ExerciseVariation
+﻿namespace Application.DTOs.Exercise
 {
     public class ExerciseVariationOutputDTO
     {

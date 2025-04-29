@@ -9,24 +9,16 @@ using FluentValidation;
 
 namespace Application.Services.Implementations
 {
-    public class RoutineHasExerciseService : IRoutineHasExerciseService
+    public class RoutineHasExerciseService(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IValidator<IdInputDTO> routineIdValidator,
+        IValidator<IdInputDTO> exerciseIdValidator) : IRoutineHasExerciseService
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly IValidator<IdInputDTO> _routineIdValidator;
-        private readonly IValidator<IdInputDTO> _exerciseIdValidator;
-
-        public RoutineHasExerciseService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IValidator<IdInputDTO> routineIdValidator,
-            IValidator<IdInputDTO> exerciseIdValidator)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _routineIdValidator = routineIdValidator;
-            _exerciseIdValidator = exerciseIdValidator;
-        }
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IMapper _mapper = mapper;
+        private readonly IValidator<IdInputDTO> _routineIdValidator = routineIdValidator;
+        private readonly IValidator<IdInputDTO> _exerciseIdValidator = exerciseIdValidator;
 
         public async Task<ServiceResponseDTO<RoutineHasExerciseOutputDTO>> AddAsync(CreateRoutineHasExerciseDTO dto)
         {
@@ -68,7 +60,7 @@ namespace Application.Services.Implementations
 
         public async Task<ServiceResponseDTO<bool>> DeleteAsync(int routineId, int exerciseId)
         {
-            var entity = await GetOrThrowAsync(routineId, exerciseId);
+            await GetOrThrowAsync(routineId, exerciseId);
 
             await _unitOfWork.RoutineHasExercises.DeleteByIdAsync(routineId, exerciseId);
             await _unitOfWork.SaveAndCommitAsync();
@@ -96,18 +88,12 @@ namespace Application.Services.Implementations
             return ServiceResponseDTO<IEnumerable<RoutineHasExerciseOutputDTO>>.CreateSuccess(dtos);
         }
 
-        // 🔁 Métodos auxiliares reutilizáveis
-
         private async Task<RoutineHasExercise> GetOrThrowAsync(int routineId, int exerciseId)
         {
             await ValidateIds(routineId, exerciseId);
 
             var entity = await _unitOfWork.RoutineHasExercises.GetByIdAsync(routineId, exerciseId);
-            if (entity == null)
-                throw new EntityNotFoundException(nameof(RoutineHasExercise), $"{routineId},{exerciseId}");
-
-
-            return entity;
+            return entity ?? throw new EntityNotFoundException(nameof(RoutineHasExercise), $"{routineId},{exerciseId}");
         }
 
         private async Task ValidateIds(int routineId, int exerciseId)

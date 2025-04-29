@@ -91,7 +91,7 @@ namespace Application.Services.Implementations
                 nameof(Instructor) => (IGenericRepository<TEntity>)_unitOfWork.Instructors,
                 nameof(Goal) => (IGenericRepository<TEntity>)_unitOfWork.Goals,
                 nameof(Level) => (IGenericRepository<TEntity>)_unitOfWork.Levels,
-                nameof(Type) => (IGenericRepository<TEntity>)_unitOfWork.Types,
+                nameof(TrainingType) => (IGenericRepository<TEntity>)_unitOfWork.Types,
                 nameof(Modality) => (IGenericRepository<TEntity>)_unitOfWork.Modalities,
                 nameof(Hashtag) => (IGenericRepository<TEntity>)_unitOfWork.Hashtags,
                 nameof(Workout) => (IGenericRepository<TEntity>)_unitOfWork.Workouts,

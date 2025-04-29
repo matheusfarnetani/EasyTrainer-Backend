@@ -11,56 +11,37 @@ using FluentValidation;
 
 namespace Application.Services.Implementations
 {
-    public class ExerciseService : GenericInstructorOwnedService<Exercise, CreateExerciseInputDTO, UpdateExerciseInputDTO, ExerciseOutputDTO>, IExerciseService
+    public class ExerciseService(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IValidator<CreateExerciseInputDTO> createValidator,
+        IValidator<UpdateExerciseInputDTO> updateValidator,
+        IValidator<IdInputDTO> exerciseIdValidator,
+        IValidator<IdInputDTO> instructorIdValidator,
+        IValidator<IdInputDTO> goalIdValidator,
+        IValidator<IdInputDTO> typeIdValidator,
+        IValidator<IdInputDTO> modalityIdValidator,
+        IValidator<IdInputDTO> hashtagIdValidator,
+        IValidator<IdInputDTO> variationIdValidator,
+        IValidator<IdInputDTO> levelIdValidator,
+        IValidator<IdInputDTO> workoutIdValidator,
+        IValidator<IdInputDTO> routineIdValidator) : GenericInstructorOwnedService<Exercise, CreateExerciseInputDTO, UpdateExerciseInputDTO, ExerciseOutputDTO>(unitOfWork, mapper), IExerciseService
     {
-        private new readonly IUnitOfWork _unitOfWork;
-        private new readonly IMapper _mapper;
+        private new readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private new readonly IMapper _mapper = mapper;
 
-        private readonly IValidator<CreateExerciseInputDTO> _createValidator;
-        private readonly IValidator<UpdateExerciseInputDTO> _updateValidator;
-        private readonly IValidator<IdInputDTO> _exerciseIdValidator;
-        private readonly IValidator<IdInputDTO> _instructorIdValidator;
-        private readonly IValidator<IdInputDTO> _goalIdValidator;
-        private readonly IValidator<IdInputDTO> _typeIdValidator;
-        private readonly IValidator<IdInputDTO> _modalityIdValidator;
-        private readonly IValidator<IdInputDTO> _hashtagIdValidator;
-        private readonly IValidator<IdInputDTO> _variationIdValidator;
-        private readonly IValidator<IdInputDTO> _levelIdValidator;
-        private readonly IValidator<IdInputDTO> _workoutIdValidator;
-        private readonly IValidator<IdInputDTO> _routineIdValidator;
-
-        public ExerciseService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IValidator<CreateExerciseInputDTO> createValidator,
-            IValidator<UpdateExerciseInputDTO> updateValidator,
-            IValidator<IdInputDTO> exerciseIdValidator,
-            IValidator<IdInputDTO> instructorIdValidator,
-            IValidator<IdInputDTO> goalIdValidator,
-            IValidator<IdInputDTO> typeIdValidator,
-            IValidator<IdInputDTO> modalityIdValidator,
-            IValidator<IdInputDTO> hashtagIdValidator,
-            IValidator<IdInputDTO> variationIdValidator,
-            IValidator<IdInputDTO> levelIdValidator,
-            IValidator<IdInputDTO> workoutIdValidator,
-            IValidator<IdInputDTO> routineIdValidator)
-            : base(unitOfWork, mapper)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _createValidator = createValidator;
-            _updateValidator = updateValidator;
-            _exerciseIdValidator = exerciseIdValidator;
-            _instructorIdValidator = instructorIdValidator;
-            _goalIdValidator = goalIdValidator;
-            _typeIdValidator = typeIdValidator;
-            _modalityIdValidator = modalityIdValidator;
-            _hashtagIdValidator = hashtagIdValidator;
-            _variationIdValidator = variationIdValidator;
-            _levelIdValidator = levelIdValidator;
-            _workoutIdValidator = workoutIdValidator;
-            _routineIdValidator = routineIdValidator;
-        }
+        private readonly IValidator<CreateExerciseInputDTO> _createValidator = createValidator;
+        private readonly IValidator<UpdateExerciseInputDTO> _updateValidator = updateValidator;
+        private readonly IValidator<IdInputDTO> _exerciseIdValidator = exerciseIdValidator;
+        private readonly IValidator<IdInputDTO> _instructorIdValidator = instructorIdValidator;
+        private readonly IValidator<IdInputDTO> _goalIdValidator = goalIdValidator;
+        private readonly IValidator<IdInputDTO> _typeIdValidator = typeIdValidator;
+        private readonly IValidator<IdInputDTO> _modalityIdValidator = modalityIdValidator;
+        private readonly IValidator<IdInputDTO> _hashtagIdValidator = hashtagIdValidator;
+        private readonly IValidator<IdInputDTO> _variationIdValidator = variationIdValidator;
+        private readonly IValidator<IdInputDTO> _levelIdValidator = levelIdValidator;
+        private readonly IValidator<IdInputDTO> _workoutIdValidator = workoutIdValidator;
+        private readonly IValidator<IdInputDTO> _routineIdValidator = routineIdValidator;
 
         #region CRUD
 
@@ -268,6 +249,12 @@ namespace Application.Services.Implementations
         #endregion
 
         #region Data Retrieval
+
+        protected override async Task<IEnumerable<Exercise>> GetEntitiesWithIncludes(int instructorId)
+        {
+            await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
+            return await _unitOfWork.Exercises.GetExercisesByInstructorIdAsync(instructorId);
+        }
 
         public async Task<ServiceResponseDTO<InstructorOutputDTO>> GetInstructorByExerciseIdAsync(int exerciseId)
         {

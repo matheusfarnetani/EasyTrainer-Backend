@@ -20,9 +20,9 @@
         public float CaloriesBurnedEstimate { get; set; }
         public int InstructorId { get; set; }
         public int LevelId { get; set; }
-        public List<int> GoalIds { get; set; } = new List<int>();
-        public List<int> TypeIds { get; set; } = new List<int>();
-        public List<int> ModalityIds { get; set; } = new List<int>();
-        public List<int> HashtagIds { get; set; } = new List<int>();
+        public List<int> GoalIds { get; set; } = [];
+        public List<int> TypeIds { get; set; } = [];
+        public List<int> ModalityIds { get; set; } = [];
+        public List<int> HashtagIds { get; set; } = [];
     }
 }

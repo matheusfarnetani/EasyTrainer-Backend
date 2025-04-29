@@ -76,13 +76,17 @@ namespace Application.Services.Implementations
 
         public virtual async Task<ServiceResponseDTO<PaginationResponseDTO<TOutputDTO>>> GetAllAsync(int instructorId, PaginationRequestDTO pagination)
         {
-            var entities = await _repository.GetAllAsync();
-            var filtered = entities.Where(e => CheckInstructorOwnership(e, instructorId));
-
-            var result = PaginationHelper.Paginate<TEntity, TOutputDTO>(filtered, pagination, _mapper);
-
+            var entities = await GetEntitiesWithIncludes(instructorId);
+            var result = PaginationHelper.Paginate<TEntity, TOutputDTO>(entities, pagination, _mapper);
             return ServiceResponseDTO<PaginationResponseDTO<TOutputDTO>>.CreateSuccess(result);
         }
+
+        protected virtual async Task<IEnumerable<TEntity>> GetEntitiesWithIncludes(int instructorId)
+        {
+            var entities = await _repository.GetAllAsync();
+            return entities.Where(e => CheckInstructorOwnership(e, instructorId));
+        }
+
 
         /// <summary>
         /// Resolves the repository based on TEntity using UnitOfWork.

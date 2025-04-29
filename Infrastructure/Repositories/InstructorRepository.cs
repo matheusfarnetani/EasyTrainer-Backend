@@ -5,19 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class InstructorRepository : GenericRepository<Instructor>, IInstructorRepository
+    public class InstructorRepository(AppDbContext context) : GenericRepository<Instructor>(context), IInstructorRepository
     {
-        private readonly AppDbContext _context;
-
-        public InstructorRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public async Task<Instructor?> GetInstructorByEmailAsync(string email)
         {
             return await _context.Instructors
-                .FirstOrDefaultAsync(i => i.Email.ToLower() == email.ToLower());
+                .FirstOrDefaultAsync(i => i.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public async Task<IEnumerable<Instructor>> GetInstructorsByUserIdAsync(int userId)
@@ -53,13 +48,13 @@ namespace Infrastructure.Repositories
         public async Task<bool> ExistsByEmailAsync(string email)
         {
             return await _context.Instructors
-                .AnyAsync(i => i.Email.ToLower() == email.ToLower());
+                .AnyAsync(i => i.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public async Task<bool> IsEmailTakenByOtherAsync(string email, int currentId)
         {
             return await _context.Instructors
-                .AnyAsync(i => i.Email.ToLower() == email.ToLower() && i.Id != currentId);
+                .AnyAsync(i => i.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase) && i.Id != currentId);
         }
     }
 }

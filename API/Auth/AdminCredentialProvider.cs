@@ -2,14 +2,9 @@
 
 namespace API.Auth
 {
-    public class AdminCredentialProvider : IAdminCredentialProvider
+    public class AdminCredentialProvider(IConfiguration config) : IAdminCredentialProvider
     {
-        private readonly IConfiguration _config;
-
-        public AdminCredentialProvider(IConfiguration config)
-        {
-            _config = config;
-        }
+        private readonly IConfiguration _config = config;
 
         public string Email => _config["AdminAuth:Email"]!;
         public string PasswordHash => _config["AdminAuth:Password"]!;

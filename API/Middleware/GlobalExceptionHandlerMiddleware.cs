@@ -4,16 +4,10 @@ using System.Text.Json;
 
 namespace API.Middleware
 {
-    public class GlobalExceptionHandlerMiddleware
+    public class GlobalExceptionHandlerMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlerMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger;
-
-        public GlobalExceptionHandlerMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlerMiddleware> logger)
-        {
-            _next = next;
-            _logger = logger;
-        }
+        private readonly RequestDelegate _next = next;
+        private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger = logger;
 
         public async Task InvokeAsync(HttpContext context)
         {
@@ -39,7 +33,7 @@ namespace API.Middleware
                     success = false,
                     error = ex is ValidationException valEx
                         ? valEx.Errors.Select(e => e.ErrorMessage)
-                        : new List<string> { ex.Message }
+                        : [ex.Message]
                 };
 
                 await context.Response.WriteAsync(JsonSerializer.Serialize(response));

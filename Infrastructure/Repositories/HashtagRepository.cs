@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class HashtagRepository : GenericRepository<Hashtag>, IHashtagRepository
+    public class HashtagRepository(AppDbContext context) : GenericRepository<Hashtag>(context), IHashtagRepository
     {
-        private readonly AppDbContext _context;
-
-        public HashtagRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public async Task<IEnumerable<Hashtag>> GetHashtagsByWorkoutAsync(int workoutId)
         {

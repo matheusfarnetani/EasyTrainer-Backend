@@ -1,4 +1,5 @@
-﻿using Application.DTOs.RoutineHasExercise;
+﻿using Application.DTOs;
+using Application.DTOs.RoutineHasExercise;
 
 namespace Application.Services.Interfaces
 {

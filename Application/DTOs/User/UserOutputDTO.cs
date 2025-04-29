@@ -12,7 +12,7 @@
         public float Height { get; set; }
         public char Gender { get; set; }
         public int LevelId { get; set; }
-        public List<int> GoalIds { get; set; } = new List<int>();
-        public List<int> InstructorIds { get; set; } = new List<int>();
+        public List<int> GoalIds { get; set; } = [];
+        public List<int> InstructorIds { get; set; } = [];
     }
 }

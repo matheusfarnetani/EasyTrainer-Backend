@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Auth;
+﻿using Application.DTOs;
+using Application.DTOs.Auth;
 using Application.Services.Interfaces;
 using Domain.API.Interfaces;
 using Domain.Infrastructure.Persistence;

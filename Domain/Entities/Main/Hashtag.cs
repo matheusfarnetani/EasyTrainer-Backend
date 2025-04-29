@@ -11,8 +11,8 @@ namespace Domain.Entities.Main
         public string Name { get; set; } = string.Empty;
 
         // Navigation Properties
-        public ICollection<WorkoutHasHashtag> WorkoutHashtags { get; set; } = new List<WorkoutHasHashtag>();
-        public ICollection<RoutineHasHashtag> RoutineHashtags { get; set; } = new List<RoutineHasHashtag>();
-        public ICollection<ExerciseHasHashtag> ExerciseHashtags { get; set; } = new List<ExerciseHasHashtag>();
+        public ICollection<WorkoutHasHashtag> WorkoutHashtags { get; set; } = [];
+        public ICollection<RoutineHasHashtag> RoutineHashtags { get; set; } = [];
+        public ICollection<ExerciseHasHashtag> ExerciseHashtags { get; set; } = [];
     }
 }

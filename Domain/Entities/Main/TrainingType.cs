@@ -12,8 +12,8 @@ namespace Domain.Entities.Main
         public string Description { get; set; } = string.Empty;
 
         // Navigation Properties
-        public ICollection<WorkoutHasType> WorkoutTypes { get; set; } = new List<WorkoutHasType>();
-        public ICollection<RoutineHasType> RoutineTypes { get; set; } = new List<RoutineHasType>();
-        public ICollection<ExerciseHasType> ExerciseTypes { get; set; } = new List<ExerciseHasType>();
+        public ICollection<WorkoutHasType> WorkoutTypes { get; set; } = [];
+        public ICollection<RoutineHasType> RoutineTypes { get; set; } = [];
+        public ICollection<ExerciseHasType> ExerciseTypes { get; set; } = [];
     }
 }

@@ -6,39 +6,62 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class RoutineRepository : GenericRepository<Routine>, IRoutineRepository
+    public class RoutineRepository(AppDbContext context) : GenericRepository<Routine>(context), IRoutineRepository
     {
-        private readonly AppDbContext _context;
-
-        public RoutineRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         // Basic Queries
         public async Task<bool> ExistsByIdAsync(int id)
         {
             return await _context.Routines.AnyAsync(r => r.Id == id);
         }
+        public async Task<IEnumerable<Routine>> GetAllWithIncludesByInstructorIdAsync(int instructorId)
+        {
+            return await _context.Routines
+                .Where(r => r.InstructorId == instructorId)
+                .Include(r => r.RoutineGoals)
+                .Include(r => r.RoutineTypes)
+                .Include(r => r.RoutineModalities)
+                .Include(r => r.RoutineHashtags)
+                .Include(r => r.RoutineExercises)
+                    .ThenInclude(re => re.Exercise)
+                .ToListAsync();
+        }
+
 
         public async Task<IEnumerable<Routine>> GetRoutinesByInstructorIdAsync(int instructorId)
         {
             return await _context.Routines
                 .Where(r => r.InstructorId == instructorId)
+                .Include(r => r.RoutineGoals)
+                .Include(r => r.RoutineTypes)
+                .Include(r => r.RoutineModalities)
+                .Include(r => r.RoutineHashtags)
+                .Include(r => r.RoutineExercises)
+                    .ThenInclude(re => re.Exercise)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Routine>> GetRoutinesByGoalIdAsync(int goalId, int instructorId)
         {
             return await _context.Routines
-                .Include(r => r.RoutineGoals)
                 .Where(r => r.InstructorId == instructorId && r.RoutineGoals.Any(g => g.GoalId == goalId))
+                .Include(r => r.RoutineGoals)
+                .Include(r => r.RoutineTypes)
+                .Include(r => r.RoutineModalities)
+                .Include(r => r.RoutineHashtags)
+                .Include(r => r.RoutineExercises)
+                    .ThenInclude(re => re.Exercise)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId)
         {
             return await _context.Routines
+                .Include(r => r.RoutineGoals)
+                .Include(r => r.RoutineTypes)
+                .Include(r => r.RoutineModalities)
+                .Include(r => r.RoutineHashtags)
                 .Where(r => r.InstructorId == instructorId && r.LevelId == levelId)
                 .ToListAsync();
         }
@@ -47,6 +70,9 @@ namespace Infrastructure.Repositories
         {
             return await _context.Routines
                 .Include(r => r.RoutineTypes)
+                .Include(r => r.RoutineGoals)
+                .Include(r => r.RoutineModalities)
+                .Include(r => r.RoutineHashtags)
                 .Where(r => r.InstructorId == instructorId && r.RoutineTypes.Any(t => t.TypeId == typeId))
                 .ToListAsync();
         }
@@ -55,6 +81,9 @@ namespace Infrastructure.Repositories
         {
             return await _context.Routines
                 .Include(r => r.RoutineModalities)
+                .Include(r => r.RoutineGoals)
+                .Include(r => r.RoutineTypes)
+                .Include(r => r.RoutineHashtags)
                 .Where(r => r.InstructorId == instructorId && r.RoutineModalities.Any(m => m.ModalityId == modalityId))
                 .ToListAsync();
         }
@@ -63,6 +92,9 @@ namespace Infrastructure.Repositories
         {
             return await _context.Routines
                 .Include(r => r.RoutineHashtags)
+                .Include(r => r.RoutineGoals)
+                .Include(r => r.RoutineTypes)
+                .Include(r => r.RoutineModalities)
                 .Where(r => r.InstructorId == instructorId && r.RoutineHashtags.Any(h => h.HashtagId == hashtagId))
                 .ToListAsync();
         }
@@ -70,7 +102,11 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Routine>> GetRoutinesByWorkoutIdAsync(int workoutId, int instructorId)
         {
             return await _context.Routines
-                .Include(r => r.WorkoutRoutines)
+                .Include(r => r.RoutineGoals)
+                .Include(r => r.RoutineTypes)
+                .Include(r => r.RoutineModalities)
+                .Include(r => r.RoutineHashtags)
+                .Include(r => r.RoutineExercises)
                 .Where(r => r.InstructorId == instructorId && r.WorkoutRoutines.Any(w => w.WorkoutId == workoutId))
                 .ToListAsync();
         }
@@ -78,6 +114,10 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Routine>> GetRoutinesByExerciseIdAsync(int exerciseId, int instructorId)
         {
             return await _context.Routines
+                .Include(r => r.RoutineGoals)
+                .Include(r => r.RoutineTypes)
+                .Include(r => r.RoutineModalities)
+                .Include(r => r.RoutineHashtags)
                 .Include(r => r.RoutineExercises)
                 .Where(r => r.InstructorId == instructorId && r.RoutineExercises.Any(e => e.ExerciseId == exerciseId))
                 .ToListAsync();

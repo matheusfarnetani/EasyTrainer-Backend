@@ -6,20 +6,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class ExerciseRepository : GenericRepository<Exercise>, IExerciseRepository
+    public class ExerciseRepository(AppDbContext context) : GenericRepository<Exercise>(context), IExerciseRepository
     {
-        private readonly AppDbContext _context;
-
-        public ExerciseRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public new async Task<Exercise?> GetByIdAsync(int id)
         {
             return await _context.Exercises
                 .Include(e => e.Instructor)
                 .Include(e => e.Level)
+                .Include(e => e.ExerciseGoals)
+                .Include(e => e.ExerciseTypes)
+                .Include(e => e.ExerciseModalities)
+                .Include(e => e.ExerciseHashtags)
+                .Include(e => e.ExerciseVariations)
+                .Include(e => e.RoutineExercises)
+                .Include(e => e.WorkoutExercises)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
@@ -195,6 +197,11 @@ namespace Infrastructure.Repositories
         {
             return await _context.Exercises
                 .Where(e => e.InstructorId == instructorId)
+                .Include(e => e.ExerciseGoals)
+                .Include(e => e.ExerciseTypes)
+                .Include(e => e.ExerciseModalities)
+                .Include(e => e.ExerciseHashtags)
+                .Include(e => e.ExerciseVariations)
                 .ToListAsync();
         }
 
@@ -202,6 +209,10 @@ namespace Infrastructure.Repositories
         {
             return await _context.Exercises
                 .Include(e => e.ExerciseGoals)
+                .Include(e => e.ExerciseTypes)
+                .Include(e => e.ExerciseModalities)
+                .Include(e => e.ExerciseHashtags)
+                .Include(e => e.ExerciseVariations)
                 .Where(e => e.InstructorId == instructorId && e.ExerciseGoals.Any(g => g.GoalId == goalId))
                 .ToListAsync();
         }
@@ -209,7 +220,12 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Exercise>> GetExercisesByLevelIdAsync(int levelId, int instructorId)
         {
             return await _context.Exercises
-                .Where(e => e.LevelId == levelId && e.InstructorId == instructorId)
+                .Include(e => e.ExerciseGoals)
+                .Include(e => e.ExerciseTypes)
+                .Include(e => e.ExerciseModalities)
+                .Include(e => e.ExerciseHashtags)
+                .Include(e => e.ExerciseVariations)
+                .Where(e => e.InstructorId == instructorId && e.LevelId == levelId)
                 .ToListAsync();
         }
 
@@ -217,6 +233,10 @@ namespace Infrastructure.Repositories
         {
             return await _context.Exercises
                 .Include(e => e.ExerciseTypes)
+                .Include(e => e.ExerciseGoals)
+                .Include(e => e.ExerciseModalities)
+                .Include(e => e.ExerciseHashtags)
+                .Include(e => e.ExerciseVariations)
                 .Where(e => e.InstructorId == instructorId && e.ExerciseTypes.Any(t => t.TypeId == typeId))
                 .ToListAsync();
         }
@@ -225,6 +245,10 @@ namespace Infrastructure.Repositories
         {
             return await _context.Exercises
                 .Include(e => e.ExerciseModalities)
+                .Include(e => e.ExerciseGoals)
+                .Include(e => e.ExerciseTypes)
+                .Include(e => e.ExerciseHashtags)
+                .Include(e => e.ExerciseVariations)
                 .Where(e => e.InstructorId == instructorId && e.ExerciseModalities.Any(m => m.ModalityId == modalityId))
                 .ToListAsync();
         }
@@ -233,6 +257,10 @@ namespace Infrastructure.Repositories
         {
             return await _context.Exercises
                 .Include(e => e.ExerciseHashtags)
+                .Include(e => e.ExerciseGoals)
+                .Include(e => e.ExerciseTypes)
+                .Include(e => e.ExerciseModalities)
+                .Include(e => e.ExerciseVariations)
                 .Where(e => e.InstructorId == instructorId && e.ExerciseHashtags.Any(h => h.HashtagId == hashtagId))
                 .ToListAsync();
         }

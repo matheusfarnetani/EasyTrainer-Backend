@@ -10,9 +10,9 @@
         public string Description { get; set; } = string.Empty;
 
         // Navigation Properties
-        public ICollection<User> Users { get; set; } = new List<User>();
-        public ICollection<Workout> Workouts { get; set; } = new List<Workout>();
-        public ICollection<Routine> Routines { get; set; } = new List<Routine>();
-        public ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
+        public ICollection<User> Users { get; set; } = [];
+        public ICollection<Workout> Workouts { get; set; } = [];
+        public ICollection<Routine> Routines { get; set; } = [];
+        public ICollection<Exercise> Exercises { get; set; } = [];
     }
 }

@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class GoalRepository : GenericRepository<Goal>, IGoalRepository
+    public class GoalRepository(AppDbContext context) : GenericRepository<Goal>(context), IGoalRepository
     {
-        private readonly AppDbContext _context;
-
-        public GoalRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public async Task<IEnumerable<Goal>> GetGoalsByUserAsync(int userId)
         {

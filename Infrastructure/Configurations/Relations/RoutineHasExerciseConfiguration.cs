@@ -15,14 +15,15 @@ namespace Infrastructure.Configurations.Relations
             builder.Property(x => x.RoutineId).HasColumnName("routine_id");
             builder.Property(x => x.ExerciseId).HasColumnName("exercise_id");
 
-            builder.Property(x => x.Order).IsRequired();
-            builder.Property(x => x.Sets).IsRequired();
-            builder.Property(x => x.Reps).IsRequired();
-            builder.Property(x => x.RestTime).IsRequired();
-            builder.Property(x => x.Note).HasMaxLength(300);
-            builder.Property(x => x.Day).IsRequired();
-            builder.Property(x => x.Week).IsRequired();
-            builder.Property(x => x.IsOptional).IsRequired();
+            builder.Property(x => x.Order).IsRequired().HasColumnName("order");
+            builder.Property(x => x.Sets).IsRequired().HasColumnName("sets");
+            builder.Property(x => x.Reps).IsRequired().HasColumnName("reps");
+            builder.Property(x => x.RestTime).IsRequired().HasColumnName("rest_time");  
+            builder.Property(x => x.Note).HasMaxLength(300).HasColumnName("note");
+            builder.Property(x => x.Day).IsRequired().HasColumnName("day");
+            builder.Property(x => x.Week).IsRequired().HasColumnName("week");
+            builder.Property(x => x.IsOptional).IsRequired().HasColumnName("is_optional");
+
 
             builder.HasOne(x => x.Routine)
                    .WithMany(r => r.RoutineExercises)

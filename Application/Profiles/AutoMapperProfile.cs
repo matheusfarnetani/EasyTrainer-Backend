@@ -10,6 +10,8 @@ using Application.DTOs.Hashtag;
 using Application.DTOs.Workout;
 using Application.DTOs.Routine;
 using Application.DTOs.Exercise;
+using Application.DTOs.RoutineHasExercise;
+using Domain.Entities.Relations;
 
 namespace Application.Profiles
 {
@@ -85,6 +87,8 @@ namespace Application.Profiles
 
             CreateMap<CreateExerciseInputDTO, Exercise>();
             CreateMap<UpdateExerciseInputDTO, Exercise>();
+
+            CreateMap<RoutineHasExercise, RoutineHasExerciseOutputDTO>();
         }
     }
 }

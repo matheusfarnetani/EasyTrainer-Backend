@@ -12,31 +12,20 @@ using FluentValidation;
 
 namespace Application.Services.Implementations
 {
-    public class UserService : GenericService<User, CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO>, IUserService
+    public class UserService(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IValidator<CreateUserInputDTO> createValidator,
+        IValidator<UpdateUserInputDTO> updateValidator,
+        IValidator<IdInputDTO> idValidator,
+        IValidator<EmailInputDTO> emailValidator) : GenericService<User, CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO>(unitOfWork, mapper), IUserService
     {
-        private readonly IValidator<CreateUserInputDTO> _createValidator;
-        private readonly IValidator<UpdateUserInputDTO> _updateValidator;
-        private readonly IValidator<IdInputDTO> _idValidator;
-        private readonly IValidator<EmailInputDTO> _emailValidator;
-        private new readonly IMapper _mapper;
-        private new readonly IUnitOfWork _unitOfWork;
-
-        public UserService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IValidator<CreateUserInputDTO> createValidator,
-            IValidator<UpdateUserInputDTO> updateValidator,
-            IValidator<IdInputDTO> idValidator,
-            IValidator<EmailInputDTO> emailValidator)
-            : base(unitOfWork, mapper)
-        {
-            _mapper = mapper;
-            _unitOfWork = unitOfWork;
-            _createValidator = createValidator;
-            _updateValidator = updateValidator;
-            _idValidator = idValidator;
-            _emailValidator = emailValidator;
-        }
+        private readonly IValidator<CreateUserInputDTO> _createValidator = createValidator;
+        private readonly IValidator<UpdateUserInputDTO> _updateValidator = updateValidator;
+        private readonly IValidator<IdInputDTO> _idValidator = idValidator;
+        private readonly IValidator<EmailInputDTO> _emailValidator = emailValidator;
+        private new readonly IMapper _mapper = mapper;
+        private new readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         public override async Task<ServiceResponseDTO<UserOutputDTO>> CreateAsync(CreateUserInputDTO dto)
         {

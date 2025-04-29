@@ -12,32 +12,21 @@ using FluentValidation;
 
 namespace Application.Services.Implementations
 {
-    public class InstructorService : GenericService<Instructor, CreateInstructorInputDTO, UpdateInstructorInputDTO, InstructorOutputDTO>, IInstructorService
+    public class InstructorService(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IValidator<CreateInstructorInputDTO> createValidator,
+        IValidator<UpdateInstructorInputDTO> updateValidator,
+        IValidator<IdInputDTO> idValidator,
+        IValidator<EmailInputDTO> emailValidator) : GenericService<Instructor, CreateInstructorInputDTO, UpdateInstructorInputDTO, InstructorOutputDTO>(unitOfWork, mapper), IInstructorService
     {
-        private new readonly IUnitOfWork _unitOfWork;
-        private new readonly IMapper _mapper;
+        private new readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private new readonly IMapper _mapper = mapper;
 
-        private readonly IValidator<CreateInstructorInputDTO> _createValidator;
-        private readonly IValidator<UpdateInstructorInputDTO> _updateValidator;
-        private readonly IValidator<IdInputDTO> _idValidator;
-        private readonly IValidator<EmailInputDTO> _emailValidator;
-
-        public InstructorService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IValidator<CreateInstructorInputDTO> createValidator,
-            IValidator<UpdateInstructorInputDTO> updateValidator,
-            IValidator<IdInputDTO> idValidator,
-            IValidator<EmailInputDTO> emailValidator)
-            : base(unitOfWork, mapper)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _createValidator = createValidator;
-            _updateValidator = updateValidator;
-            _idValidator = idValidator;
-            _emailValidator = emailValidator;
-        }
+        private readonly IValidator<CreateInstructorInputDTO> _createValidator = createValidator;
+        private readonly IValidator<UpdateInstructorInputDTO> _updateValidator = updateValidator;
+        private readonly IValidator<IdInputDTO> _idValidator = idValidator;
+        private readonly IValidator<EmailInputDTO> _emailValidator = emailValidator;
 
         // General
         public override async Task<ServiceResponseDTO<InstructorOutputDTO>> CreateAsync(CreateInstructorInputDTO dto)

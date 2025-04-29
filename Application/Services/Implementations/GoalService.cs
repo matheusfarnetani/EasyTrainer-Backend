@@ -12,32 +12,21 @@ using FluentValidation;
 
 namespace Application.Services.Implementations
 {
-    public class GoalService : GenericService<Goal, CreateGoalInputDTO, UpdateGoalInputDTO, GoalOutputDTO>, IGoalService
+    public class GoalService(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IValidator<CreateGoalInputDTO> createValidator,
+        IValidator<UpdateGoalInputDTO> updateValidator,
+        IValidator<IdInputDTO> goalIdValidator,
+        IValidator<IdInputDTO> instructorIdValidator) : GenericService<Goal, CreateGoalInputDTO, UpdateGoalInputDTO, GoalOutputDTO>(unitOfWork, mapper), IGoalService
     {
-        private new readonly IUnitOfWork _unitOfWork;
-        private new readonly IMapper _mapper;
+        private new readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private new readonly IMapper _mapper = mapper;
 
-        private readonly IValidator<CreateGoalInputDTO> _createValidator;
-        private readonly IValidator<UpdateGoalInputDTO> _updateValidator;
-        private readonly IValidator<IdInputDTO> _goalIdValidator;
-        private readonly IValidator<IdInputDTO> _instructorIdValidator;
-
-        public GoalService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IValidator<CreateGoalInputDTO> createValidator,
-            IValidator<UpdateGoalInputDTO> updateValidator,
-            IValidator<IdInputDTO> goalIdValidator,
-            IValidator<IdInputDTO> instructorIdValidator)
-            : base(unitOfWork, mapper)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _createValidator = createValidator;
-            _updateValidator = updateValidator;
-            _goalIdValidator = goalIdValidator;
-            _instructorIdValidator = instructorIdValidator;
-        }
+        private readonly IValidator<CreateGoalInputDTO> _createValidator = createValidator;
+        private readonly IValidator<UpdateGoalInputDTO> _updateValidator = updateValidator;
+        private readonly IValidator<IdInputDTO> _goalIdValidator = goalIdValidator;
+        private readonly IValidator<IdInputDTO> _instructorIdValidator = instructorIdValidator;
 
         // General
         public override async Task<ServiceResponseDTO<GoalOutputDTO>> CreateAsync(CreateGoalInputDTO dto)

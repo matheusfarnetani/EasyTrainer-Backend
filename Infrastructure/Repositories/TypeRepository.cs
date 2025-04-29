@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class TypeRepository : GenericRepository<TrainingType>, ITypeRepository
+    public class TypeRepository(AppDbContext context) : GenericRepository<TrainingType>(context), ITypeRepository
     {
-        private readonly AppDbContext _context;
-
-        public TypeRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public async Task<IEnumerable<TrainingType>> GetTypesByWorkoutAsync(int workoutId)
         {

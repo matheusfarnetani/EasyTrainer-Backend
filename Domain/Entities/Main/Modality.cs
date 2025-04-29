@@ -12,8 +12,8 @@ namespace Domain.Entities.Main
         public string Description { get; set; } = string.Empty;
 
         // Navigation Properties
-        public ICollection<WorkoutHasModality> WorkoutModalities { get; set; } = new List<WorkoutHasModality>();
-        public ICollection<RoutineHasModality> RoutineModalities { get; set; } = new List<RoutineHasModality>();
-        public ICollection<ExerciseHasModality> ExerciseModalities { get; set; } = new List<ExerciseHasModality>();
+        public ICollection<WorkoutHasModality> WorkoutModalities { get; set; } = [];
+        public ICollection<RoutineHasModality> RoutineModalities { get; set; } = [];
+        public ICollection<ExerciseHasModality> ExerciseModalities { get; set; } = [];
     }
 }

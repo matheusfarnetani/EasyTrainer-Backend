@@ -6,20 +6,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class WorkoutRepository : GenericRepository<Workout>, IWorkoutRepository
+    public class WorkoutRepository(AppDbContext context) : GenericRepository<Workout>(context), IWorkoutRepository
     {
-        private readonly AppDbContext _context;
-
-        public WorkoutRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public new async Task<Workout?> GetByIdAsync(int id)
         {
             return await _context.Workouts
                 .Include(w => w.Instructor)
                 .Include(w => w.Level)
+                .Include(w => w.WorkoutGoals)
+                .Include(w => w.WorkoutTypes)
+                .Include(w => w.WorkoutModalities)
+                .Include(w => w.WorkoutHashtags)
+                .Include(w => w.WorkoutRoutines)
+                .Include(w => w.WorkoutExercises)
+                .Include(w => w.WorkoutUsers)
                 .FirstOrDefaultAsync(w => w.Id == id);
         }
 
@@ -228,6 +230,13 @@ namespace Infrastructure.Repositories
         {
             return await _context.Workouts
                 .Where(w => w.InstructorId == instructorId)
+                .Include(w => w.WorkoutGoals)
+                .Include(w => w.WorkoutTypes)
+                .Include(w => w.WorkoutModalities)
+                .Include(w => w.WorkoutHashtags)
+                .Include(w => w.WorkoutExercises)
+                .Include(w => w.WorkoutRoutines)
+                .Include(w => w.WorkoutUsers)
                 .ToListAsync();
         }
 
@@ -235,6 +244,9 @@ namespace Infrastructure.Repositories
         {
             var query = _context.Workouts
                 .Include(w => w.WorkoutGoals)
+                .Include(w => w.WorkoutTypes)
+                .Include(w => w.WorkoutModalities)
+                .Include(w => w.WorkoutHashtags)
                 .AsQueryable();
 
             query = query.Where(w => w.WorkoutGoals.Any(g => g.GoalId == goalId));
@@ -250,7 +262,12 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Workout>> GetWorkoutsByLevelIdAsync(int levelId, int? instructorId = null, int? userId = null)
         {
-            var query = _context.Workouts.AsQueryable();
+            var query = _context.Workouts
+                .Include(w => w.WorkoutGoals)
+                .Include(w => w.WorkoutTypes)
+                .Include(w => w.WorkoutModalities)
+                .Include(w => w.WorkoutHashtags)
+                .AsQueryable();
 
             query = query.Where(w => w.LevelId == levelId);
 
@@ -267,6 +284,9 @@ namespace Infrastructure.Repositories
         {
             var query = _context.Workouts
                 .Include(w => w.WorkoutTypes)
+                .Include(w => w.WorkoutGoals)
+                .Include(w => w.WorkoutModalities)
+                .Include(w => w.WorkoutHashtags)
                 .AsQueryable();
 
             query = query.Where(w => w.WorkoutTypes.Any(t => t.TypeId == typeId));
@@ -284,6 +304,9 @@ namespace Infrastructure.Repositories
         {
             var query = _context.Workouts
                 .Include(w => w.WorkoutModalities)
+                .Include(w => w.WorkoutGoals)
+                .Include(w => w.WorkoutTypes)
+                .Include(w => w.WorkoutHashtags)
                 .AsQueryable();
 
             query = query.Where(w => w.WorkoutModalities.Any(m => m.ModalityId == modalityId));
@@ -301,6 +324,9 @@ namespace Infrastructure.Repositories
         {
             var query = _context.Workouts
                 .Include(w => w.WorkoutHashtags)
+                .Include(w => w.WorkoutGoals)
+                .Include(w => w.WorkoutTypes)
+                .Include(w => w.WorkoutModalities)
                 .AsQueryable();
 
             query = query.Where(w => w.WorkoutHashtags.Any(h => h.HashtagId == hashtagId));

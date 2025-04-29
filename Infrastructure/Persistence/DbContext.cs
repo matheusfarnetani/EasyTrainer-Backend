@@ -6,10 +6,8 @@ using System.Reflection;
 
 namespace Infrastructure.Persistence
 {
-    public class AppDbContext : DbContext, IAppDbContext
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IAppDbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
         public DbSet<User> Users { get; set; }
         public DbSet<Instructor> Instructors { get; set; }
         public DbSet<Goal> Goals { get; set; }

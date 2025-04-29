@@ -30,5 +30,6 @@ namespace Domain.Infrastructure.Persistence
         Task<TResult> BeginAndCommitAsync<TResult>(int userId, Func<Task<TResult>> operation);
         Task BeginAndCommitAsync(int userId, Func<Task> operation);
         bool HasPendingChanges();
+        new void Dispose();
     }
 }

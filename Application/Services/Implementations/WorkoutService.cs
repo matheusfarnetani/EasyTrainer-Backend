@@ -13,56 +13,37 @@ using Application.Services.Interfaces;
 
 namespace Application.Services.Implementations
 {
-    public class WorkoutService : GenericInstructorOwnedService<Workout, CreateWorkoutInputDTO, UpdateWorkoutInputDTO, WorkoutOutputDTO>, IWorkoutService
+    public class WorkoutService(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IValidator<CreateWorkoutInputDTO> createValidator,
+        IValidator<UpdateWorkoutInputDTO> updateValidator,
+        IValidator<IdInputDTO> idValidator,
+        IValidator<IdInputDTO> levelIdValidator,
+        IValidator<IdInputDTO> workoutIdValidator,
+        IValidator<IdInputDTO> instructorIdValidator,
+        IValidator<IdInputDTO> goalIdValidator,
+        IValidator<IdInputDTO> typeIdValidator,
+        IValidator<IdInputDTO> modalityIdValidator,
+        IValidator<IdInputDTO> hashtagIdValidator,
+        IValidator<IdInputDTO> routineIdValidator,
+        IValidator<IdInputDTO> exerciseIdValidator) : GenericInstructorOwnedService<Workout, CreateWorkoutInputDTO, UpdateWorkoutInputDTO, WorkoutOutputDTO>(unitOfWork, mapper), IWorkoutService
     {
-        private new readonly IUnitOfWork _unitOfWork;
-        private new readonly IMapper _mapper;
+        private new readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private new readonly IMapper _mapper = mapper;
 
-        private readonly IValidator<CreateWorkoutInputDTO> _createValidator;
-        private readonly IValidator<UpdateWorkoutInputDTO> _updateValidator;
-        private readonly IValidator<IdInputDTO> _idValidator;
-        private readonly IValidator<IdInputDTO> _levelIdValidator;
-        private readonly IValidator<IdInputDTO> _workoutIdValidator;
-        private readonly IValidator<IdInputDTO> _instructorIdValidator;
-        private readonly IValidator<IdInputDTO> _goalIdValidator;
-        private readonly IValidator<IdInputDTO> _typeIdValidator;
-        private readonly IValidator<IdInputDTO> _modalityIdValidator;
-        private readonly IValidator<IdInputDTO> _hashtagIdValidator;
-        private readonly IValidator<IdInputDTO> _routineIdValidator;
-        private readonly IValidator<IdInputDTO> _exerciseIdValidator;
-
-        public WorkoutService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IValidator<CreateWorkoutInputDTO> createValidator,
-            IValidator<UpdateWorkoutInputDTO> updateValidator,
-            IValidator<IdInputDTO> idValidator,
-            IValidator<IdInputDTO> levelIdValidator,
-            IValidator<IdInputDTO> workoutIdValidator,
-            IValidator<IdInputDTO> instructorIdValidator,
-            IValidator<IdInputDTO> goalIdValidator,
-            IValidator<IdInputDTO> typeIdValidator,
-            IValidator<IdInputDTO> modalityIdValidator,
-            IValidator<IdInputDTO> hashtagIdValidator,
-            IValidator<IdInputDTO> routineIdValidator,
-            IValidator<IdInputDTO> exerciseIdValidator)
-            : base(unitOfWork, mapper)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _createValidator = createValidator;
-            _updateValidator = updateValidator;
-            _idValidator = idValidator;
-            _levelIdValidator = levelIdValidator;
-            _workoutIdValidator = workoutIdValidator;
-            _instructorIdValidator = instructorIdValidator;
-            _goalIdValidator = goalIdValidator;
-            _typeIdValidator = typeIdValidator;
-            _modalityIdValidator = modalityIdValidator;
-            _hashtagIdValidator = hashtagIdValidator;
-            _routineIdValidator = routineIdValidator;
-            _exerciseIdValidator = exerciseIdValidator;
-        }
+        private readonly IValidator<CreateWorkoutInputDTO> _createValidator = createValidator;
+        private readonly IValidator<UpdateWorkoutInputDTO> _updateValidator = updateValidator;
+        private readonly IValidator<IdInputDTO> _idValidator = idValidator;
+        private readonly IValidator<IdInputDTO> _levelIdValidator = levelIdValidator;
+        private readonly IValidator<IdInputDTO> _workoutIdValidator = workoutIdValidator;
+        private readonly IValidator<IdInputDTO> _instructorIdValidator = instructorIdValidator;
+        private readonly IValidator<IdInputDTO> _goalIdValidator = goalIdValidator;
+        private readonly IValidator<IdInputDTO> _typeIdValidator = typeIdValidator;
+        private readonly IValidator<IdInputDTO> _modalityIdValidator = modalityIdValidator;
+        private readonly IValidator<IdInputDTO> _hashtagIdValidator = hashtagIdValidator;
+        private readonly IValidator<IdInputDTO> _routineIdValidator = routineIdValidator;
+        private readonly IValidator<IdInputDTO> _exerciseIdValidator = exerciseIdValidator;
 
         // Ownership Validation
         protected override bool CheckInstructorOwnership(Workout entity, int instructorId)
@@ -78,6 +59,12 @@ namespace Application.Services.Implementations
 
             entity.InstructorId = instructorId;
         }
+        protected override async Task<IEnumerable<Workout>> GetEntitiesWithIncludes(int instructorId)
+        {
+            await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
+            return await _unitOfWork.Workouts.GetWorkoutsByInstructorIdAsync(instructorId);
+        }
+
 
         // Ensure the instructor owns the workout
         private void EnsureInstructorOwnership(Workout entity, int instructorId)
@@ -91,10 +78,7 @@ namespace Application.Services.Implementations
             await _workoutIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = workoutId });
             await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var entity = await _unitOfWork.Workouts.GetByIdAsync(workoutId);
-            if (entity == null)
-                throw new EntityNotFoundException(nameof(Workout), workoutId);
-
+            var entity = await _unitOfWork.Workouts.GetByIdAsync(workoutId) ?? throw new EntityNotFoundException(nameof(Workout), workoutId);
             EnsureInstructorOwnership(entity, instructorId);
 
             return entity;

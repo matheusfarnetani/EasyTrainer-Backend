@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class LevelRepository : GenericRepository<Level>, ILevelRepository
+    public class LevelRepository(AppDbContext context) : GenericRepository<Level>(context), ILevelRepository
     {
-        private readonly AppDbContext _context;
-
-        public LevelRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public async Task<Level?> GetLevelByUserAsync(int userId)
         {

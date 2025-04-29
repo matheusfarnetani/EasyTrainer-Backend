@@ -6,54 +6,36 @@ using Domain.Infrastructure.Persistence;
 
 namespace Infrastructure.Persistence
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork(
+        AppDbContext context,
+        ILogger<UnitOfWork> logger,
+        IUserRepository users,
+        IInstructorRepository instructors,
+        IGoalRepository goals,
+        ILevelRepository levels,
+        ITypeRepository types,
+        IModalityRepository modalities,
+        IHashtagRepository hashtags,
+        IWorkoutRepository workouts,
+        IRoutineRepository routines,
+        IExerciseRepository exercises,
+        IRoutineHasExerciseRepository routineHasExercises) : IUnitOfWork
     {
-        private readonly AppDbContext _context;
-        private readonly ILogger<UnitOfWork> _logger;
+        private readonly AppDbContext _context = context;
+        private readonly ILogger<UnitOfWork> _logger = logger;
         private IDbContextTransaction? _currentTransaction;
 
-        public IUserRepository Users { get; }
-        public IInstructorRepository Instructors { get; }
-        public IGoalRepository Goals { get; }
-        public ILevelRepository Levels { get; }
-        public ITypeRepository Types { get; }
-        public IModalityRepository Modalities { get; }
-        public IHashtagRepository Hashtags { get; }
-        public IWorkoutRepository Workouts { get; }
-        public IRoutineRepository Routines { get; }
-        public IExerciseRepository Exercises { get; }
-        public IRoutineHasExerciseRepository RoutineHasExercises { get; }
-
-        public UnitOfWork(
-            AppDbContext context,
-            ILogger<UnitOfWork> logger,
-            IUserRepository users,
-            IInstructorRepository instructors,
-            IGoalRepository goals,
-            ILevelRepository levels,
-            ITypeRepository types,
-            IModalityRepository modalities,
-            IHashtagRepository hashtags,
-            IWorkoutRepository workouts,
-            IRoutineRepository routines,
-            IExerciseRepository exercises,
-            IRoutineHasExerciseRepository routineHasExercises)
-        {
-            _context = context;
-            _logger = logger;
-
-            Users = users;
-            Instructors = instructors;
-            Goals = goals;
-            Levels = levels;
-            Types = types;
-            Modalities = modalities;
-            Hashtags = hashtags;
-            Workouts = workouts;
-            Routines = routines;
-            Exercises = exercises;
-            RoutineHasExercises = routineHasExercises;
-        }
+        public IUserRepository Users { get; } = users;
+        public IInstructorRepository Instructors { get; } = instructors;
+        public IGoalRepository Goals { get; } = goals;
+        public ILevelRepository Levels { get; } = levels;
+        public ITypeRepository Types { get; } = types;
+        public IModalityRepository Modalities { get; } = modalities;
+        public IHashtagRepository Hashtags { get; } = hashtags;
+        public IWorkoutRepository Workouts { get; } = workouts;
+        public IRoutineRepository Routines { get; } = routines;
+        public IExerciseRepository Exercises { get; } = exercises;
+        public IRoutineHasExerciseRepository RoutineHasExercises { get; } = routineHasExercises;
 
         public async Task BeginTransactionAsync(int userId)
         {

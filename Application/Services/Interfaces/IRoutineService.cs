@@ -2,6 +2,7 @@
 using Application.DTOs.Exercise;
 using Application.DTOs.Instructor;
 using Application.DTOs.Routine;
+using Application.DTOs.Workout;
 
 namespace Application.Services.Interfaces
 {
@@ -25,6 +26,7 @@ namespace Application.Services.Interfaces
 
         // Data retrieval
         Task<ServiceResponseDTO<InstructorOutputDTO>> GetInstructorByRoutineIdAsync(int routineId);
+        Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination);
         Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination);
 
         Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetByInstructorIdAsync(int instructorId, PaginationRequestDTO pagination);

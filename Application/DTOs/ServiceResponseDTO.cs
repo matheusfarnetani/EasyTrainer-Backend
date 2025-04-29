@@ -1,30 +1,33 @@
-﻿public class ServiceResponseDTO<T>
+﻿namespace Application.DTOs
 {
-    public bool Success { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public T? Data { get; set; }
-    public List<string>? Errors { get; set; }
-    public int? StatusCode { get; set; }
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-
-    public static ServiceResponseDTO<T> CreateSuccess(T data, string message = "Success")
+    public class ServiceResponseDTO<T>
     {
-        return new ServiceResponseDTO<T>
-        {
-            Success = true,
-            Data = data,
-            Message = message
-        };
-    }
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public T? Data { get; set; }
+        public List<string>? Errors { get; set; }
+        public int? StatusCode { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-    public static ServiceResponseDTO<T> CreateFailure(string message, List<string>? errors = null, int? statusCode = null)
-    {
-        return new ServiceResponseDTO<T>
+        public static ServiceResponseDTO<T> CreateSuccess(T data, string message = "Success")
         {
-            Success = false,
-            Message = message,
-            Errors = errors,
-            StatusCode = statusCode
-        };
+            return new ServiceResponseDTO<T>
+            {
+                Success = true,
+                Data = data,
+                Message = message
+            };
+        }
+
+        public static ServiceResponseDTO<T> CreateFailure(string message, List<string>? errors = null, int? statusCode = null)
+        {
+            return new ServiceResponseDTO<T>
+            {
+                Success = false,
+                Message = message,
+                Errors = errors,
+                StatusCode = statusCode
+            };
+        }
     }
 }

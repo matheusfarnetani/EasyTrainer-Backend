@@ -2,11 +2,7 @@
 
 namespace Application.Exceptions
 {
-    public class UnauthorizedOperationException : Exception
+    public class UnauthorizedOperationException(string message) : Exception(message)
     {
-        public UnauthorizedOperationException(string message)
-            : base(message)
-        {
-        }
     }
 }

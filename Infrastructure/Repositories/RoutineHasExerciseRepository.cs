@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class RoutineHasExerciseRepository : IRoutineHasExerciseRepository
+    public class RoutineHasExerciseRepository(AppDbContext context) : IRoutineHasExerciseRepository
     {
-        private readonly AppDbContext _context;
-
-        public RoutineHasExerciseRepository(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public async Task AddAsync(RoutineHasExercise entity)
         {

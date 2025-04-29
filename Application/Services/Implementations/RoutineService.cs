@@ -11,56 +11,39 @@ using Domain.Infrastructure.Persistence;
 using FluentValidation;
 using Application.Validators.Level;
 using Application.Validators.Workout;
+using Application.DTOs.Workout;
 
 namespace Application.Services.Implementations
 {
-    public class RoutineService : GenericInstructorOwnedService<Routine, CreateRoutineInputDTO, UpdateRoutineInputDTO, RoutineOutputDTO>, IRoutineService
+    public class RoutineService(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IValidator<CreateRoutineInputDTO> createValidator,
+        IValidator<UpdateRoutineInputDTO> updateValidator,
+        IValidator<IdInputDTO> routineIdValidator,
+        IValidator<IdInputDTO> instructorIdValidator,
+        IValidator<IdInputDTO> goalIdValidator,
+        IValidator<IdInputDTO> typeIdValidator,
+        IValidator<IdInputDTO> modalityIdValidator,
+        IValidator<IdInputDTO> hashtagIdValidator,
+        IValidator<IdInputDTO> exerciseIdValidator,
+        IValidator<IdInputDTO> levelIdValidator,
+        IValidator<IdInputDTO> workoutIdValidator) : GenericInstructorOwnedService<Routine, CreateRoutineInputDTO, UpdateRoutineInputDTO, RoutineOutputDTO>(unitOfWork, mapper), IRoutineService
     {
-        private new readonly IUnitOfWork _unitOfWork;
-        private new readonly IMapper _mapper;
+        private new readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private new readonly IMapper _mapper = mapper;
 
-        private readonly IValidator<CreateRoutineInputDTO> _createValidator;
-        private readonly IValidator<UpdateRoutineInputDTO> _updateValidator;
-        private readonly IValidator<IdInputDTO> _routineIdValidator;
-        private readonly IValidator<IdInputDTO> _instructorIdValidator;
-        private readonly IValidator<IdInputDTO> _goalIdValidator;
-        private readonly IValidator<IdInputDTO> _typeIdValidator;
-        private readonly IValidator<IdInputDTO> _modalityIdValidator;
-        private readonly IValidator<IdInputDTO> _hashtagIdValidator;
-        private readonly IValidator<IdInputDTO> _exerciseIdValidator;
-        private readonly IValidator<IdInputDTO> _levelIdValidator;
-        private readonly IValidator<IdInputDTO> _workoutIdValidator;
-
-        public RoutineService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IValidator<CreateRoutineInputDTO> createValidator,
-            IValidator<UpdateRoutineInputDTO> updateValidator,
-            IValidator<IdInputDTO> routineIdValidator,
-            IValidator<IdInputDTO> instructorIdValidator,
-            IValidator<IdInputDTO> goalIdValidator,
-            IValidator<IdInputDTO> typeIdValidator,
-            IValidator<IdInputDTO> modalityIdValidator,
-            IValidator<IdInputDTO> hashtagIdValidator,
-            IValidator<IdInputDTO> exerciseIdValidator,
-            IValidator<IdInputDTO> levelIdValidator,
-            IValidator<IdInputDTO> workoutIdValidator)
-            : base(unitOfWork, mapper)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _createValidator = createValidator;
-            _updateValidator = updateValidator;
-            _routineIdValidator = routineIdValidator;
-            _instructorIdValidator = instructorIdValidator;
-            _goalIdValidator = goalIdValidator;
-            _typeIdValidator = typeIdValidator;
-            _modalityIdValidator = modalityIdValidator;
-            _hashtagIdValidator = hashtagIdValidator;
-            _exerciseIdValidator = exerciseIdValidator;
-            _levelIdValidator = levelIdValidator;
-            _workoutIdValidator = workoutIdValidator;
-        }
+        private readonly IValidator<CreateRoutineInputDTO> _createValidator = createValidator;
+        private readonly IValidator<UpdateRoutineInputDTO> _updateValidator = updateValidator;
+        private readonly IValidator<IdInputDTO> _routineIdValidator = routineIdValidator;
+        private readonly IValidator<IdInputDTO> _instructorIdValidator = instructorIdValidator;
+        private readonly IValidator<IdInputDTO> _goalIdValidator = goalIdValidator;
+        private readonly IValidator<IdInputDTO> _typeIdValidator = typeIdValidator;
+        private readonly IValidator<IdInputDTO> _modalityIdValidator = modalityIdValidator;
+        private readonly IValidator<IdInputDTO> _hashtagIdValidator = hashtagIdValidator;
+        private readonly IValidator<IdInputDTO> _exerciseIdValidator = exerciseIdValidator;
+        private readonly IValidator<IdInputDTO> _levelIdValidator = levelIdValidator;
+        private readonly IValidator<IdInputDTO> _workoutIdValidator = workoutIdValidator;
 
         protected override void SetInstructorId(Routine entity, int instructorId)
         {
@@ -85,12 +68,19 @@ namespace Application.Services.Implementations
             await _routineIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = routineId });
             await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
-            var routine = await _unitOfWork.Routines.GetByIdAsync(routineId);
-            if (routine is null)
-                throw new EntityNotFoundException(nameof(Routine), routineId);
-
+            var routine = await _unitOfWork.Routines.GetByIdAsync(routineId) ?? throw new EntityNotFoundException(nameof(Routine), routineId);
             EnsureInstructorOwnership(routine, instructorId);
             return routine;
+        }
+
+        public override async Task<ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>> GetAllAsync(int instructorId, PaginationRequestDTO pagination)
+        {
+            await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
+
+            var entities = await GetEntitiesWithIncludes(instructorId);
+            var result = PaginationHelper.Paginate<Routine, RoutineOutputDTO>(entities, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<RoutineOutputDTO>>.CreateSuccess(result);
         }
 
         public override async Task<ServiceResponseDTO<RoutineOutputDTO>> CreateAsync(CreateRoutineInputDTO dto, int instructorId)
@@ -127,7 +117,7 @@ namespace Application.Services.Implementations
 
         public override async Task<ServiceResponseDTO<bool>> DeleteAsync(int id, int instructorId)
         {
-            var entity = await GetOwnedRoutineOrThrowAsync(id, instructorId);
+            await GetOwnedRoutineOrThrowAsync(id, instructorId);
             await _unitOfWork.Routines.DeleteByIdAsync(id);
             await _unitOfWork.SaveAndCommitAsync();
 
@@ -234,6 +224,17 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<InstructorOutputDTO>.CreateFailure("Instructor not found for this routine.");
 
             return ServiceResponseDTO<InstructorOutputDTO>.CreateSuccess(_mapper.Map<InstructorOutputDTO>(instructor));
+        }
+
+        public async Task<ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>> GetWorkoutsByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination)
+        {
+            await _workoutIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = routineId });
+            await _instructorIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
+
+            var workouts = await _unitOfWork.Workouts.GetWorkoutsByRoutineIdAsync(routineId, instructorId);
+            var result = PaginationHelper.Paginate<Workout, WorkoutOutputDTO>(workouts, pagination, _mapper);
+
+            return ServiceResponseDTO<PaginationResponseDTO<WorkoutOutputDTO>>.CreateSuccess(result);
         }
 
         public async Task<ServiceResponseDTO<PaginationResponseDTO<ExerciseOutputDTO>>> GetExercisesByRoutineIdAsync(int routineId, int instructorId, PaginationRequestDTO pagination)

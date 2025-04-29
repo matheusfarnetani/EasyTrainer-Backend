@@ -4,16 +4,10 @@ using Domain.Infrastructure.RepositoriesInterfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T>(AppDbContext databaseContext) : IGenericRepository<T> where T : class
     {
-        private readonly AppDbContext _databaseContext;
-        private readonly DbSet<T> _dbSet;
-
-        public GenericRepository(AppDbContext databaseContext)
-        {
-            _databaseContext = databaseContext;
-            _dbSet = databaseContext.Set<T>();
-        }
+        private readonly AppDbContext _databaseContext = databaseContext;
+        private readonly DbSet<T> _dbSet = databaseContext.Set<T>();
 
         public async Task AddAsync(T entity)
         {

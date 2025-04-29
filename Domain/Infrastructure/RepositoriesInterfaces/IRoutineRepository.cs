@@ -4,6 +4,7 @@ namespace Domain.Infrastructure.RepositoriesInterfaces
 {
     public interface IRoutineRepository : IGenericRepository<Routine>
     {
+        Task<IEnumerable<Routine>> GetAllWithIncludesByInstructorIdAsync(int instructorId);
         Task<IEnumerable<Routine>> GetRoutinesByInstructorIdAsync(int instructorId);
         Task<IEnumerable<Routine>> GetRoutinesByGoalIdAsync(int goalId, int instructorId);
         Task<IEnumerable<Routine>> GetRoutinesByLevelIdAsync(int levelId, int instructorId);

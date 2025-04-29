@@ -25,6 +25,7 @@ using Application.Validators.Hashtag;
 using Application.DTOs.Exercise;
 using Application.Validators.Exercise;
 using Application.Validators;
+using Application.DTOs.RoutineHasExercise;
 
 namespace Application
 {
@@ -47,7 +48,7 @@ namespace Application
             services.AddScoped<IWorkoutService, WorkoutService>();
             services.AddScoped<IRoutineService, RoutineService>();
             services.AddScoped<IExerciseService, ExerciseService>();
-            services.AddScoped<RoutineHasExerciseService, RoutineHasExerciseService>();
+            services.AddScoped<IRoutineHasExerciseService, RoutineHasExerciseService>();
 
             // Validators
             services.AddScoped<IValidator<CreateUserInputDTO>, CreateUserValidator>();
