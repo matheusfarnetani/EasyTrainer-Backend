@@ -19,9 +19,9 @@ namespace Domain.Entities.Main
         public int Age => DateTime.Today.Year - Birthday.Year - (Birthday.Date > DateTime.Today.AddYears(-(DateTime.Today.Year - Birthday.Year)) ? 1 : 0);
 
         // Navigation Properties
-        public ICollection<UserHasInstructor> UserInstructors { get; set; } = new List<UserHasInstructor>();
-        public ICollection<Workout> Workouts { get; set; } = new List<Workout>();
-        public ICollection<Routine> Routines { get; set; } = new List<Routine>();
-        public ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
+        public ICollection<UserHasInstructor> UserInstructors { get; set; } = [];
+        public ICollection<Workout> Workouts { get; set; } = [];
+        public ICollection<Routine> Routines { get; set; } = [];
+        public ICollection<Exercise> Exercises { get; set; } = [];
     }
 }

@@ -56,17 +56,33 @@ namespace Application.Profiles
             CreateMap<UpdateHashtagInputDTO, Hashtag>();
 
             // Workout mappings
-            CreateMap<Workout, WorkoutOutputDTO>();
+            CreateMap<Workout, WorkoutOutputDTO>()
+                .ForMember(dest => dest.GoalIds, opt => opt.MapFrom(src => src.WorkoutGoals.Select(g => g.GoalId)))
+                .ForMember(dest => dest.TypeIds, opt => opt.MapFrom(src => src.WorkoutTypes.Select(t => t.TypeId)))
+                .ForMember(dest => dest.ModalityIds, opt => opt.MapFrom(src => src.WorkoutModalities.Select(m => m.ModalityId)))
+                .ForMember(dest => dest.HashtagIds, opt => opt.MapFrom(src => src.WorkoutHashtags.Select(h => h.HashtagId)));
+
             CreateMap<CreateWorkoutInputDTO, Workout>();
             CreateMap<UpdateWorkoutInputDTO, Workout>();
 
             // Routine mappings
-            CreateMap<Routine, RoutineOutputDTO>();
+            CreateMap<Routine, RoutineOutputDTO>()
+                .ForMember(dest => dest.GoalIds, opt => opt.MapFrom(src => src.RoutineGoals.Select(g => g.GoalId)))
+                .ForMember(dest => dest.TypeIds, opt => opt.MapFrom(src => src.RoutineTypes.Select(t => t.TypeId)))
+                .ForMember(dest => dest.ModalityIds, opt => opt.MapFrom(src => src.RoutineModalities.Select(m => m.ModalityId)))
+                .ForMember(dest => dest.HashtagIds, opt => opt.MapFrom(src => src.RoutineHashtags.Select(h => h.HashtagId)));
+
             CreateMap<CreateRoutineInputDTO, Routine>();
             CreateMap<UpdateRoutineInputDTO, Routine>();
 
             // Exercise mappings
-            CreateMap<Exercise, ExerciseOutputDTO>();
+            CreateMap<Exercise, ExerciseOutputDTO>()
+                .ForMember(dest => dest.GoalIds, opt => opt.MapFrom(src => src.ExerciseGoals.Select(g => g.GoalId)))
+                .ForMember(dest => dest.TypeIds, opt => opt.MapFrom(src => src.ExerciseTypes.Select(t => t.TypeId)))
+                .ForMember(dest => dest.ModalityIds, opt => opt.MapFrom(src => src.ExerciseModalities.Select(m => m.ModalityId)))
+                .ForMember(dest => dest.HashtagIds, opt => opt.MapFrom(src => src.ExerciseHashtags.Select(h => h.HashtagId)))
+                .ForMember(dest => dest.VariationIds, opt => opt.MapFrom(src => src.ExerciseVariations.Select(v => v.VariationId)));
+
             CreateMap<CreateExerciseInputDTO, Exercise>();
             CreateMap<UpdateExerciseInputDTO, Exercise>();
         }

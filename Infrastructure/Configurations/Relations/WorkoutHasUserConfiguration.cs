@@ -25,7 +25,7 @@ namespace Infrastructure.Configurations.Relations
                    .HasConstraintName("fk_workouthasuser_workout");
 
             builder.HasOne(x => x.User)
-                   .WithMany(u => u.WorkoutUsers)
+                   .WithMany(u => u.Workouts)
                    .HasForeignKey(x => x.UserId)
                    .OnDelete(DeleteBehavior.Cascade)
                    .HasConstraintName("fk_workouthasuser_user");

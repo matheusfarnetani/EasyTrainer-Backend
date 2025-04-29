@@ -30,13 +30,13 @@ namespace Domain.Entities.Main
         // Navigation Properties
         public Instructor Instructor { get; set; } = null!;
         public Level Level { get; set; } = null!;
-        public ICollection<ExerciseHasType> ExerciseTypes { get; set; } = new List<ExerciseHasType>();
-        public ICollection<ExerciseHasModality> ExerciseModalities { get; set; } = new List<ExerciseHasModality>();
-        public ICollection<ExerciseHasGoal> ExerciseGoals { get; set; } = new List<ExerciseHasGoal>();
-        public ICollection<ExerciseHasHashtag> ExerciseHashtags { get; set; } = new List<ExerciseHasHashtag>();
-        public ICollection<ExerciseHasVariation> ExerciseVariations { get; set; } = new List<ExerciseHasVariation>();
-        public ICollection<RoutineHasExercise> RoutineExercises { get; set; } = new List<RoutineHasExercise>();
-        public ICollection<WorkoutHasExercise> WorkoutExercises { get; set; } = new List<WorkoutHasExercise>();
-        public ICollection<ExerciseHasVariation> IsVariationOf { get; set; } = new List<ExerciseHasVariation>();
+        public ICollection<ExerciseHasType> ExerciseTypes { get; set; } = [];
+        public ICollection<ExerciseHasModality> ExerciseModalities { get; set; } = [];
+        public ICollection<ExerciseHasGoal> ExerciseGoals { get; set; } = [];
+        public ICollection<ExerciseHasHashtag> ExerciseHashtags { get; set; } = [];
+        public ICollection<ExerciseHasVariation> ExerciseVariations { get; set; } = [];
+        public ICollection<RoutineHasExercise> RoutineExercises { get; set; } = [];
+        public ICollection<WorkoutHasExercise> WorkoutExercises { get; set; } = [];
+        public ICollection<ExerciseHasVariation> IsVariationOf { get; set; } = [];
     }
 }

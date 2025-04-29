@@ -29,9 +29,8 @@ namespace Domain.Entities.Main
         public Instructor Instructor { get; set; } = null!;
 
         // Many-to-Many via junction tables
-        public ICollection<UserHasInstructor> UserInstructors { get; set; } = new List<UserHasInstructor>();
-        public ICollection<UserHasGoal> UserGoals { get; set; } = new List<UserHasGoal>();
-        public ICollection<WorkoutHasUser> Workouts { get; set; } = new List<WorkoutHasUser>();
-        public ICollection<WorkoutHasUser> WorkoutUsers { get; set; } = new List<WorkoutHasUser>();
+        public ICollection<UserHasInstructor> UserInstructors { get; set; } = [];
+        public ICollection<UserHasGoal> UserGoals { get; set; } = [];
+        public ICollection<WorkoutHasUser> Workouts { get; set; } = [];
     }
 }

@@ -6,14 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class UserRepository : GenericRepository<User>, IUserRepository
+    public class UserRepository(AppDbContext context) : GenericRepository<User>(context), IUserRepository
     {
-        private readonly AppDbContext _context;
-
-        public UserRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public new async Task<User?> GetByIdAsync(int id)
         {
@@ -32,15 +27,21 @@ namespace Infrastructure.Repositories
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await _context.Users
+                .Include(u => u.Level)
+                .Include(u => u.Instructor)
                 .Include(u => u.UserGoals)
+                    .ThenInclude(g => g.Goal)
                 .Include(u => u.UserInstructors)
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+                    .ThenInclude(i => i.Instructor)
+                .Include(u => u.Workouts)
+                    .ThenInclude(wu => wu.Workout)
+                .FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public async Task<bool> ExistsByEmailAsync(string email)
         {
             return await _context.Users
-                .AnyAsync(u => u.Email.ToLower() == email.ToLower());
+                .AnyAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public async Task<bool> ExistsByIdAsync(int id)
@@ -51,7 +52,7 @@ namespace Infrastructure.Repositories
         public async Task<bool> IsEmailTakenByOtherUserAsync(string email, int currentUserId)
         {
             return await _context.Users
-                .AnyAsync(u => u.Email.ToLower() == email.ToLower() && u.Id != currentUserId);
+                .AnyAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase) && u.Id != currentUserId);
         }
 
         // Instructor
@@ -86,6 +87,14 @@ namespace Infrastructure.Repositories
         {
             return await _context.Users
                 .Where(u => u.UserInstructors.Any(i => i.InstructorId == instructorId))
+                .Include(u => u.Level)
+                .Include(u => u.Instructor)
+                .Include(u => u.UserGoals)
+                    .ThenInclude(g => g.Goal)
+                .Include(u => u.UserInstructors)
+                    .ThenInclude(i => i.Instructor)
+                .Include(u => u.Workouts)
+                    .ThenInclude(wu => wu.Workout)
                 .ToListAsync();
         }
 
@@ -129,6 +138,14 @@ namespace Infrastructure.Repositories
         {
             return await _context.Users
                 .Where(u => u.UserGoals.Any(g => g.GoalId == goalId))
+                .Include(u => u.Level)
+                .Include(u => u.Instructor)
+                .Include(u => u.UserGoals)
+                    .ThenInclude(g => g.Goal)
+                .Include(u => u.UserInstructors)
+                    .ThenInclude(i => i.Instructor)
+                .Include(u => u.Workouts)
+                    .ThenInclude(wu => wu.Workout)
                 .ToListAsync();
         }
 
@@ -163,6 +180,17 @@ namespace Infrastructure.Repositories
             return await _context.WorkoutHasUsers
                 .Where(x => x.UserId == userId)
                 .Include(x => x.Workout)
+                    .ThenInclude(w => w.WorkoutGoals)
+                        .ThenInclude(g => g.Goal)
+                .Include(x => x.Workout)
+                    .ThenInclude(w => w.WorkoutHashtags)
+                        .ThenInclude(h => h.Hashtag)
+                .Include(x => x.Workout)
+                    .ThenInclude(w => w.WorkoutModalities)
+                        .ThenInclude(m => m.Modality)
+                .Include(x => x.Workout)
+                    .ThenInclude(w => w.WorkoutTypes)
+                        .ThenInclude(t => t.Type)
                 .Select(x => x.Workout)
                 .ToListAsync();
         }
@@ -170,7 +198,15 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<User>> GetUsersByWorkoutIdAsync(int workoutId)
         {
             return await _context.Users
-                .Where(u => u.WorkoutUsers.Any(w => w.WorkoutId == workoutId))
+                .Where(u => u.Workouts.Any(w => w.WorkoutId == workoutId))
+                .Include(u => u.Level)
+                .Include(u => u.Instructor)
+                .Include(u => u.UserGoals)
+                    .ThenInclude(g => g.Goal)
+                .Include(u => u.UserInstructors)
+                    .ThenInclude(i => i.Instructor)
+                .Include(u => u.Workouts)
+                    .ThenInclude(wu => wu.Workout)
                 .ToListAsync();
         }
     }
