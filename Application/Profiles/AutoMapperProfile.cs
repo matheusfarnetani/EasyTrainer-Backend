@@ -11,6 +11,7 @@ using Application.DTOs.Workout;
 using Application.DTOs.Routine;
 using Application.DTOs.Exercise;
 using Application.DTOs.RoutineHasExercise;
+using Application.DTOs.Auth;
 using Domain.Entities.Relations;
 
 namespace Application.Profiles
@@ -26,6 +27,8 @@ namespace Application.Profiles
 
             CreateMap<CreateUserInputDTO, User>();
             CreateMap<UpdateUserInputDTO, User>();
+            CreateMap<BaseRegisterDTO, User>()
+                .ForMember(dest => dest.Password, opt => opt.Ignore());
 
             // Instructor mappings
             CreateMap<Instructor, InstructorOutputDTO>();

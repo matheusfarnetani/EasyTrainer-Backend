@@ -35,13 +35,12 @@ namespace Infrastructure.Repositories
                     .ThenInclude(i => i.Instructor)
                 .Include(u => u.Workouts)
                     .ThenInclude(wu => wu.Workout)
-                .FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<bool> ExistsByEmailAsync(string email)
         {
-            return await _context.Users
-                .AnyAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
+            return await _context.Users.AnyAsync(u => u.Email == email);
         }
 
         public async Task<bool> ExistsByIdAsync(int id)

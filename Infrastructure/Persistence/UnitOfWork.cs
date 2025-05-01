@@ -87,35 +87,45 @@ namespace Infrastructure.Persistence
 
         public async Task<TResult> BeginAndCommitAsync<TResult>(int userId, Func<Task<TResult>> operation)
         {
-            await BeginTransactionAsync(userId);
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-            try
+            return await strategy.ExecuteAsync(async () =>
             {
-                var result = await operation();
-                await SaveAndCommitAsync();
-                return result;
-            }
-            catch
-            {
-                await RollbackAsync();
-                throw;
-            }
+                await BeginTransactionAsync(userId);
+
+                try
+                {
+                    var result = await operation();
+                    await SaveAndCommitAsync();
+                    return result;
+                }
+                catch
+                {
+                    await RollbackAsync();
+                    throw;
+                }
+            });
         }
 
         public async Task BeginAndCommitAsync(int userId, Func<Task> operation)
         {
-            await BeginTransactionAsync(userId);
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-            try
+            await strategy.ExecuteAsync(async () =>
             {
-                await operation();
-                await SaveAndCommitAsync();
-            }
-            catch
-            {
-                await RollbackAsync();
-                throw;
-            }
+                await BeginTransactionAsync(userId);
+
+                try
+                {
+                    await operation();
+                    await SaveAndCommitAsync();
+                }
+                catch
+                {
+                    await RollbackAsync();
+                    throw;
+                }
+            });
         }
 
         public bool HasPendingChanges()

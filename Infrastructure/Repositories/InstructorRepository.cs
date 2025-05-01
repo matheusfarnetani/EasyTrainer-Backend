@@ -12,7 +12,7 @@ namespace Infrastructure.Repositories
         public async Task<Instructor?> GetInstructorByEmailAsync(string email)
         {
             return await _context.Instructors
-                .FirstOrDefaultAsync(i => i.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
+                .FirstOrDefaultAsync(i => i.Email == email);
         }
 
         public async Task<IEnumerable<Instructor>> GetInstructorsByUserIdAsync(int userId)
@@ -48,13 +48,13 @@ namespace Infrastructure.Repositories
         public async Task<bool> ExistsByEmailAsync(string email)
         {
             return await _context.Instructors
-                .AnyAsync(i => i.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
+                .AnyAsync(i => i.Email == email);
         }
 
         public async Task<bool> IsEmailTakenByOtherAsync(string email, int currentId)
         {
             return await _context.Instructors
-                .AnyAsync(i => i.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase) && i.Id != currentId);
+                .AnyAsync(i => i.Email == email && i.Id != currentId);
         }
     }
 }

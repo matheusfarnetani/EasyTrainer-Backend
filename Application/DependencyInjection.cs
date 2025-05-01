@@ -25,7 +25,8 @@ using Application.Validators.Hashtag;
 using Application.DTOs.Exercise;
 using Application.Validators.Exercise;
 using Application.Validators;
-using Application.DTOs.RoutineHasExercise;
+using Application.DTOs.Auth;
+using Application.Validators.Auth;
 
 namespace Application
 {
@@ -73,6 +74,8 @@ namespace Application
             services.AddScoped<IValidator<UpdateExerciseInputDTO>, UpdateExerciseValidator>();
             services.AddScoped<IValidator<IdInputDTO>, IdInputValidator>();
             services.AddScoped<IValidator<EmailInputDTO>, EmailInputValidator>();
+            services.AddScoped<IValidator<CreateUserRegisterDTO>, CreateUserRegisterValidator>();
+            services.AddScoped<IValidator<CreateInstructorRegisterDTO>, CreateInstructorRegisterValidator>();
 
             // AutoMapper
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);

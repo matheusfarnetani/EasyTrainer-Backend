@@ -11,8 +11,7 @@ namespace Infrastructure.Persistence
 
         public string GetCurrentConnectionString()
         {
-            var role = _userContext.Role;
-            return GetConnectionString(role);
+            return GetConnectionStringOrDefault("admin");
         }
 
         public string GetConnectionString(string role)
@@ -26,6 +25,17 @@ namespace Infrastructure.Persistence
             };
 
             return connection ?? throw new InvalidOperationException($"Connection string for role '{role}' is not configured.");
+        }
+
+        public string GetConnectionStringOrDefault(string defaultRole)
+        {
+            var role = _userContext.Role;
+            if (string.IsNullOrWhiteSpace(role))
+            {
+                role = defaultRole;
+            }
+
+            return GetConnectionString(role);
         }
     }
 }

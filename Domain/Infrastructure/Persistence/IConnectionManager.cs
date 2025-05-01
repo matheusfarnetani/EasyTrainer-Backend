@@ -4,5 +4,6 @@
     {
         string GetConnectionString(string role);
         string GetCurrentConnectionString();
+        string GetConnectionStringOrDefault(string role);
     }
 }

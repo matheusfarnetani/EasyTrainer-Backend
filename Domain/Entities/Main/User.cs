@@ -14,15 +14,15 @@ namespace Domain.Entities.Main
         public DateTime Birthday { get; set; }
         public float Weight { get; set; }
         public float Height { get; set; }
-        public char Gender { get; set; }
+        public char? Gender { get; set; }
         public string Password { get; set; } = string.Empty;
 
         // Computed Property
         public int Age => DateTime.Today.Year - Birthday.Year - (Birthday.Date > DateTime.Today.AddYears(-(DateTime.Today.Year - Birthday.Year)) ? 1 : 0);
 
         // Foreign Key
-        public int LevelId { get; set; }
-        public int InstructorId { get; set; }
+        public int? LevelId { get; set; }
+        public int? InstructorId { get; set; }
 
         // Navigation
         public Level Level { get; set; } = null!;
