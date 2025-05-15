@@ -3,11 +3,22 @@ using Domain.Entities.Relations;
 using Domain.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using Domain.API.Interfaces;
+using System.Data;
 
 namespace Infrastructure.Persistence
 {
-    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IAppDbContext
+    public class AppDbContext : DbContext, IAppDbContext
     {
+        private readonly IServiceProvider _serviceProvider;
+
+        public AppDbContext(DbContextOptions<AppDbContext> options, IServiceProvider serviceProvider)
+            : base(options)
+        {
+            _serviceProvider = serviceProvider;
+        }
+
+        // DbSets
         public DbSet<User> Users { get; set; }
         public DbSet<Instructor> Instructors { get; set; }
         public DbSet<Goal> Goals { get; set; }
@@ -45,13 +56,30 @@ namespace Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
             base.OnModelCreating(modelBuilder);
         }
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            return base.SaveChangesAsync(cancellationToken);
+            var userContext = _serviceProvider.GetService(typeof(ICurrentUserContext)) as ICurrentUserContext;
+
+            var strategy = Database.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
+            {
+                var connection = Database.GetDbConnection();
+
+                if (connection.State != ConnectionState.Open)
+                    await connection.OpenAsync(cancellationToken);
+
+                // SET @user_id na mesma conexão
+                using var command = connection.CreateCommand();
+                command.CommandText = $"SET @user_id = {userContext?.Id ?? 0};";
+                await command.ExecuteNonQueryAsync(cancellationToken);
+
+                // Agora executa o SaveChanges normalmente
+                return await base.SaveChangesAsync(cancellationToken);
+            });
         }
     }
 }

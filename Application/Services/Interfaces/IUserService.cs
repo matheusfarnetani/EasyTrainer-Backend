@@ -9,6 +9,7 @@ namespace Application.Services.Interfaces
     public interface IUserService : IGenericService<CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO>
     {
         Task<ServiceResponseDTO<UserOutputDTO>> GetByEmailAsync(string email);
+        Task<bool> UpdatePasswordAsync(int userId, string currentPassword, string newPassword);
 
         // Instructor
         Task<ServiceResponseDTO<bool>> AddInstructorToUserAsync(int userId, int instructorId);

@@ -10,6 +10,24 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5130); // HTTP
+    serverOptions.ListenAnyIP(7173, listenOptions => listenOptions.UseHttps()); // HTTPS
+});
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 // Add services to the container.
 builder.Services.AddControllers(options =>
 {
@@ -57,7 +75,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 
 // Middlewares
 app.UseAuthentication();

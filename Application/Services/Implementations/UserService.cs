@@ -53,13 +53,28 @@ namespace Application.Services.Implementations
             if (dto.Weight.HasValue) user.Weight = dto.Weight.Value;
             if (dto.Height.HasValue) user.Height = dto.Height.Value;
             if (dto.Gender.HasValue) user.Gender = dto.Gender.Value;
-            if (dto.Password != null) user.Password = dto.Password;
+            if (dto.Password != null) user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             if (dto.LevelId.HasValue) user.LevelId = dto.LevelId.Value;
 
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveAndCommitAsync();
 
             return ServiceResponseDTO<UserOutputDTO>.CreateSuccess(_mapper.Map<UserOutputDTO>(user));
+        }
+
+        public async Task<bool> UpdatePasswordAsync(int userId, string currentPassword, string newPassword)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user == null) return false;
+
+            var isValidPassword = BCrypt.Net.BCrypt.Verify(currentPassword, user.Password);
+            if (!isValidPassword) return false;
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            await _unitOfWork.Users.UpdateAsync(user);
+            await _unitOfWork.CommitAsync();
+
+            return true;
         }
 
         public override async Task<ServiceResponseDTO<bool>> DeleteAsync(int id)

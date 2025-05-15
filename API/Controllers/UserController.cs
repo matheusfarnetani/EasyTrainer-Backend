@@ -40,6 +40,16 @@ namespace API.Controllers
             return Ok(response);
         }
 
+        [HttpPut("{id}/password")]
+        public async Task<IActionResult> UpdatePassword(int id, [FromBody] UpdatePasswordDTO dto)
+        {
+            var success = await _userService.UpdatePasswordAsync(id, dto.CurrentPassword, dto.NewPassword);
+            if (!success)
+                return BadRequest(new { success = false, message = "Incorrect current password or user not found." });
+
+            return Ok(new { success = true, message = "Password updated successfully." });
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

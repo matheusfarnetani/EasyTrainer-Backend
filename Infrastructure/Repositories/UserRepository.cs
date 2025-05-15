@@ -51,7 +51,7 @@ namespace Infrastructure.Repositories
         public async Task<bool> IsEmailTakenByOtherUserAsync(string email, int currentUserId)
         {
             return await _context.Users
-                .AnyAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase) && u.Id != currentUserId);
+                .AnyAsync(u => u.Email.ToLower() == email.ToLower() && u.Id != currentUserId);
         }
 
         // Instructor
