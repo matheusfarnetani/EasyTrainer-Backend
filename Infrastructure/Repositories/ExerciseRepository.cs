@@ -10,16 +10,22 @@ namespace Infrastructure.Repositories
     {
         private readonly AppDbContext _context = context;
 
-        public new async Task<Exercise?> GetByIdAsync(int id)
+        private IQueryable<Exercise> IncludeAllRelations(IQueryable<Exercise> query)
         {
-            return await _context.Exercises
-                .Include(e => e.Instructor)
-                .Include(e => e.Level)
+            return query
                 .Include(e => e.ExerciseGoals)
                 .Include(e => e.ExerciseTypes)
                 .Include(e => e.ExerciseModalities)
                 .Include(e => e.ExerciseHashtags)
-                .Include(e => e.ExerciseVariations)
+                .Include(e => e.ExerciseVariations);
+        }
+
+
+        public new async Task<Exercise?> GetByIdAsync(int id)
+        {
+            return await IncludeAllRelations(_context.Exercises)
+                .Include(e => e.Instructor)
+                .Include(e => e.Level)
                 .Include(e => e.RoutineExercises)
                 .Include(e => e.WorkoutExercises)
                 .FirstOrDefaultAsync(e => e.Id == id);
@@ -195,79 +201,49 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Exercise>> GetExercisesByInstructorIdAsync(int instructorId)
         {
-            return await _context.Exercises
+            return await IncludeAllRelations(_context.Exercises)
                 .Where(e => e.InstructorId == instructorId)
-                .Include(e => e.ExerciseGoals)
-                .Include(e => e.ExerciseTypes)
-                .Include(e => e.ExerciseModalities)
-                .Include(e => e.ExerciseHashtags)
-                .Include(e => e.ExerciseVariations)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Exercise>> GetExercisesByGoalIdAsync(int goalId, int instructorId)
         {
-            return await _context.Exercises
-                .Include(e => e.ExerciseGoals)
-                .Include(e => e.ExerciseTypes)
-                .Include(e => e.ExerciseModalities)
-                .Include(e => e.ExerciseHashtags)
-                .Include(e => e.ExerciseVariations)
+            return await IncludeAllRelations(_context.Exercises)
                 .Where(e => e.InstructorId == instructorId && e.ExerciseGoals.Any(g => g.GoalId == goalId))
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Exercise>> GetExercisesByLevelIdAsync(int levelId, int instructorId)
         {
-            return await _context.Exercises
-                .Include(e => e.ExerciseGoals)
-                .Include(e => e.ExerciseTypes)
-                .Include(e => e.ExerciseModalities)
-                .Include(e => e.ExerciseHashtags)
-                .Include(e => e.ExerciseVariations)
+            return await IncludeAllRelations(_context.Exercises)
                 .Where(e => e.InstructorId == instructorId && e.LevelId == levelId)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Exercise>> GetExercisesByTypeIdAsync(int typeId, int instructorId)
         {
-            return await _context.Exercises
-                .Include(e => e.ExerciseTypes)
-                .Include(e => e.ExerciseGoals)
-                .Include(e => e.ExerciseModalities)
-                .Include(e => e.ExerciseHashtags)
-                .Include(e => e.ExerciseVariations)
+            return await IncludeAllRelations(_context.Exercises)
                 .Where(e => e.InstructorId == instructorId && e.ExerciseTypes.Any(t => t.TypeId == typeId))
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Exercise>> GetExercisesByModalityIdAsync(int modalityId, int instructorId)
         {
-            return await _context.Exercises
-                .Include(e => e.ExerciseModalities)
-                .Include(e => e.ExerciseGoals)
-                .Include(e => e.ExerciseTypes)
-                .Include(e => e.ExerciseHashtags)
-                .Include(e => e.ExerciseVariations)
+            return await IncludeAllRelations(_context.Exercises)
                 .Where(e => e.InstructorId == instructorId && e.ExerciseModalities.Any(m => m.ModalityId == modalityId))
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Exercise>> GetExercisesByHashtagIdAsync(int hashtagId, int instructorId)
         {
-            return await _context.Exercises
-                .Include(e => e.ExerciseHashtags)
-                .Include(e => e.ExerciseGoals)
-                .Include(e => e.ExerciseTypes)
-                .Include(e => e.ExerciseModalities)
-                .Include(e => e.ExerciseVariations)
+            return await IncludeAllRelations(_context.Exercises)
                 .Where(e => e.InstructorId == instructorId && e.ExerciseHashtags.Any(h => h.HashtagId == hashtagId))
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Exercise>> GetExercisesByRoutineIdAsync(int routineId, int instructorId)
         {
-            return await _context.Exercises
+            return await IncludeAllRelations(_context.Exercises)
                 .Include(e => e.RoutineExercises)
                 .Where(e => e.InstructorId == instructorId && e.RoutineExercises.Any(r => r.RoutineId == routineId))
                 .ToListAsync();
@@ -275,7 +251,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Exercise>> GetExercisesByWorkoutIdAsync(int workoutId, int instructorId)
         {
-            return await _context.Exercises
+            return await IncludeAllRelations(_context.Exercises)
                 .Include(e => e.WorkoutExercises)
                 .Where(e => e.InstructorId == instructorId && e.WorkoutExercises.Any(w => w.WorkoutId == workoutId))
                 .ToListAsync();
@@ -283,7 +259,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Exercise>> GetVariationsByExerciseAsync(int exerciseId, int instructorId)
         {
-            return await _context.Exercises
+            return await IncludeAllRelations(_context.Exercises)
                 .Include(e => e.IsVariationOf)
                 .Where(e => e.InstructorId == instructorId && e.IsVariationOf.Any(v => v.ExerciseId == exerciseId))
                 .ToListAsync();
