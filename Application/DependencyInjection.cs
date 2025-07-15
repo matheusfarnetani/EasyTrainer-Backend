@@ -27,6 +27,8 @@ using Application.Validators.Exercise;
 using Application.Validators;
 using Application.DTOs.Auth;
 using Application.Validators.Auth;
+using Application.DTOs.Video;
+using Application.Validators.Video;
 
 namespace Application
 {
@@ -50,6 +52,10 @@ namespace Application
             services.AddScoped<IRoutineService, RoutineService>();
             services.AddScoped<IExerciseService, ExerciseService>();
             services.AddScoped<IRoutineHasExerciseService, RoutineHasExerciseService>();
+
+            // Video
+            services.AddScoped<IVideoService, VideoService>();
+            services.AddScoped<ICloudinaryService, CloudinaryService>();
 
             // Validators
             services.AddScoped<IValidator<CreateUserInputDTO>, CreateUserValidator>();
@@ -76,6 +82,10 @@ namespace Application
             services.AddScoped<IValidator<EmailInputDTO>, EmailInputValidator>();
             services.AddScoped<IValidator<CreateUserRegisterDTO>, CreateUserRegisterValidator>();
             services.AddScoped<IValidator<CreateInstructorRegisterDTO>, CreateInstructorRegisterValidator>();
+
+            // Video
+            services.AddScoped<IValidator<CreateVideoInputDTO>, CreateVideoValidator>();
+            services.AddScoped<IValidator<UpdateVideoInputDTO>, UpdateVideoValidator>();
 
             // AutoMapper
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);

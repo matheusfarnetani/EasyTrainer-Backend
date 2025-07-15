@@ -24,7 +24,7 @@ namespace Application.Services.Implementations
         {
             var entity = _mapper.Map<RoutineHasExercise>(dto);
             await _unitOfWork.RoutineHasExercises.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<RoutineHasExerciseOutputDTO>.CreateSuccess(_mapper.Map<RoutineHasExerciseOutputDTO>(entity));
         }
 
@@ -42,7 +42,7 @@ namespace Application.Services.Implementations
             if (dto.IsOptional.HasValue) entity.IsOptional = dto.IsOptional.Value;
 
             await _unitOfWork.RoutineHasExercises.UpdateAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<RoutineHasExerciseOutputDTO>.CreateSuccess(_mapper.Map<RoutineHasExerciseOutputDTO>(entity));
         }
@@ -63,7 +63,7 @@ namespace Application.Services.Implementations
             await GetOrThrowAsync(routineId, exerciseId);
 
             await _unitOfWork.RoutineHasExercises.DeleteByIdAsync(routineId, exerciseId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }

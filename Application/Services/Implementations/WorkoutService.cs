@@ -93,7 +93,7 @@ namespace Application.Services.Implementations
             SetInstructorId(entity, instructorId);
 
             await _unitOfWork.Workouts.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<WorkoutOutputDTO>.CreateSuccess(_mapper.Map<WorkoutOutputDTO>(entity));
         }
@@ -112,7 +112,7 @@ namespace Application.Services.Implementations
             if (dto.LevelId.HasValue) entity.LevelId = dto.LevelId.Value;
 
             await _unitOfWork.Workouts.UpdateAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<WorkoutOutputDTO>.CreateSuccess(_mapper.Map<WorkoutOutputDTO>(entity));
         }
@@ -122,7 +122,7 @@ namespace Application.Services.Implementations
             var entity = await GetOwnedWorkoutOrThrowAsync(id, instructorId);
 
             await _unitOfWork.Workouts.DeleteByIdAsync(entity.Id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -134,7 +134,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.AddGoalToWorkoutAsync(workoutId, goalId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -144,7 +144,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.RemoveGoalFromWorkoutAsync(workoutId, goalId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -155,7 +155,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.AddTypeToWorkoutAsync(workoutId, typeId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -165,7 +165,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.RemoveTypeFromWorkoutAsync(workoutId, typeId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -176,7 +176,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.AddModalityToWorkoutAsync(workoutId, modalityId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -186,7 +186,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.RemoveModalityFromWorkoutAsync(workoutId, modalityId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -197,7 +197,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.AddHashtagToWorkoutAsync(workoutId, hashtagId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -207,7 +207,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.RemoveHashtagFromWorkoutAsync(workoutId, hashtagId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -218,7 +218,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.AddRoutineToWorkoutAsync(workoutId, routineId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -228,7 +228,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.RemoveRoutineFromWorkoutAsync(workoutId, routineId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -239,7 +239,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.AddExerciseToWorkoutAsync(workoutId, exerciseId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -249,7 +249,7 @@ namespace Application.Services.Implementations
             await GetOwnedWorkoutOrThrowAsync(workoutId, instructorId);
 
             await _unitOfWork.Workouts.RemoveExerciseFromWorkoutAsync(workoutId, exerciseId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 

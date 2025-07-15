@@ -46,7 +46,7 @@ namespace Application.Services.Implementations
 
             var entity = _mapper.Map<Level>(dto);
             await _unitOfWork.Levels.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<LevelOutputDTO>.CreateSuccess(_mapper.Map<LevelOutputDTO>(entity));
         }
@@ -63,7 +63,7 @@ namespace Application.Services.Implementations
             if (dto.Description != null) level.Description = dto.Description;
 
             await _unitOfWork.Levels.UpdateAsync(level);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<LevelOutputDTO>.CreateSuccess(_mapper.Map<LevelOutputDTO>(level));
         }
@@ -77,7 +77,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<bool>.CreateFailure("Level not found.");
 
             await _unitOfWork.Levels.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }

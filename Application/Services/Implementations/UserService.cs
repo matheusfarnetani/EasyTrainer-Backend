@@ -33,7 +33,7 @@ namespace Application.Services.Implementations
 
             var entity = _mapper.Map<User>(dto);
             await _unitOfWork.Users.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<UserOutputDTO>.CreateSuccess(_mapper.Map<UserOutputDTO>(entity));
         }
@@ -57,7 +57,7 @@ namespace Application.Services.Implementations
             if (dto.LevelId.HasValue) user.LevelId = dto.LevelId.Value;
 
             await _unitOfWork.Users.UpdateAsync(user);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<UserOutputDTO>.CreateSuccess(_mapper.Map<UserOutputDTO>(user));
         }
@@ -72,7 +72,7 @@ namespace Application.Services.Implementations
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
             await _unitOfWork.Users.UpdateAsync(user);
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return true;
         }
@@ -86,7 +86,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<bool>.CreateFailure("User not found.");
 
             await _unitOfWork.Users.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -109,7 +109,7 @@ namespace Application.Services.Implementations
             await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
             await _unitOfWork.Users.AddInstructorToUserAsync(userId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -120,7 +120,7 @@ namespace Application.Services.Implementations
             await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = instructorId });
 
             await _unitOfWork.Users.RemoveInstructorFromUserAsync(userId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -163,7 +163,7 @@ namespace Application.Services.Implementations
             await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = goalId });
 
             await _unitOfWork.Users.AddGoalToUserAsync(userId, goalId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -174,7 +174,7 @@ namespace Application.Services.Implementations
             await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = goalId });
 
             await _unitOfWork.Users.RemoveGoalFromUserAsync(userId, goalId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -223,7 +223,7 @@ namespace Application.Services.Implementations
 
             // 3. Create Relationship
             await _unitOfWork.Users.AddWorkoutToUserAsync(userId, workoutId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -248,7 +248,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<bool>.CreateFailure("User is not associated with the instructor.");
 
             await _unitOfWork.Users.RemoveWorkoutFromUserAsync(userId, workoutId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }

@@ -46,7 +46,7 @@ namespace Application.Services.Implementations
 
             var entity = _mapper.Map<Modality>(dto);
             await _unitOfWork.Modalities.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<ModalityOutputDTO>.CreateSuccess(_mapper.Map<ModalityOutputDTO>(entity));
         }
@@ -63,7 +63,7 @@ namespace Application.Services.Implementations
             if (dto.Description != null) modality.Description = dto.Description;
 
             await _unitOfWork.Modalities.UpdateAsync(modality);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<ModalityOutputDTO>.CreateSuccess(_mapper.Map<ModalityOutputDTO>(modality));
         }
@@ -77,7 +77,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<bool>.CreateFailure("Modality not found.");
 
             await _unitOfWork.Modalities.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }

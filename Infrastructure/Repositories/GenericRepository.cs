@@ -30,7 +30,7 @@ namespace Infrastructure.Repositories
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(bool tracked = true)
+        public async Task<IEnumerable<T>> GetAllAsync(bool tracked = false)
         {
             IQueryable<T> query = _dbSet;
             if (!tracked)

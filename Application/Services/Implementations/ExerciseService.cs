@@ -43,7 +43,7 @@ namespace Application.Services.Implementations
         private readonly IValidator<IdInputDTO> _workoutIdValidator = workoutIdValidator;
         private readonly IValidator<IdInputDTO> _routineIdValidator = routineIdValidator;
 
-        #region CRUD
+        #region
 
         public override async Task<ServiceResponseDTO<ExerciseOutputDTO>> CreateAsync(CreateExerciseInputDTO dto, int instructorId)
         {
@@ -54,7 +54,7 @@ namespace Application.Services.Implementations
             SetInstructorId(entity, instructorId);
 
             await _unitOfWork.Exercises.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<ExerciseOutputDTO>.CreateSuccess(_mapper.Map<ExerciseOutputDTO>(entity));
         }
@@ -64,26 +64,9 @@ namespace Application.Services.Implementations
             await _updateValidator.ValidateAndThrowAsync(dto);
             var entity = await GetOwnedExerciseOrThrowAsync(dto.Id, instructorId);
 
-            if (dto.Name != null) entity.Name = dto.Name;
-            if (dto.Description != null) entity.Description = dto.Description;
-            if (dto.Equipment != null) entity.Equipment = dto.Equipment;
-            if (dto.BodyPart != null) entity.BodyPart = dto.BodyPart;
-            if (dto.VideoUrl != null) entity.VideoUrl = dto.VideoUrl;
-            if (dto.ImageUrl != null) entity.ImageUrl = dto.ImageUrl;
-            if (dto.Steps != null) entity.Steps = dto.Steps;
-            if (dto.Contraindications != null) entity.Contraindications = dto.Contraindications;
-            if (dto.SafetyTips != null) entity.SafetyTips = dto.SafetyTips;
-            if (dto.CommonMistakes != null) entity.CommonMistakes = dto.CommonMistakes;
-            if (dto.IndicatedFor != null) entity.IndicatedFor = dto.IndicatedFor;
-            if (dto.Duration.HasValue) entity.Duration = dto.Duration.Value;
-            if (dto.Repetition.HasValue) entity.Repetition = dto.Repetition.Value;
-            if (dto.Sets.HasValue) entity.Sets = dto.Sets.Value;
-            if (dto.RestTime.HasValue) entity.RestTime = dto.RestTime.Value;
-            if (dto.CaloriesBurnedEstimate.HasValue) entity.CaloriesBurnedEstimate = dto.CaloriesBurnedEstimate.Value;
-            if (dto.LevelId.HasValue) entity.LevelId = dto.LevelId.Value;
-
+            _mapper.Map(dto, entity);
             await _unitOfWork.Exercises.UpdateAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<ExerciseOutputDTO>.CreateSuccess(_mapper.Map<ExerciseOutputDTO>(entity));
         }
@@ -92,14 +75,10 @@ namespace Application.Services.Implementations
         {
             var entity = await GetOwnedExerciseOrThrowAsync(id, instructorId);
             await _unitOfWork.Exercises.DeleteByIdAsync(entity.Id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
-
-        #endregion
-
-        #region Ownership & Validation Helpers
 
         private async Task<Exercise> GetOwnedExerciseOrThrowAsync(int exerciseId, int instructorId)
         {
@@ -142,7 +121,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.AddGoalToExerciseAsync(exerciseId, goalId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -153,7 +132,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.RemoveGoalFromExerciseAsync(exerciseId, goalId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -164,7 +143,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.AddTypeToExerciseAsync(exerciseId, typeId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -175,7 +154,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.RemoveTypeFromExerciseAsync(exerciseId, typeId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -186,7 +165,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.AddModalityToExerciseAsync(exerciseId, modalityId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -197,7 +176,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.RemoveModalityFromExerciseAsync(exerciseId, modalityId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -208,7 +187,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.AddHashtagToExerciseAsync(exerciseId, hashtagId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -219,7 +198,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.RemoveHashtagFromExerciseAsync(exerciseId, hashtagId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -230,7 +209,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.AddVariationToExerciseAsync(exerciseId, variationId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -241,7 +220,7 @@ namespace Application.Services.Implementations
             await GetOwnedExerciseOrThrowAsync(exerciseId, instructorId);
 
             await _unitOfWork.Exercises.RemoveVariationFromExerciseAsync(exerciseId, variationId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }

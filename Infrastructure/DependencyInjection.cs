@@ -4,6 +4,7 @@ using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using Domain.Infrastructure.RepositoriesInterfaces;
 using Domain.Infrastructure.Persistence;
+using Infrastructure.Interceptors;
 
 namespace Infrastructure
 {
@@ -23,15 +24,21 @@ namespace Infrastructure
             services.AddScoped<IRoutineRepository, RoutineRepository>();
             services.AddScoped<IExerciseRepository, ExerciseRepository>();
             services.AddScoped<IRoutineHasExerciseRepository, RoutineHasExerciseRepository>();
+            services.AddScoped<IVideoRepository, VideoRepository>();
 
-            // ConnectionManager and UnitOfWork
-            services.AddScoped<IConnectionManager, ConnectionManager>();
+            // Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            // DbContext with ConnectionManager
+
+            // Interceptor
+            services.AddScoped<UserIdCommandInterceptor>();
+
+            // DbContext (Scoped)
+            services.AddScoped<IConnectionManager, ConnectionManager>();
             services.AddDbContext<AppDbContext>((provider, options) =>
             {
                 var connectionManager = provider.GetRequiredService<IConnectionManager>();
+                var interceptor = provider.GetRequiredService<UserIdCommandInterceptor>();
                 var connStr = connectionManager.GetCurrentConnectionString();
 
                 options.UseMySql(
@@ -45,8 +52,9 @@ namespace Infrastructure
                             errorNumbersToAdd: null
                         );
                     });
-            });
 
+                options.AddInterceptors(interceptor);
+            });
 
             // Health Check
             services.AddHealthChecks().AddDbContextCheck<AppDbContext>("Database");

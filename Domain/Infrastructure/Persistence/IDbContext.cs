@@ -17,6 +17,7 @@ namespace Domain.Infrastructure.Persistence
         DbSet<Routine> Routines { get; }
         DbSet<Exercise> Exercises { get; }
         DbSet<RoutineHasExercise> RoutineHasExercises { get; }
+        DbSet<Video> Videos { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

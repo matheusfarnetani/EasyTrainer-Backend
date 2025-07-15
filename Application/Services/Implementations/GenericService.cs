@@ -29,7 +29,7 @@ namespace Application.Services.Implementations
         {
             var entity = _mapper.Map<TEntity>(dto);
             await _repository.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<TOutputDTO>.CreateSuccess(_mapper.Map<TOutputDTO>(entity));
         }
@@ -41,7 +41,7 @@ namespace Application.Services.Implementations
         {
             var entity = _mapper.Map<TEntity>(dto);
             await _repository.UpdateAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<TOutputDTO>.CreateSuccess(_mapper.Map<TOutputDTO>(entity));
         }
@@ -52,7 +52,7 @@ namespace Application.Services.Implementations
         public virtual async Task<ServiceResponseDTO<bool>> DeleteAsync(int id)
         {
             await _repository.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -98,6 +98,7 @@ namespace Application.Services.Implementations
                 nameof(Routine) => (IGenericRepository<TEntity>)_unitOfWork.Routines,
                 nameof(Exercise) => (IGenericRepository<TEntity>)_unitOfWork.Exercises,
                 nameof(RoutineHasExercise) => (IGenericRepository<TEntity>)_unitOfWork.RoutineHasExercises,
+                nameof(Video) => (IGenericRepository<TEntity>)_unitOfWork.Videos,
                 _ => throw new InvalidOperationException($"No repository configured for {typeof(TEntity).Name}")
             };
         }

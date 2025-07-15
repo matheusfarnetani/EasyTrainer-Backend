@@ -1,4 +1,6 @@
-﻿using Domain.Infrastructure.RepositoriesInterfaces;
+﻿using System;
+using Domain.Entities.Main;
+using Domain.Infrastructure.RepositoriesInterfaces;
 
 namespace Domain.Infrastructure.Persistence
 {
@@ -16,19 +18,19 @@ namespace Domain.Infrastructure.Persistence
         IRoutineRepository Routines { get; }
         IExerciseRepository Exercises { get; }
         IRoutineHasExerciseRepository RoutineHasExercises { get; }
+        IVideoRepository Videos { get; }
 
         // Transaction management
-        Task BeginTransactionAsync(int userId);
-        Task CommitAsync();
-        Task RollbackAsync();
+        //Task BeginTransactionAsync();
+        //Task CommitAsync();
+        //Task RollbackAsync();
 
         // Persistence
         Task SaveAsync();
-        Task SaveAndCommitAsync();
+        //Task SaveAndCommitAsync();
 
         // Utility
-        Task<TResult> BeginAndCommitAsync<TResult>(int userId, Func<Task<TResult>> operation);
-        Task BeginAndCommitAsync(int userId, Func<Task> operation);
+        //Task BeginAndCommitAsync(Func<Task> operation);
         bool HasPendingChanges();
         new void Dispose();
     }

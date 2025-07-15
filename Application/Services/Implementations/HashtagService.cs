@@ -46,7 +46,7 @@ namespace Application.Services.Implementations
 
             var entity = _mapper.Map<Hashtag>(dto);
             await _unitOfWork.Hashtags.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<HashtagOutputDTO>.CreateSuccess(_mapper.Map<HashtagOutputDTO>(entity));
         }
@@ -62,7 +62,7 @@ namespace Application.Services.Implementations
             if (dto.Name != null) hashtag.Name = dto.Name;
 
             await _unitOfWork.Hashtags.UpdateAsync(hashtag);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<HashtagOutputDTO>.CreateSuccess(_mapper.Map<HashtagOutputDTO>(hashtag));
         }
@@ -76,7 +76,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<bool>.CreateFailure("Hashtag not found.");
 
             await _unitOfWork.Hashtags.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }

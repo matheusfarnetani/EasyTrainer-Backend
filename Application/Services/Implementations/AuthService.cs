@@ -78,10 +78,8 @@ namespace Application.Services.Implementations
             user.LevelId = null;
             user.InstructorId = null;
 
-            await _unitOfWork.BeginAndCommitAsync(0, async () =>
-            {
-                await _unitOfWork.Users.AddAsync(user);
-            });
+            await _unitOfWork.Users.AddAsync(user);
+            await _unitOfWork.SaveAsync();
 
             var token = _jwtService.GenerateToken(user.Id, "user", user.Email);
 
@@ -102,10 +100,8 @@ namespace Application.Services.Implementations
             instructor.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             instructor.Gender = null;
 
-            await _unitOfWork.BeginAndCommitAsync(0, async () =>
-            {
-                await _unitOfWork.Instructors.AddAsync(instructor);
-            });
+            await _unitOfWork.Instructors.AddAsync(instructor);
+            await _unitOfWork.SaveAsync();
 
             var token = _jwtService.GenerateToken(instructor.Id, "instructor", instructor.Email);
 
@@ -116,7 +112,6 @@ namespace Application.Services.Implementations
                 Instructor = _mapper.Map<InstructorOutputDTO>(instructor)
             });
         }
-
     }
 
 }

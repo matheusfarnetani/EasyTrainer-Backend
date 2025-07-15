@@ -46,7 +46,7 @@ namespace Application.Services.Implementations
 
             var entity = _mapper.Map<TrainingType>(dto);
             await _unitOfWork.Types.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<TypeOutputDTO>.CreateSuccess(_mapper.Map<TypeOutputDTO>(entity));
         }
@@ -63,7 +63,7 @@ namespace Application.Services.Implementations
             if (dto.Description != null) type.Description = dto.Description;
 
             await _unitOfWork.Types.UpdateAsync(type);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<TypeOutputDTO>.CreateSuccess(_mapper.Map<TypeOutputDTO>(type));
         }
@@ -77,7 +77,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<bool>.CreateFailure("Type not found.");
 
             await _unitOfWork.Types.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }

@@ -5,5 +5,6 @@
         int Id { get; }
         string Role { get; }
         string Email { get; }
+        bool IsExternalRequest { get; }
     }
 }

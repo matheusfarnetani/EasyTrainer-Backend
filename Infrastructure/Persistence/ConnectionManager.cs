@@ -11,6 +11,11 @@ namespace Infrastructure.Persistence
 
         public string GetCurrentConnectionString()
         {
+            if (_userContext.IsExternalRequest)
+            {
+                return GetConnectionString("system");
+            }
+
             return GetConnectionStringOrDefault("admin");
         }
 
@@ -21,6 +26,7 @@ namespace Infrastructure.Persistence
                 "admin" => _configuration.GetConnectionString("EasyTrainerAdmin"),
                 "instructor" => _configuration.GetConnectionString("EasyTrainerInstructor"),
                 "user" => _configuration.GetConnectionString("EasyTrainerUser"),
+                "system" => _configuration.GetConnectionString("EasyTrainerSystem"),
                 _ => throw new ArgumentException("Invalid role")
             };
 

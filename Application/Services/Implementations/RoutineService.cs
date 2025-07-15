@@ -92,7 +92,7 @@ namespace Application.Services.Implementations
             SetInstructorId(entity, instructorId);
 
             await _unitOfWork.Routines.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<RoutineOutputDTO>.CreateSuccess(_mapper.Map<RoutineOutputDTO>(entity));
         }
@@ -110,7 +110,7 @@ namespace Application.Services.Implementations
             if (dto.LevelId.HasValue) entity.LevelId = dto.LevelId.Value;
 
             await _unitOfWork.Routines.UpdateAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<RoutineOutputDTO>.CreateSuccess(_mapper.Map<RoutineOutputDTO>(entity));
         }
@@ -119,7 +119,7 @@ namespace Application.Services.Implementations
         {
             await GetOwnedRoutineOrThrowAsync(id, instructorId);
             await _unitOfWork.Routines.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -130,7 +130,7 @@ namespace Application.Services.Implementations
             await _goalIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = goalId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.AddGoalToRoutineAsync(routineId, goalId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -139,7 +139,7 @@ namespace Application.Services.Implementations
             await _goalIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = goalId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.RemoveGoalFromRoutineAsync(routineId, goalId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -148,7 +148,7 @@ namespace Application.Services.Implementations
             await _typeIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = typeId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.AddTypeToRoutineAsync(routineId, typeId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -157,7 +157,7 @@ namespace Application.Services.Implementations
             await _typeIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = typeId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.RemoveTypeFromRoutineAsync(routineId, typeId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -166,7 +166,7 @@ namespace Application.Services.Implementations
             await _modalityIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = modalityId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.AddModalityToRoutineAsync(routineId, modalityId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -175,7 +175,7 @@ namespace Application.Services.Implementations
             await _modalityIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = modalityId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.RemoveModalityFromRoutineAsync(routineId, modalityId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -184,7 +184,7 @@ namespace Application.Services.Implementations
             await _hashtagIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = hashtagId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.AddHashtagToRoutineAsync(routineId, hashtagId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -193,7 +193,7 @@ namespace Application.Services.Implementations
             await _hashtagIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = hashtagId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.RemoveHashtagFromRoutineAsync(routineId, hashtagId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -202,7 +202,7 @@ namespace Application.Services.Implementations
             await _exerciseIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = exerciseId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.AddExerciseToRoutineAsync(routineId, exerciseId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 
@@ -211,7 +211,7 @@ namespace Application.Services.Implementations
             await _exerciseIdValidator.ValidateAndThrowAsync(new IdInputDTO { Id = exerciseId });
             await GetOwnedRoutineOrThrowAsync(routineId, instructorId);
             await _unitOfWork.Routines.RemoveExerciseFromRoutineAsync(routineId, exerciseId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
 

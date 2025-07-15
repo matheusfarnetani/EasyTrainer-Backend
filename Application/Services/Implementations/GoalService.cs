@@ -35,7 +35,7 @@ namespace Application.Services.Implementations
 
             var entity = _mapper.Map<Goal>(dto);
             await _unitOfWork.Goals.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<GoalOutputDTO>.CreateSuccess(_mapper.Map<GoalOutputDTO>(entity));
         }
@@ -52,7 +52,7 @@ namespace Application.Services.Implementations
             if (dto.Description != null) goal.Description = dto.Description;
 
             await _unitOfWork.Goals.UpdateAsync(goal);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<GoalOutputDTO>.CreateSuccess(_mapper.Map<GoalOutputDTO>(goal));
         }
@@ -66,7 +66,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<bool>.CreateFailure("Goal not found.");
 
             await _unitOfWork.Goals.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }

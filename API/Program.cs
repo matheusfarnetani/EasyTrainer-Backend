@@ -5,6 +5,8 @@ using Domain.API.Interfaces;
 using API.Middleware;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Application.BackgroundServices;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 
@@ -12,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5130); // HTTP
+    serverOptions.ListenAnyIP(5151); // HTTP
     serverOptions.ListenAnyIP(7173, listenOptions => listenOptions.UseHttps()); // HTTPS
 });
 
@@ -28,14 +30,18 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add services to the container.
+// Add controllers
 builder.Services.AddControllers(options =>
 {
     var policy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
     options.Filters.Add(new AuthorizeFilter(policy));
-});
+})
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -58,13 +64,19 @@ builder.Services.AddAuthentication("Bearer")
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(config["Jwt:Key"]!))
+                Encoding.UTF8.GetBytes(config["Jwt:Key"]!)
+            )
         };
     });
+
 
 // Application and Infrastructure
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+
+// Video Processing Worker
+builder.Services.AddHttpClient();
+builder.Services.AddHostedService<VideoProcessingWorker>();
 
 var app = builder.Build();
 
@@ -78,8 +90,31 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
-// Middlewares
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    var ext = context.Request.Headers["X-External-Request"];
+    Console.WriteLine($"X-External-Request: {ext}");
+    var isExternal = context.Request.Headers["X-External-Request"].ToString().Equals("true", StringComparison.OrdinalIgnoreCase);
+
+    if (isExternal)
+    {
+        var claims = new[]
+        {
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, "-1"),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "system"),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, "external@system.local")
+        };
+
+        var identity = new System.Security.Claims.ClaimsIdentity(claims, "External");
+        context.User = new System.Security.Claims.ClaimsPrincipal(identity);
+    }
+
+    await next();
+});
+
+// Middlewares
+
 app.UseAuthorization();
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 

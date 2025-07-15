@@ -13,6 +13,7 @@ using Application.DTOs.Exercise;
 using Application.DTOs.RoutineHasExercise;
 using Application.DTOs.Auth;
 using Domain.Entities.Relations;
+using Application.DTOs.Video;
 
 namespace Application.Profiles
 {
@@ -92,6 +93,19 @@ namespace Application.Profiles
             CreateMap<UpdateExerciseInputDTO, Exercise>();
 
             CreateMap<RoutineHasExercise, RoutineHasExerciseOutputDTO>();
+
+            // Video mappings
+            CreateMap<Video, VideoOutputDTO>();
+            CreateMap<CreateVideoInputDTO, Video>()
+                .ForMember(dest => dest.Filename, opt => opt.MapFrom(src => src.File.FileName));
+            CreateMap<UpdateVideoInputDTO, Video>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
+            // C# → Python (VideoBackInputDTO)
+            CreateMap<Video, VideoBackInputDTO>()
+                .ForMember(dest => dest.InputUrl, opt => opt.MapFrom(src => src.FileUrl))
+                .ForMember(dest => dest.OutputPublicId, opt => opt.Ignore()) // Definido no Worker
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
         }
     }
 }

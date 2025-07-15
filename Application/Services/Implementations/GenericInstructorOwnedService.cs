@@ -29,7 +29,7 @@ namespace Application.Services.Implementations
             SetInstructorId(entity, instructorId);
 
             await _repository.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<TOutputDTO>.CreateSuccess(_mapper.Map<TOutputDTO>(entity));
         }
@@ -42,7 +42,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<TOutputDTO>.CreateFailure("You are not authorized to update this entity.");
 
             await _repository.UpdateAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<TOutputDTO>.CreateSuccess(_mapper.Map<TOutputDTO>(entity));
         }
@@ -57,7 +57,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<bool>.CreateFailure("You are not authorized to delete this entity.");
 
             await _repository.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }

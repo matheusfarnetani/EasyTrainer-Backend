@@ -35,7 +35,7 @@ namespace Application.Services.Implementations
 
             var entity = _mapper.Map<Instructor>(dto);
             await _unitOfWork.Instructors.AddAsync(entity);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<InstructorOutputDTO>.CreateSuccess(_mapper.Map<InstructorOutputDTO>(entity));
         }
@@ -56,7 +56,7 @@ namespace Application.Services.Implementations
             if (dto.Gender.HasValue) instructor.Gender = dto.Gender.Value;
 
             await _unitOfWork.Instructors.UpdateAsync(instructor);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<InstructorOutputDTO>.CreateSuccess(_mapper.Map<InstructorOutputDTO>(instructor));
         }
@@ -70,7 +70,7 @@ namespace Application.Services.Implementations
                 return ServiceResponseDTO<bool>.CreateFailure("Instructor not found.");
 
             await _unitOfWork.Instructors.DeleteByIdAsync(id);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -93,7 +93,7 @@ namespace Application.Services.Implementations
             await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = userId });
 
             await _unitOfWork.Users.AddInstructorToUserAsync(userId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
@@ -104,7 +104,7 @@ namespace Application.Services.Implementations
             await _idValidator.ValidateAndThrowAsync(new IdInputDTO { Id = userId });
 
             await _unitOfWork.Users.RemoveInstructorFromUserAsync(userId, instructorId);
-            await _unitOfWork.SaveAndCommitAsync();
+            await _unitOfWork.SaveAsync();
 
             return ServiceResponseDTO<bool>.CreateSuccess(true);
         }
